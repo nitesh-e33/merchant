@@ -2,13 +2,14 @@ import Image from 'next/image';
 import { useState } from 'react';
 import Link from 'next/link';
 import { API_BASE_URL } from "../lib/constant";
-import axios from 'axios';
+import { useRouter } from 'next/navigation';
 
 export default function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const router = useRouter();
   
   const submitLoginForm = async() => {
     let isValid = true;
@@ -29,13 +30,18 @@ export default function LoginForm() {
 
     if (isValid) {
       try {
-        const response = await axios.post(`${API_BASE_URL}/merchant/login`, {
-          email: email,
-          password: password
+        let response = await fetch(`${API_BASE_URL}/merchant/login`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({email: email, password: password, isLoginProcess: email})
         });
-        
+
         // Handle the response from the API
-        console.log('Login successful:', response.data);
+        response = await response.json();
+        console.log('Login successful:', response);
+        router.push('/dashboard');
       } catch (error) {
         console.error('Error logging in:', error);
       }

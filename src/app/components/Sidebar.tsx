@@ -1,4 +1,4 @@
-import { faAngleLeft, faCircle, faTachometerAlt } from '@fortawesome/free-solid-svg-icons';
+import { faAngleLeft, faCircle, faSearch, faTachometerAlt } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Link from 'next/link';
 import React from 'react';
@@ -19,7 +19,7 @@ const Sidebar = () => {
                 <input className="form-control form-control-sidebar" type="search" placeholder="Search" aria-label="Search" />
                 <div className="input-group-append">
                 <button className="btn btn-sidebar">
-                    <i className="fas fa-search fa-fw"></i>
+                    <FontAwesomeIcon icon={faSearch} className="nav-icon" />
                 </button>
                 </div>
             </div>

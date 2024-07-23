@@ -8,6 +8,7 @@ import '../styles/globals.css';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { config } from '@fortawesome/fontawesome-svg-core';
 config.autoAddCss = false;
+import '../js/adminlte.min.js'
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
