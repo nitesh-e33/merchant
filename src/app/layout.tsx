@@ -9,6 +9,8 @@ import '@fortawesome/fontawesome-svg-core/styles.css';
 import { config } from '@fortawesome/fontawesome-svg-core';
 config.autoAddCss = false;
 import '../js/adminlte.min.js'
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
@@ -39,6 +41,17 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
         ) : (
           <div>{children}</div>
         )}
+        <ToastContainer 
+          position="top-right" 
+          autoClose={3000} 
+          hideProgressBar={false} 
+          newestOnTop={false} 
+          closeOnClick 
+          rtl={false} 
+          pauseOnFocusLoss 
+          draggable 
+          pauseOnHover 
+        />
       </body>
     </html>
   );

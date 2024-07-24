@@ -1,8 +1,10 @@
+'use client'
 import Image from 'next/image';
 import { useState } from 'react';
 import Link from 'next/link';
-import { API_BASE_URL } from "../lib/constant";
 import { useRouter } from 'next/navigation';
+import { apiRequest } from '../lib/apiHelper';
+import { toast } from "react-toastify";
 
 export default function LoginForm() {
   const [email, setEmail] = useState('');
@@ -30,18 +32,27 @@ export default function LoginForm() {
 
     if (isValid) {
       try {
-        let response = await fetch(`${API_BASE_URL}/merchant/login`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({email: email, password: password, isLoginProcess: email})
-        });
-
-        // Handle the response from the API
-        response = await response.json();
-        console.log('Login successful:', response);
-        router.push('/dashboard');
+        const loginData = { 
+          email: email,
+          password: password,
+          isLoginProcess: 'email'
+        };
+        const response = await apiRequest("POST", "/merchant/login", loginData);
+        if (response.StatusCode === '1') {
+          const user = response.Result;
+          if (user.token) {
+            localStorage.setItem('user', JSON.stringify(user));
+            if (user.isKYCVerified) {
+              router.push('/dashboard');
+            } else {
+              router.push('/my-account');
+            }
+          } else {
+            toast.error('Token not found');
+          }
+        } else {
+          toast.error(response.Result);
+        }
       } catch (error) {
         console.error('Error logging in:', error);
       }
