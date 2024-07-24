@@ -5,12 +5,13 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import Sidebar from './components/Sidebar';
 import '../styles/globals.css';
+import '../js/globals.js'
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { config } from '@fortawesome/fontawesome-svg-core';
 config.autoAddCss = false;
-import '../js/adminlte.min.js'
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();

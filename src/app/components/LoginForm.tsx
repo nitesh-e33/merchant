@@ -13,11 +13,15 @@ export default function LoginForm() {
   const [passwordError, setPasswordError] = useState('');
   const router = useRouter();
   
-  const submitLoginForm = async() => {
+  const submitLoginForm = async () => {
     let isValid = true;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!email) {
       setEmailError('Email is required');
+      isValid = false;
+    } else if (!emailRegex.test(email)) {
+      setEmailError('Invalid email format');
       isValid = false;
     } else {
       setEmailError('');
