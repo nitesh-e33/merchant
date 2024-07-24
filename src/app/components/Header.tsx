@@ -2,7 +2,6 @@ import { faBars, faUser, faCog, faSignOutAlt, faExpandArrowsAlt } from '@fortawe
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import dynamic from 'next/dynamic';
 import { apiRequest } from '../lib/apiHelper';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
@@ -20,7 +19,7 @@ const Header = () => {
 
   const handleLogout = async () => {
     try {
-      const response = await apiRequest('GET', '/v1/merchant/logout', user);
+      const response = await apiRequest('GET', '/v1/merchant/logout');
       if (response.StatusCode === '1') {
         localStorage.removeItem('user');
         toast.success(response.Message);
@@ -32,6 +31,10 @@ const Header = () => {
       console.error('Logout Error:', error);
     }
   };
+
+  const merchantSetting = async () => {
+    
+  }
 
   return (
     <nav className="main-header navbar navbar-expand navbar-white navbar-light">
@@ -58,7 +61,7 @@ const Header = () => {
               <Link href="/my-account" passHref className="dropdown-item">
                 <FontAwesomeIcon icon={faUser} className="mr-2" /> My Account
               </Link>
-              <button className="dropdown-item merchant-setting" type="button" data-is-verified={user.isKYCVerified}>
+              <button onClick={merchantSetting} className="dropdown-item merchant-setting" type="button" data-is-verified={user.isKYCVerified}>
                 <FontAwesomeIcon icon={faCog} className="mr-2" /> Settings
               </button>
               <button onClick={handleLogout} className="dropdown-item">

@@ -43,6 +43,38 @@ const Sidebar = () => {
                     </li>
                 </ul>
                 </li>
+
+                <li className="nav-item">
+                <a href="#" className="nav-link" title="Transaction">
+                    <FontAwesomeIcon icon={faTachometerAlt} className="nav-icon" />
+                    <span>Transaction</span>
+                    <FontAwesomeIcon icon={faAngleLeft} className="right" />
+                </a>
+                <ul className="nav nav-treeview">
+                    <li className="nav-item">
+                    <Link href="/dashboard" className="nav-link sub-nav-link">
+                        <FontAwesomeIcon icon={faCircle} className="nav-icon" />
+                        <p>Transaction List</p>
+                    </Link>
+                    </li>
+                </ul>
+                </li>
+
+                <li className="nav-item">
+                <a href="#" className="nav-link" title="Refund">
+                    <FontAwesomeIcon icon={faTachometerAlt} className="nav-icon" />
+                    <span>Refund</span>
+                    <FontAwesomeIcon icon={faAngleLeft} className="right" />
+                </a>
+                <ul className="nav nav-treeview">
+                    <li className="nav-item">
+                    <Link href="/dashboard" className="nav-link sub-nav-link">
+                        <FontAwesomeIcon icon={faCircle} className="nav-icon" />
+                        <p>Refund List</p>
+                    </Link>
+                    </li>
+                </ul>
+                </li>
             </ul>
         </nav>
       </div>
