@@ -1,17 +1,81 @@
 'use client'
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import UserProfileForm from "../components/MyAccount/UserProfileForm";
 import CompanyProfileForm from "../components/MyAccount/CompanyProfileForm";
+import { apiRequest } from "../lib/apiHelper";
+import { toast } from "react-toastify";
 
-const Page = () => {
+const Page: React.FC = () => {
   const [activeTab, setActiveTab] = useState("user");
-  const [userId, setUserId] = useState();
-  const [companyId, setCompanyId] = useState();
-  const [bankId, setBankId] = useState();
-  const [companyData, setCompanyData] = useState();
-  const [entityList, setEntityList] = useState();
+  const [userId, setUserId] = useState<string>('');
+  const [companyId, setCompanyId] = useState<string>('');
+  const [bankId, setBankId] = useState<string>('');
+  const [companyData, setCompanyData] = useState<any>({});
+  const [entityList, setEntityList] = useState<any[]>([]);
+  const [kycRequiredDocsList, setKycRequiredDocsList] = useState<any[]>([]);
+  const [bankData, setBankData] = useState<any>({});
+  const [services, setServices] = useState<any[]>([]);
+  const [userData, setUserData] = useState<any>({});
+  const [error, setError] = useState<string | null>(null);
 
-  const handleTabClick = (tab:any) => {
+  useEffect(() => {
+    const fetchMerchantProfile = async () => {
+      const storedUser = localStorage.getItem('user');
+      let storedUserId = '';
+
+      if (storedUser) {
+        try {
+          const userData = JSON.parse(storedUser);
+          storedUserId = userData.user_id || '';
+          setUserId(storedUserId);
+        } catch (e) {
+          console.error('Error parsing user data from localStorage:', e);
+          setError('Error retrieving user data');
+          return;
+        }
+      }
+
+      try {
+        const response = await apiRequest('GET', '/v1/merchant/profile', {merchant_id:storedUserId});
+
+        if (response.StatusCode === '1') {
+          const user = response.Result || {};
+          setUserData(user);
+          const companyData = user.company || {};
+          const companyId = companyData.company_id || '';
+          const bankData = user.bank_account?.[0] || {};
+          const bankId = bankData.id || '';
+          const entityList = await apiRequest('GET', '/v1/merchant/entity/list');
+          const kycRequiredDocsList = companyId ? await apiRequest('GET', '/v1/merchant/get-all-kyc-required-document', {
+            company_id: companyId,
+            entity_id: companyData.entity_type,
+          }) : [];
+          const services = companyData.credentials?.mapped_services || [];
+
+          setCompanyData(companyData);
+          setCompanyId(companyId);
+          setBankData(bankData);
+          setBankId(bankId);
+          setEntityList(entityList.Result || []);
+          setKycRequiredDocsList(kycRequiredDocsList.Result || []);
+          setServices(services);
+        } else if (response.StatusCode === '0') {
+          setError(response.Message || 'An error occurred');
+          toast.error(response.Message || 'An error occurred');
+        } else {
+          toast.error(response.Result || 'An unknown error occurred');
+          setError(response.Result || 'An unknown error occurred');
+        }
+      } catch (error) {
+        setError('An error occurred while fetching the profile');
+        console.error('Error fetching merchant profile:', error);
+      }
+    };
+
+    fetchMerchantProfile();
+  }, []);
+
+  const handleTabClick = (tab: string) => {
     setActiveTab(tab);
   };
 
@@ -71,7 +135,7 @@ const Page = () => {
                   className={`tab-pane fade ${activeTab === "user" ? "show active" : ""}`}
                   role="tabpanel"
                 >
-                  <UserProfileForm />
+                  <UserProfileForm userData={userData} />
                 </div>
                 <div
                   className={`tab-pane fade ${activeTab === "company" ? "show active" : ""}`}
@@ -83,6 +147,9 @@ const Page = () => {
                     bankId={bankId}
                     companyData={companyData}
                     entityList={entityList}
+                    kycRequiredDocsList={kycRequiredDocsList}
+                    bankData={bankData}
+                    services={services}
                   />
                 </div>
                 <div
@@ -122,6 +189,7 @@ const Page = () => {
           </div>
         </div>
       </div>
+      {error && <div className="alert alert-danger">{error}</div>}
     </>
   );
 };
