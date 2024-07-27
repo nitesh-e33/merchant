@@ -1,20 +1,20 @@
+import React, { useState, useEffect, ChangeEvent } from 'react';
 import { apiRequest } from '@/app/lib/apiHelper';
-import React, { useState, ChangeEvent } from 'react';
 import { toast } from 'react-toastify';
 
 interface FormData {
-  userid: string;
-  fname: string;
-  lname: string;
+  userid: number;
+  user_fname: string;
+  user_lname: string;
   email: string;
   alt_email_address: string;
-  phone: string;
+  user_phone: string;
   alt_user_phone: string;
   user_pan_no: string;
   user_aadhaar_no: string;
   user_address1: string;
   user_address2: string;
-  pincode: string;
+  pincode: number;
   city: string;
   state: string;
 }
@@ -33,23 +33,23 @@ interface Errors {
   stateError: string;
 }
 interface UserProfileFormProps {
-  userData: any;
+  userData: FormData;
 }
 
-const UserProfileForm: React.FC = () => {
+const UserProfileForm: React.FC<UserProfileFormProps> = ({ userData }) => {
   const [formData, setFormData] = useState<FormData>({
-    userid: '',
-    fname: '',
-    lname: '',
+    userid: 0,
+    user_fname: '',
+    user_lname: '',
     email: '',
     alt_email_address: '',
-    phone: '',
+    user_phone: '',
     alt_user_phone: '',
     user_pan_no: '',
     user_aadhaar_no: '',
     user_address1: '',
     user_address2: '',
-    pincode: '',
+    pincode: 0,
     city: '',
     state: '',
   });
@@ -68,9 +68,27 @@ const UserProfileForm: React.FC = () => {
     stateError: '',
   });
 
-  const [userData, setUserData] = useState<UserProfileFormProps>({
-    userData: '',
-  });
+  // Update formData when userData changes
+  useEffect(() => {
+    if (userData) {
+      setFormData({
+        userid: userData.userid || 0,
+        user_fname: userData.user_fname || '',
+        user_lname: userData.user_lname || '',
+        email: userData.email || '',
+        alt_email_address: userData.alt_email_address || '',
+        user_phone: userData.user_phone || '',
+        alt_user_phone: userData.alt_user_phone || '',
+        user_pan_no: userData.user_pan_no || '',
+        user_aadhaar_no: userData.user_aadhaar_no || '',
+        user_address1: userData.user_address1 || '',
+        user_address2: userData.user_address2 || '',
+        pincode: userData.pincode || 0,
+        city: userData.city || '',
+        state: userData.state || '',
+      });
+    }
+  }, [userData]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -137,11 +155,11 @@ const UserProfileForm: React.FC = () => {
             <label>First Name *</label>
             <input
               type="text"
-              name="fname"
-              id="fname"
+              name="user_fname"
+              id="user_fname"
               placeholder="First Name"
               className="form-control"
-              value={formData.fname}
+              value={formData.user_fname}
               onChange={handleChange}
             />
             <p id="fnameError" className="text-danger">{errors.fnameError}</p>
@@ -152,11 +170,11 @@ const UserProfileForm: React.FC = () => {
             <label>Last Name</label>
             <input
               type="text"
-              name="lname"
-              id="lname"
+              name="user_lname"
+              id="user_lname"
               placeholder="Last Name"
               className="form-control"
-              value={formData.lname}
+              value={formData.user_lname}
               onChange={handleChange}
             />
           </div>
@@ -196,11 +214,11 @@ const UserProfileForm: React.FC = () => {
             <label>Mobile *</label>
             <input
               type="text"
-              name="phone"
-              id="phone"
+              name="user_phone"
+              id="user_phone"
               placeholder="Mobile No."
               className="form-control"
-              value={formData.phone}
+              value={formData.user_phone}
               onChange={handleChange}
             />
             <p id="phoneError" className="text-danger">{errors.phoneError}</p>
@@ -238,12 +256,12 @@ const UserProfileForm: React.FC = () => {
         </div>
         <div className="col-sm-6">
           <div className="form-group">
-            <label>Aadhaar No.</label>
+            <label>Aadhar Number</label>
             <input
               type="text"
               name="user_aadhaar_no"
               id="user_aadhaar_no"
-              placeholder="Aadhaar No."
+              placeholder="Aadhar Number"
               className="form-control"
               value={formData.user_aadhaar_no}
               onChange={handleChange}
@@ -287,7 +305,7 @@ const UserProfileForm: React.FC = () => {
               type="text"
               name="pincode"
               id="pincode"
-              placeholder="Pin Code"
+              placeholder="Pincode"
               className="form-control"
               value={formData.pincode}
               onChange={handleChange}
@@ -301,10 +319,11 @@ const UserProfileForm: React.FC = () => {
             <input
               type="text"
               name="city"
-              placeholder="City"
               id="city"
+              placeholder="City"
               className="form-control"
               value={formData.city}
+              onChange={handleChange}
               readOnly
             />
             <p id="cityError" className="text-danger">{errors.cityError}</p>
@@ -316,31 +335,20 @@ const UserProfileForm: React.FC = () => {
             <input
               type="text"
               name="state"
-              placeholder="State"
               id="state"
+              placeholder="State"
               className="form-control"
               value={formData.state}
+              onChange={handleChange}
               readOnly
             />
             <p id="stateError" className="text-danger">{errors.stateError}</p>
           </div>
         </div>
       </div>
-      <div className="row">
-        <div className="col-sm-2 col-sm-offset-8">
-          <a className="btn btn-info btn-block btnCancel" href="/my-account">
-            Cancel
-          </a>
-        </div>
-        <div className="col-sm-2">
-          <input
-            className="btn btn-success btn-block userFormBtn"
-            type="button"
-            value="Next"
-            onClick={submitUserForm}
-          />
-        </div>
-      </div>
+      <button type="button" onClick={submitUserForm} className="btn btn-primary">
+        Submit
+      </button>
     </form>
   );
 };
