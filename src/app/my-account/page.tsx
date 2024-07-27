@@ -6,6 +6,7 @@ import { apiRequest } from "../lib/apiHelper";
 import { toast } from "react-toastify";
 
 const Page: React.FC = () => {
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("user");
   const [userId, setUserId] = useState<string>('');
   const [companyId, setCompanyId] = useState<string>('');
@@ -31,6 +32,7 @@ const Page: React.FC = () => {
         } catch (e) {
           console.error('Error parsing user data from localStorage:', e);
           setError('Error retrieving user data');
+          setLoading(false); // Set loading to false
           return;
         }
       }
@@ -82,12 +84,24 @@ const Page: React.FC = () => {
       } catch (error) {
         setError('An error occurred while fetching the profile');
         console.error('Error fetching merchant profile:', error);
+      } finally {
+        setLoading(false); // Ensure loading is set to false when fetching is complete
       }
     };
 
     fetchMerchantProfile();
   }, []);
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <i className="fas fa-spinner fa-spin text-3xl text-blue-500"></i>
+          <p className="mt-4 text-lg text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
   const handleTabClick = (tab: string) => {
     // Control tab navigation based on data availability
     if (tab === "company" && !userId) return;
