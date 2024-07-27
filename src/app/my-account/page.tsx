@@ -59,6 +59,19 @@ const Page: React.FC = () => {
           setEntityList(entityList.Result || []);
           setKycRequiredDocsList(kycRequiredDocsList.Result || []);
           setServices(services);
+
+          // Set initial active tab based on the data availability
+          if (!user) {
+            setActiveTab('user');
+          } else if (user && !companyData) {
+            setActiveTab('company');
+          } else if (user && companyData && !bankData) {
+            setActiveTab('bank');
+          } else if (user && companyData && bankData && !services.length) {
+            setActiveTab('document');
+          } else {
+            setActiveTab('service');
+          }
         } else if (response.StatusCode === '0') {
           setError(response.Message || 'An error occurred');
           toast.error(response.Message || 'An error occurred');
@@ -76,6 +89,11 @@ const Page: React.FC = () => {
   }, []);
 
   const handleTabClick = (tab: string) => {
+    // Control tab navigation based on data availability
+    if (tab === "company" && !userId) return;
+    if (tab === "bank" && (!userId || !companyId)) return;
+    if (tab === "document" && (!userId || !companyId || !bankId)) return;
+    if (tab === "service" && (!userId || !companyId || !bankId || !services.length)) return;
     setActiveTab(tab);
   };
 
@@ -127,6 +145,17 @@ const Page: React.FC = () => {
                     Document Type
                   </a>
                 </li>
+                {services.length > 0 && (
+                  <li className="nav-item">
+                    <a
+                      className={`nav-link ${activeTab === "service" ? "active" : ""}`}
+                      onClick={() => handleTabClick("service")}
+                      role="tab"
+                    >
+                      Service(s)
+                    </a>
+                  </li>
+                )}
               </ul>
             </div>
             <div className="card-body">
@@ -147,9 +176,6 @@ const Page: React.FC = () => {
                     bankId={bankId}
                     companyData={companyData}
                     entityList={entityList}
-                    kycRequiredDocsList={kycRequiredDocsList}
-                    bankData={bankData}
-                    services={services}
                   />
                 </div>
                 <div
@@ -183,13 +209,30 @@ const Page: React.FC = () => {
                   commodo dignissim. In hac habitasse platea dictumst. Praesent
                   imperdiet accumsan ex sit amet facilisis.
                 </div>
+                {services.length > 0 && (
+                  <div
+                    className={`tab-pane fade ${activeTab === "service" ? "show active" : ""}`}
+                    role="tabpanel"
+                  >
+                    Integer imperdiet finibus ipsum, quis rutrum enim iaculis
+                    eu. Quisque at eros metus. Fusce aliquam est nec massa
+                    aliquet, eget eleifend neque scelerisque. Sed eu facilisis
+                    odio. Sed sagittis mi vitae ex maximus facilisis. Vestibulum
+                    dictum consectetur quam, nec lacinia urna venenatis
+                    tincidunt. Nam vel semper odio. Pellentesque a est in dui
+                    fermentum malesuada nec vel eros. Nulla ac justo ornare,
+                    suscipit nulla sed, blandit tellus. Aenean purus libero,
+                    ultricies sed faucibus nec, mollis at odio. Nulla facilisi.
+                    Donec vulputate sem a nibh sollicitudin, quis tincidunt
+                    eros placerat. Integer ut aliquam sem. Nam aliquet urna
+                    mattis, mollis ligula quis, vehicula dui.
+                  </div>
+                )}
               </div>
             </div>
-            {/* /.card */}
           </div>
         </div>
       </div>
-      {error && <div className="alert alert-danger">{error}</div>}
     </>
   );
 };
