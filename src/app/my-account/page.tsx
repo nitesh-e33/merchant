@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import UserProfileForm from "../components/MyAccount/UserProfileForm";
 import CompanyProfileForm from "../components/MyAccount/CompanyProfileForm";
+import BankProfileForm from "../components/MyAccount/BankProfileForm";
 import { apiRequest } from "../lib/apiHelper";
 import { toast } from "react-toastify";
 
@@ -196,18 +197,12 @@ const Page: React.FC = () => {
                   className={`tab-pane fade ${activeTab === "bank" ? "show active" : ""}`}
                   role="tabpanel"
                 >
-                  Morbi turpis dolor, vulputate vitae felis non, tincidunt
-                  congue mauris. Phasellus volutpat augue id mi placerat mollis.
-                  Vivamus faucibus eu massa eget condimentum. Fusce nec
-                  hendrerit sem, ac tristique nulla. Integer vestibulum orci
-                  odio. Cras nec augue ipsum. Suspendisse ut velit condimentum,
-                  mattis urna a, malesuada nunc. Curabitur eleifend facilisis
-                  velit finibus tristique. Nam vulputate, eros non luctus
-                  efficitur, ipsum odio volutpat massa, sit amet sollicitudin
-                  est libero sed ipsum. Nulla lacinia, ex vitae gravida
-                  fermentum, lectus ipsum gravida arcu, id fermentum metus arcu
-                  vel metus. Curabitur eget sem eu risus tincidunt eleifend ac
-                  ornare magna.
+                 <BankProfileForm
+                    userId={userId}
+                    companyId={companyId}
+                    bankId={bankId}
+                    bankData={bankData}
+                  />
                 </div>
                 <div
                   className={`tab-pane fade ${activeTab === "document" ? "show active" : ""}`}
