@@ -80,8 +80,6 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
 
     if (name === 'pincode') {
       handlePincodeInput(value);
-    } else {
-      // validateForm();
     }
   };
 
@@ -125,8 +123,115 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
     }
   };
 
-  const submitCompanyForm = () => {
-    // Your form submission logic here
+  const validateForm = () => {
+    let valid = true;
+    let newErrors = {
+      c_nameError: '',
+      hostNameError: '',
+      aliasNameError: '',
+      c_emailError: '',
+      c_phoneError: '',
+      c_address1Error: '',
+      c_logoError: '',
+      entityTypeError: '',
+      c_pincodeError: '',
+      c_cityError: '',
+      c_stateError: '',
+    };
+
+    // Validate company name
+    if (!formData.company_name) {
+      newErrors.c_nameError = 'Company name is required';
+      valid = false;
+    } else if (!/^[a-zA-Z\s]+$/.test(formData.company_name)) {
+      newErrors.c_nameError = 'Company name should contain only alphabets';
+      valid = false;
+    }
+
+    // Validate alias name
+    if (!formData.company_alias_name) {
+      newErrors.aliasNameError = 'Alias name is required';
+      valid = false;
+    }
+
+    // Validate host name
+    if (!formData.host_name) {
+      newErrors.hostNameError = 'Host name is required';
+      valid = false;
+    }
+
+    // Validate email
+    if (!formData.company_email) {
+      newErrors.c_emailError = 'Email is required';
+      valid = false;
+    } else if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,10}$/.test(formData.company_email)) {
+      newErrors.c_emailError = 'Invalid email format';
+      valid = false;
+    }
+
+    // Validate phone
+    if (!formData.company_phone) {
+      newErrors.c_phoneError = 'Phone number is required';
+      valid = false;
+    } else if (!/^(\+?[0-9]{1,5})?([7-9][0-9]{9})$/.test(formData.company_phone)) {
+      newErrors.c_phoneError = 'Invalid phone number';
+      valid = false;
+    }
+
+    // Validate address 1
+    if (!formData.company_address1) {
+      newErrors.c_address1Error = 'Address is required';
+      valid = false;
+    }
+
+    // Validate entity type
+    if (!formData.entity_type) {
+      newErrors.entityTypeError = 'Entity type is required';
+      valid = false;
+    }
+
+    // Validate pincode
+    if (!formData.pincode) {
+      newErrors.c_pincodeError = 'Pincode is required';
+      valid = false;
+    }
+
+    // Validate city
+    if (!formData.city) {
+      newErrors.c_cityError = 'City is required';
+      valid = false;
+    }
+
+    // Validate state
+    if (!formData.state) {
+      newErrors.c_stateError = 'State is required';
+      valid = false;
+    }
+
+    setErrors(newErrors);
+    return valid;
+  };
+
+  const submitCompanyForm = async() => {
+    if (validateForm()) {
+      try {
+        const response = await apiRequest('POST', '/v1/merchant/update-company-profile', formData);
+        if (response.StatusCode === '1') {
+          toast.success('Company profile updated successfully');
+          window.location.reload();
+        } else {
+          if (response.Result) {
+            toast.error(response.Result);
+          } else {
+            toast.error('Something went wrong. Please try again later.');
+          }
+        }
+      } catch (error) {
+        console.error('Error saving company profile:', error);
+      }
+    } else {
+      toast.error('Please fix the errors in the form');
+    }
   };
 
   return (
