@@ -98,8 +98,9 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ userData }) => {
 
     if (name === 'pincode') {
       handlePincodeInput(value);
+    } else {
+      validateForm();
     }
-    validateForm();
   };
 
   const handlePincodeInput = async (pincode: string) => {

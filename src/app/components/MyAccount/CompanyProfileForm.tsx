@@ -1,5 +1,7 @@
+import { apiRequest } from '@/app/lib/apiHelper';
 import { API_ASSET_URL } from '@/app/lib/constant';
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 
 interface CompanyProfileFormProps {
   userId: string;
@@ -28,6 +30,20 @@ interface CompanyProfileFormProps {
   }[];
 }
 
+interface Errors {
+  c_nameError: string;
+  hostNameError: string;
+  aliasNameError: string;
+  c_emailError: string;
+  c_phoneError: string;
+  c_address1Error: string;
+  c_logoError: string,
+  entityTypeError: string;
+  c_pincodeError: string;
+  c_cityError: string;
+  c_stateError: string;
+}
+
 const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
   userId,
   companyId,
@@ -36,6 +52,20 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
   entityList,
 }) => {
   const [formData, setFormData] = useState(companyData);
+
+  const [errors, setErrors] = useState<Errors>({
+    c_nameError: '',
+    hostNameError: '',
+    aliasNameError: '',
+    c_emailError: '',
+    c_phoneError: '',
+    c_address1Error: '',
+    c_logoError: '',
+    entityTypeError: '',
+    c_pincodeError: '',
+    c_cityError: '',
+    c_stateError: '',
+  });
 
   useEffect(() => {
     setFormData(companyData);
@@ -47,6 +77,52 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
       ...formData,
       [name]: value,
     });
+
+    if (name === 'pincode') {
+      handlePincodeInput(value);
+    } else {
+      // validateForm();
+    }
+  };
+
+  const handlePincodeInput = async (pincode: string) => {
+    if (/^\d{6}$/.test(pincode)) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        c_pincodeError: '',
+      }));
+
+      try {
+        const data = await apiRequest('GET', '/city-state-pincode', { pincode });
+        if (data.StatusCode === '1') {
+          setFormData((prevData) => ({
+            ...prevData,
+            city: data.Result.city.city_name,
+            state: data.Result.state.state_name,
+          }));
+        } else {
+          if (data.redirect) {
+            window.location.href = data.redirect;
+          } else if (data.Result) {
+            toast.error(data.Result);
+          } else {
+            console.error('Something went wrong. Please try again later.');
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching city and state:', error);
+      }
+    } else {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        c_pincodeError: 'Pincode should be 6 digits.',
+      }));
+      setFormData((prevData) => ({
+        ...prevData,
+        city: '',
+        state: '',
+      }));
+    }
   };
 
   const submitCompanyForm = () => {
@@ -71,7 +147,7 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
               value={formData.company_name || ''}
               onChange={handleInputChange}
             />
-            <p id="c_nameError" className="text-danger"></p>
+            <p id="c_nameError" className="text-danger">{errors.c_nameError}</p>
           </div>
         </div>
         <div className="col-sm-6">
@@ -86,7 +162,7 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
               value={formData.company_alias_name || ''}
               onChange={handleInputChange}
             />
-            <p id="aliasNameError" className="text-danger"></p>
+            <p id="aliasNameError" className="text-danger">{errors.aliasNameError}</p>
           </div>
         </div>
         <div className="col-sm-6">
@@ -101,7 +177,7 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
               value={formData.host_name || ''}
               onChange={handleInputChange}
             />
-            <p id="hostNameError" className="text-danger"></p>
+            <p id="hostNameError" className="text-danger">{errors.hostNameError}</p>
           </div>
         </div>
         <div className="col-sm-6">
@@ -117,7 +193,7 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
               value={formData.company_email || ''}
               onChange={handleInputChange}
             />
-            <p id="c_emailError" className="text-danger"></p>
+            <p id="c_emailError" className="text-danger">{errors.c_emailError}</p>
           </div>
         </div>
         <div className="col-sm-6">
@@ -132,7 +208,7 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
               value={formData.company_phone || ''}
               onChange={handleInputChange}
             />
-            <p id="c_phoneError" className="text-danger"></p>
+            <p id="c_phoneError" className="text-danger">{errors.c_phoneError}</p>
           </div>
         </div>
         <div className="col-sm-6">
@@ -147,7 +223,7 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
               value={formData.company_address1 || ''}
               onChange={handleInputChange}
             />
-            <p id="c_address1Error" className="text-danger"></p>
+            <p id="c_address1Error" className="text-danger">{errors.c_address1Error}</p>
           </div>
         </div>
         <div className="col-sm-6">
@@ -187,7 +263,7 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
               id="company_logo"
               className="form-control"
             />
-            <p id="c_logoError" className="text-danger"></p>
+            <p id="c_logoError" className="text-danger">{errors.c_logoError}</p>
           </div>
         </div>
         <div className="col-sm-6">
@@ -207,7 +283,7 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
                 </option>
               ))}
             </select>
-            <p id="entityTypeError" className="text-danger"></p>
+            <p id="entityTypeError" className="text-danger">{errors.entityTypeError}</p>
           </div>
         </div>
         <div className="col-sm-6">
@@ -222,7 +298,7 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
               value={formData.pincode || ''}
               onChange={handleInputChange}
             />
-            <p id="c_pincodeError" className="text-danger"></p>
+            <p id="c_pincodeError" className="text-danger">{errors.c_pincodeError}</p>
           </div>
         </div>
         <div className="col-sm-6">
@@ -238,7 +314,7 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
               value={formData.city || ''}
               readOnly
             />
-            <p id="c_cityError" className="text-danger"></p>
+            <p id="c_cityError" className="text-danger">{errors.c_cityError}</p>
           </div>
         </div>
         <div className="col-sm-6">
@@ -254,7 +330,7 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
               value={formData.state || ''}
               readOnly
             />
-            <p id="c_stateError" className="text-danger"></p>
+            <p id="c_stateError" className="text-danger">{errors.c_stateError}</p>
           </div>
         </div>
       </div>
