@@ -1,5 +1,5 @@
 import { API_ASSET_URL } from '@/app/lib/constant';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface CompanyProfileFormProps {
   userId: string;
@@ -28,7 +28,27 @@ interface CompanyProfileFormProps {
   }[];
 }
 
-const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({ userId, companyId, bankId, companyData, entityList }) => {
+const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
+  userId,
+  companyId,
+  bankId,
+  companyData,
+  entityList,
+}) => {
+  const [formData, setFormData] = useState(companyData);
+
+  useEffect(() => {
+    setFormData(companyData);
+  }, [companyData]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
   const submitCompanyForm = () => {
     // Your form submission logic here
   };
@@ -48,7 +68,8 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({ userId, company
               id="company_name"
               placeholder="Company Name"
               className="form-control"
-              defaultValue={companyData.company_name || ''}
+              value={formData.company_name || ''}
+              onChange={handleInputChange}
             />
             <p id="c_nameError" className="text-danger"></p>
           </div>
@@ -62,7 +83,8 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({ userId, company
               id="company_alias_name"
               placeholder="Company Alias Name"
               className="form-control"
-              defaultValue={companyData.company_alias_name || ''}
+              value={formData.company_alias_name || ''}
+              onChange={handleInputChange}
             />
             <p id="aliasNameError" className="text-danger"></p>
           </div>
@@ -76,7 +98,8 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({ userId, company
               id="host_name"
               placeholder="Host Name"
               className="form-control"
-              defaultValue={companyData.host_name || ''}
+              value={formData.host_name || ''}
+              onChange={handleInputChange}
             />
             <p id="hostNameError" className="text-danger"></p>
           </div>
@@ -91,7 +114,8 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({ userId, company
               id="company_email"
               data-field="email"
               className="form-control"
-              defaultValue={companyData.company_email || ''}
+              value={formData.company_email || ''}
+              onChange={handleInputChange}
             />
             <p id="c_emailError" className="text-danger"></p>
           </div>
@@ -105,7 +129,8 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({ userId, company
               id="company_phone"
               placeholder="Company Phone No."
               className="form-control"
-              defaultValue={companyData.company_phone || ''}
+              value={formData.company_phone || ''}
+              onChange={handleInputChange}
             />
             <p id="c_phoneError" className="text-danger"></p>
           </div>
@@ -119,7 +144,8 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({ userId, company
               id="company_address1"
               placeholder="Company Address 1"
               className="form-control"
-              defaultValue={companyData.company_address1 || ''}
+              value={formData.company_address1 || ''}
+              onChange={handleInputChange}
             />
             <p id="c_address1Error" className="text-danger"></p>
           </div>
@@ -133,42 +159,50 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({ userId, company
               id="company_address2"
               placeholder="Company Address 2"
               className="form-control"
-              defaultValue={companyData.company_address2 || ''}
+              value={formData.company_address2 || ''}
+              onChange={handleInputChange}
             />
           </div>
         </div>
         <div className="col-sm-6">
           <div className="form-group">
             <label>Company Logo</label>
-            {companyData.company_logo && (
+            {formData.company_logo && (
               <a
-                href={`${API_ASSET_URL}${companyData.company_logo}`}
+                href={`${API_ASSET_URL}${formData.company_logo}`}
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <img
-                  src={`${API_ASSET_URL}${companyData.company_logo}`}
+                  src={`${API_ASSET_URL}${formData.company_logo}`}
                   alt="company logo"
                   width="30px"
                   height="30px"
                 />
               </a>
             )}
-            <input type="file" name="company_logo" id="company_logo" className="form-control" />
+            <input
+              type="file"
+              name="company_logo"
+              id="company_logo"
+              className="form-control"
+            />
             <p id="c_logoError" className="text-danger"></p>
           </div>
         </div>
         <div className="col-sm-6">
           <div className="form-group">
             <label>Entity Business Type *</label>
-            <select name="entity_type" id="entity_type" className="form-control">
+            <select
+              name="entity_type"
+              id="entity_type"
+              className="form-control"
+              value={formData.entity_type || ''}
+              onChange={handleInputChange}
+            >
               <option value="">--Select Entity Type--</option>
               {entityList.map((entity) => (
-                <option
-                  key={entity.id}
-                  value={entity.id}
-                  selected={entity.id === companyData.entity_type}
-                >
+                <option key={entity.id} value={entity.id}>
                   {entity.entity_name}
                 </option>
               ))}
@@ -185,7 +219,8 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({ userId, company
               id="company_pincode"
               placeholder="Pin Code"
               className="form-control"
-              defaultValue={companyData.pincode || ''}
+              value={formData.pincode || ''}
+              onChange={handleInputChange}
             />
             <p id="c_pincodeError" className="text-danger"></p>
           </div>
@@ -200,7 +235,7 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({ userId, company
               id="company_city"
               data-field="city"
               className="form-control"
-              defaultValue={companyData.city || ''}
+              value={formData.city || ''}
               readOnly
             />
             <p id="c_cityError" className="text-danger"></p>
@@ -216,7 +251,7 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({ userId, company
               id="company_state"
               data-field="state"
               className="form-control"
-              defaultValue={companyData.state || ''}
+              value={formData.state || ''}
               readOnly
             />
             <p id="c_stateError" className="text-danger"></p>

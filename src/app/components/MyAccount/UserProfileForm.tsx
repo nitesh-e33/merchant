@@ -68,11 +68,10 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ userData }) => {
     stateError: '',
   });
 
-  // Update formData when userData changes
   useEffect(() => {
     if (userData) {
       setFormData({
-        userid: userData.userid || 0,
+        userid: userData.id || 0,
         user_fname: userData.user_fname || '',
         user_lname: userData.user_lname || '',
         email: userData.email || '',
@@ -100,6 +99,7 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ userData }) => {
     if (name === 'pincode') {
       handlePincodeInput(value);
     }
+    validateForm();
   };
 
   const handlePincodeInput = async (pincode: string) => {
@@ -142,8 +142,133 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ userData }) => {
     }
   };
 
-  const submitUserForm = () => {
-    // Your form submission logic here
+  const validateForm = () => {
+    let valid = true;
+    let newErrors = {
+      fnameError: '',
+      emailError: '',
+      phoneError: '',
+      altEmailError: '',
+      altPhoneError: '',
+      panError: '',
+      aadharError: '',
+      address1Error: '',
+      pincodeError: '',
+      cityError: '',
+      stateError: '',
+    };
+
+    // Validate first name
+    if (!formData.user_fname) {
+      newErrors.fnameError = 'First name is required';
+      valid = false;
+    } else if (!/^[a-zA-Z\s]+$/.test(formData.user_fname)) {
+      newErrors.fnameError = 'First Name should contain only alphabets.';
+      valid = false;
+    }
+
+    // Validate email
+    if (!formData.email) {
+      newErrors.emailError = 'Email is required';
+      valid = false;
+    } else if (!/^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/.test(formData.email)) {
+      newErrors.emailError = 'Invalid email format';
+      valid = false;
+    }
+
+    // Validate phone
+    if (!formData.user_phone) {
+      newErrors.phoneError = 'Phone number is required';
+      valid = false;
+    } else if (!/^(0|\+[0-9]{1,5})?([7-9][0-9]{9})$/.test(formData.user_phone)) {
+      newErrors.phoneError = 'Invalid phone number';
+      valid = false;
+    }
+
+    // Validate alternative email
+    if (formData.alt_email_address && !/^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/.test(formData.alt_email_address)) {
+      newErrors.altEmailError = 'Invalid alternative email format';
+      valid = false;
+    }
+
+    // Validate alternative phone
+    if (formData.alt_user_phone && !/^(0|\+[0-9]{1,5})?([7-9][0-9]{9})$/.test(formData.alt_user_phone)) {
+      newErrors.altPhoneError = 'Invalid alternative phone number';
+      valid = false;
+    }
+
+    // Ensure primary and alternative emails are not the same
+    if (formData.email && formData.alt_email_address && formData.email === formData.alt_email_address) {
+      newErrors.altEmailError = 'Email and alternative email cannot be the same';
+      valid = false;
+    }
+
+    // Ensure primary and alternative phones are not the same
+    if (formData.user_phone && formData.alt_user_phone && formData.user_phone === formData.alt_user_phone) {
+      newErrors.altPhoneError = 'Phone number and alternative phone number cannot be the same';
+      valid = false;
+    }
+
+    // Validate PAN number
+    if (formData.user_pan_no && !/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(formData.user_pan_no)) {
+      newErrors.panError = 'Invalid PAN number';
+      valid = false;
+    }
+
+    // Validate Aadhaar number
+    if (formData.user_aadhaar_no && !/^[2-9]\d{3}\d{4}\d{4}$/.test(formData.user_aadhaar_no)) {
+      newErrors.aadharError = 'Invalid Aadhaar number';
+      valid = false;
+    }
+
+    // Validate address
+    if (!formData.user_address1) {
+      newErrors.address1Error = 'Address is required';
+      valid = false;
+    }
+
+    // Validate pincode
+    if (!formData.pincode) {
+      newErrors.pincodeError = 'Pincode is required';
+      valid = false;
+    }
+
+    // Validate city
+    if (!formData.city) {
+      newErrors.cityError = 'City is required';
+      valid = false;
+    }
+
+    // Validate state
+    if (!formData.state) {
+      newErrors.stateError = 'State is required';
+      valid = false;
+    }
+
+    setErrors(newErrors);
+    return valid;
+  };
+
+  const submitUserForm = async () => {
+    if (validateForm()) {
+      try {
+        const response = await apiRequest('POST', '/v1/merchant/update/user', formData);
+        if (response.StatusCode === '1') {
+          toast.success('User profile updated successfully');
+          window.location.reload();
+        } else {
+          if (response.Result) {
+            toast.error(response.Result);
+          } else {
+            toast.error('Something went wrong. Please try again later.');
+          }
+        }
+      } catch (error) {
+        console.error('Error saving user profile:', error);
+      }
+    } else {
+      toast.error('Please fix the errors in the form');
+    }
   };
 
   return (
@@ -323,7 +448,6 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ userData }) => {
               placeholder="City"
               className="form-control"
               value={formData.city}
-              onChange={handleChange}
               readOnly
             />
             <p id="cityError" className="text-danger">{errors.cityError}</p>
@@ -339,16 +463,27 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ userData }) => {
               placeholder="State"
               className="form-control"
               value={formData.state}
-              onChange={handleChange}
               readOnly
             />
             <p id="stateError" className="text-danger">{errors.stateError}</p>
           </div>
         </div>
       </div>
-      <button type="button" onClick={submitUserForm} className="btn btn-primary">
-        Submit
-      </button>
+      <div className="row">
+        <div className="col-sm-2 col-sm-offset-8">
+          <a className="btn btn-info btn-block btnCancel" href="/my-account">
+            Cancel
+          </a>
+        </div>
+        <div className="col-sm-2">
+          <input
+            className="btn btn-success btn-block updateUserProfile"
+            type="button"
+            value="Next"
+            onClick={submitUserForm}
+          />
+        </div>
+      </div>
     </form>
   );
 };
