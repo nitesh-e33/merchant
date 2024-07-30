@@ -12,11 +12,8 @@ interface CompanyProfileFormProps {
     company_alias_name?: string;
     host_name?: string;
     company_email?: string;
-    is_email_verified?: boolean;
     company_phone?: string;
-    is_phone_verified?: boolean;
     company_address1?: string;
-    is_company__address_verified?: boolean;
     company_address2?: string;
     company_logo?: string | File;
     entity_type?: string;
@@ -37,7 +34,7 @@ interface Errors {
   c_emailError: string;
   c_phoneError: string;
   c_address1Error: string;
-  c_logoError: string,
+  c_logoError: string;
   entityTypeError: string;
   c_pincodeError: string;
   c_cityError: string;
@@ -217,14 +214,33 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
     if (validateForm()) {
       try {
         const formDataToSend = new FormData();
-        Object.keys(formData).forEach(key => {
-          formDataToSend.append(key, formData[key as keyof typeof formData] as any);
-        });
-  
+
+        // Append only the required fields
+        formDataToSend.append('company_name', formData.company_name || '');
+        formDataToSend.append('company_alias_name', formData.company_alias_name || '');
+        formDataToSend.append('host_name', formData.host_name || '');
+        formDataToSend.append('company_email', formData.company_email || '');
+        formDataToSend.append('company_phone', formData.company_phone || '');
+        formDataToSend.append('company_address1', formData.company_address1 || '');
+        formDataToSend.append('company_address2', formData.company_address2 || '');
+        if (formData.company_logo instanceof File) {
+          formDataToSend.append('company_logo', formData.company_logo);
+        }
+        formDataToSend.append('entity_type', formData.entity_type || '');
+        formDataToSend.append('pincode', formData.pincode || '');
+        formDataToSend.append('city', formData.city || '');
+        formDataToSend.append('state', formData.state || '');
+
+        formDataToSend.append('merchant_user_id', userId);
+        formDataToSend.append('company_id', companyId);
+        formDataToSend.append('user_account_id', bankId);
+
         const response = await apiRequest('POST', '/v1/merchant/update-company-profile', formDataToSend);
         if (response.StatusCode === '1') {
           toast.success('Company profile updated successfully');
-          window.location.reload();
+          setTimeout(function () {
+            // window.location.reload();
+          }, 2000);
         } else {
           if (response.Result) {
             toast.error(response.Result);
@@ -295,11 +311,10 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
           <div className="form-group">
             <label>Company Email *</label>
             <input
-              type="email"
+              type="text"
               name="company_email"
-              placeholder="Company Email"
               id="company_email"
-              data-field="email"
+              placeholder="Company Email"
               className="form-control"
               value={formData.company_email || ''}
               onChange={handleInputChange}
@@ -309,12 +324,12 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
         </div>
         <div className="col-sm-6">
           <div className="form-group">
-            <label>Company Phone No. *</label>
+            <label>Company Phone *</label>
             <input
               type="text"
               name="company_phone"
               id="company_phone"
-              placeholder="Company Phone No."
+              placeholder="Company Phone"
               className="form-control"
               value={formData.company_phone || ''}
               onChange={handleInputChange}
@@ -362,7 +377,7 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
               >
                 <img
                   src={`${API_ASSET_URL}${formData.company_logo}`}
-                  alt="company logo"
+                  alt="company_logo"
                   width="30px"
                   height="30px"
                 />
@@ -373,13 +388,14 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
               name="company_logo"
               id="company_logo"
               className="form-control"
+              onChange={handleInputChange}
             />
             <p id="c_logoError" className="text-danger">{errors.c_logoError}</p>
           </div>
         </div>
         <div className="col-sm-6">
           <div className="form-group">
-            <label>Entity Business Type *</label>
+            <label>Entity Type *</label>
             <select
               name="entity_type"
               id="entity_type"
@@ -387,11 +403,9 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
               value={formData.entity_type || ''}
               onChange={handleInputChange}
             >
-              <option value="">--Select Entity Type--</option>
+              <option value="">Select Entity Type</option>
               {entityList.map((entity) => (
-                <option key={entity.id} value={entity.id}>
-                  {entity.entity_name}
-                </option>
+                <option key={entity.id} value={entity.entity_name}>{entity.entity_name}</option>
               ))}
             </select>
             <p id="entityTypeError" className="text-danger">{errors.entityTypeError}</p>
@@ -403,8 +417,8 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
             <input
               type="text"
               name="pincode"
-              id="company_pincode"
-              placeholder="Pin Code"
+              id="pincode"
+              placeholder="Pincode"
               className="form-control"
               value={formData.pincode || ''}
               onChange={handleInputChange}
@@ -418,12 +432,12 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
             <input
               type="text"
               name="city"
+              id="city"
               placeholder="City"
-              id="company_city"
-              data-field="city"
               className="form-control"
               value={formData.city || ''}
-              readOnly
+              onChange={handleInputChange}
+              disabled
             />
             <p id="c_cityError" className="text-danger">{errors.c_cityError}</p>
           </div>
@@ -434,30 +448,30 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
             <input
               type="text"
               name="state"
+              id="state"
               placeholder="State"
-              id="company_state"
-              data-field="state"
               className="form-control"
               value={formData.state || ''}
-              readOnly
+              onChange={handleInputChange}
+              disabled
             />
             <p id="c_stateError" className="text-danger">{errors.c_stateError}</p>
           </div>
         </div>
-      </div>
-      <div className="row">
-        <div className="col-sm-2 col-sm-offset-8">
-          <a className="btn btn-info btn-block btnCancel" href="/my-account">
-            Cancel
-          </a>
-        </div>
-        <div className="col-sm-2">
-          <input
-            className="btn btn-success btn-block companyFormBtn"
-            type="button"
-            value="Next"
-            onClick={submitCompanyForm}
-          />
+        <div className="row">
+          <div className="col-sm-2 col-sm-offset-8">
+            <a className="btn btn-info btn-block btnCancel" href="/my-account">
+              Cancel
+            </a>
+          </div>
+          <div className="col-sm-2">
+            <input
+              className="btn btn-success btn-block updateUserProfile"
+              type="button"
+              value="Next"
+              onClick={submitCompanyForm}
+            />
+          </div>
         </div>
       </div>
     </form>
