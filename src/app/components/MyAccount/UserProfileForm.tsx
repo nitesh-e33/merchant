@@ -4,11 +4,11 @@ import { toast } from 'react-toastify';
 
 interface FormData {
   userid: number;
-  user_fname: string;
-  user_lname: string;
+  fname: string;
+  lname: string;
   email: string;
   alt_email_address: string;
-  user_phone: string;
+  phone: string;
   alt_user_phone: string;
   user_pan_no: string;
   user_aadhaar_no: string;
@@ -39,11 +39,11 @@ interface UserProfileFormProps {
 const UserProfileForm: React.FC<UserProfileFormProps> = ({ userData }) => {
   const [formData, setFormData] = useState<FormData>({
     userid: 0,
-    user_fname: '',
-    user_lname: '',
+    fname: '',
+    lname: '',
     email: '',
     alt_email_address: '',
-    user_phone: '',
+    phone: '',
     alt_user_phone: '',
     user_pan_no: '',
     user_aadhaar_no: '',
@@ -72,11 +72,11 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ userData }) => {
     if (userData) {
       setFormData({
         userid: userData.id || 0,
-        user_fname: userData.user_fname || '',
-        user_lname: userData.user_lname || '',
+        fname: userData.user_fname || '',
+        lname: userData.user_lname || '',
         email: userData.email || '',
         alt_email_address: userData.alt_email_address || '',
-        user_phone: userData.user_phone || '',
+        phone: userData.user_phone || '',
         alt_user_phone: userData.alt_user_phone || '',
         user_pan_no: userData.user_pan_no || '',
         user_aadhaar_no: userData.user_aadhaar_no || '',
@@ -158,10 +158,10 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ userData }) => {
     };
 
     // Validate first name
-    if (!formData.user_fname) {
+    if (!formData.fname) {
       newErrors.fnameError = 'First name is required';
       valid = false;
-    } else if (!/^[a-zA-Z\s]+$/.test(formData.user_fname)) {
+    } else if (!/^[a-zA-Z\s]+$/.test(formData.fname)) {
       newErrors.fnameError = 'First Name should contain only alphabets.';
       valid = false;
     }
@@ -176,10 +176,10 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ userData }) => {
     }
 
     // Validate phone
-    if (!formData.user_phone) {
+    if (!formData.phone) {
       newErrors.phoneError = 'Phone number is required';
       valid = false;
-    } else if (!/^(0|\+[0-9]{1,5})?([7-9][0-9]{9})$/.test(formData.user_phone)) {
+    } else if (!/^(0|\+[0-9]{1,5})?([7-9][0-9]{9})$/.test(formData.phone)) {
       newErrors.phoneError = 'Invalid phone number';
       valid = false;
     }
@@ -203,7 +203,7 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ userData }) => {
     }
 
     // Ensure primary and alternative phones are not the same
-    if (formData.user_phone && formData.alt_user_phone && formData.user_phone === formData.alt_user_phone) {
+    if (formData.phone && formData.alt_user_phone && formData.phone === formData.alt_user_phone) {
       newErrors.altPhoneError = 'Phone number and alternative phone number cannot be the same';
       valid = false;
     }
@@ -254,7 +254,9 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ userData }) => {
         const response = await apiRequest('POST', '/v1/merchant/update/user', formData);
         if (response.StatusCode === '1') {
           toast.success('User profile updated successfully');
-          window.location.reload();
+          setTimeout(function () {
+            window.location.reload();
+          }, 2000);
         } else {
           if (response.Result) {
             toast.error(response.Result);
@@ -279,11 +281,11 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ userData }) => {
             <label>First Name *</label>
             <input
               type="text"
-              name="user_fname"
-              id="user_fname"
+              name="fname"
+              id="fname"
               placeholder="First Name"
               className="form-control"
-              value={formData.user_fname}
+              value={formData.fname}
               onChange={handleChange}
             />
             <p id="fnameError" className="text-danger">{errors.fnameError}</p>
@@ -294,11 +296,11 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ userData }) => {
             <label>Last Name</label>
             <input
               type="text"
-              name="user_lname"
-              id="user_lname"
+              name="lname"
+              id="lname"
               placeholder="Last Name"
               className="form-control"
-              value={formData.user_lname}
+              value={formData.lname}
               onChange={handleChange}
             />
           </div>
@@ -338,11 +340,11 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ userData }) => {
             <label>Mobile *</label>
             <input
               type="text"
-              name="user_phone"
-              id="user_phone"
+              name="phone"
+              id="phone"
               placeholder="Mobile No."
               className="form-control"
-              value={formData.user_phone}
+              value={formData.phone}
               onChange={handleChange}
             />
             <p id="phoneError" className="text-danger">{errors.phoneError}</p>

@@ -8,7 +8,6 @@ export async function apiRequest(method, endpoint, data) {
 
     // Prepare headers
     const headers = {
-      "Content-Type": "application/json",
       "Accept": "application/json"
     };
 
@@ -21,9 +20,13 @@ export async function apiRequest(method, endpoint, data) {
       headers: headers
     };
 
-    if (method === 'GET' && data) {
+    if (data instanceof FormData) {
+      options.body = data;
+      // The browser will automatically set the Content-Type to multipart/form-data when using FormData
+    } else if (method === 'GET' && data) {
       Object.keys(data).forEach(key => url.searchParams.append(key, data[key]));
     } else if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
+      options.headers['Content-Type'] = 'application/json';
       options.body = JSON.stringify(data);
     }
 

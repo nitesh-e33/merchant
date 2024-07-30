@@ -18,7 +18,7 @@ interface CompanyProfileFormProps {
     company_address1?: string;
     is_company__address_verified?: boolean;
     company_address2?: string;
-    company_logo?: string;
+    company_logo?: string | File;
     entity_type?: string;
     pincode?: string;
     city?: string;
@@ -72,12 +72,13 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
   }, [companyData]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-
+    const { name, value, files } = e.target;
+    
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: files ? files[0] : value,  // Handle file input
+    }));
+  
     if (name === 'pincode') {
       handlePincodeInput(value);
     }
@@ -212,10 +213,15 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
     return valid;
   };
 
-  const submitCompanyForm = async() => {
+  const submitCompanyForm = async () => {
     if (validateForm()) {
       try {
-        const response = await apiRequest('POST', '/v1/merchant/update-company-profile', formData);
+        const formDataToSend = new FormData();
+        Object.keys(formData).forEach(key => {
+          formDataToSend.append(key, formData[key as keyof typeof formData] as any);
+        });
+  
+        const response = await apiRequest('POST', '/v1/merchant/update-company-profile', formDataToSend);
         if (response.StatusCode === '1') {
           toast.success('Company profile updated successfully');
           window.location.reload();
