@@ -395,7 +395,7 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
         </div>
         <div className="col-sm-6">
           <div className="form-group">
-            <label>Entity Type *</label>
+            <label>Entity Business Type *</label>
             <select
               name="entity_type"
               id="entity_type"
@@ -403,9 +403,11 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
               value={formData.entity_type || ''}
               onChange={handleInputChange}
             >
-              <option value="">Select Entity Type</option>
+              <option value="">--Select Entity Type--</option>
               {entityList.map((entity) => (
-                <option key={entity.id} value={entity.entity_name}>{entity.entity_name}</option>
+                <option key={entity.id} value={entity.id}>
+                  {entity.entity_name}
+                </option>
               ))}
             </select>
             <p id="entityTypeError" className="text-danger">{errors.entityTypeError}</p>
