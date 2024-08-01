@@ -238,7 +238,7 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
         const response = await apiRequest('POST', '/v1/merchant/update-company-profile', formDataToSend);
         if (response.StatusCode === '1') {
           toast.success('Company profile updated successfully');
-          setTimeout(function () {
+          setTimeout(() => {
             // window.location.reload();
           }, 2000);
         } else {
@@ -257,7 +257,7 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
   };
 
   return (
-    <form action="/my-account" method="post" id="frmCreateCompanyProfile">
+    <form action="/my-account" encType='multipart/form-data' method="post" id="frmCreateCompanyProfile">
       <input type="hidden" name="merchant_user_id" value={userId} />
       <input type="hidden" name="company_id" value={companyId} />
       <input type="hidden" name="user_account_id" value={bankId} />

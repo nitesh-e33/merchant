@@ -41,7 +41,7 @@ export default function LoginForm() {
           password: password,
           isLoginProcess: 'email'
         };
-        const response = await apiRequest("POST", "/merchant/login", loginData);
+        const response = await apiRequest("POST", "/merchant/login", {post: loginData});
         if (response.StatusCode === '1') {
           const user = response.Result;
           if (user.token) {

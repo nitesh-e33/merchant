@@ -39,7 +39,7 @@ const Page: React.FC = () => {
       }
 
       try {
-        const response = await apiRequest('GET', '/v1/merchant/profile', {merchant_id:storedUserId});
+        const response = await apiRequest('GET', '/v1/merchant/profile', { get: { merchant_id: storedUserId } });
 
         if (response.StatusCode === '1') {
           const user = response.Result || {};
@@ -50,8 +50,10 @@ const Page: React.FC = () => {
           const bankId = bankData.id || '';
           const entityList = await apiRequest('GET', '/v1/merchant/entity/list');
           const kycRequiredDocsList = companyId ? await apiRequest('GET', '/v1/merchant/get-all-kyc-required-document', {
-            company_id: companyId,
-            entity_id: companyData.entity_type,
+            get: {
+              company_id: companyId,
+              entity_id: companyData.entity_type,
+            },
           }) : [];
           const services = companyData.credentials?.mapped_services || [];
 

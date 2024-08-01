@@ -109,7 +109,7 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ userData }) => {
       }));
 
       try {
-        const data = await apiRequest('GET', '/city-state-pincode', { pincode });
+        const data = await apiRequest('GET', '/city-state-pincode', {get: {pincode} });
         if (data.StatusCode === '1') {
           setFormData((prevData) => ({
             ...prevData,
@@ -251,7 +251,7 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ userData }) => {
   const submitUserForm = async () => {
     if (validateForm()) {
       try {
-        const response = await apiRequest('POST', '/v1/merchant/update/user', formData);
+        const response = await apiRequest('POST', '/v1/merchant/update/user', {post: formData});
         if (response.StatusCode === '1') {
           toast.success('User profile updated successfully');
           setTimeout(function () {

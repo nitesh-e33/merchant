@@ -1,60 +1,127 @@
-import { API_BASE_URL } from "../lib/constant";
+import axios from 'axios';
 
-export async function apiRequest(method, endpoint, data) {
-    const url = new URL(`${API_BASE_URL}${endpoint}`);
+export async function apiRequest(type, api, data = {}) {
 
-    // Get token using the getToken function
-    const token = getToken();
+  const api_url = process.env.NEXT_PUBLIC_API_BASE_URL;
+  let headers = {};
 
-    // Prepare headers
-    const headers = {
-      "Accept": "application/json"
+  if (shouldBypassToken(api)) {
+    const token = data.token || getToken();
+    headers = {
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/json',
     };
 
-    // Add authorization header if token exists
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    const options = {
-      method: method,
-      headers: headers
-    };
+    // Add headers to data object
+    data.headers = headers;
 
-    if (data instanceof FormData) {
-      options.body = data;
-      // The browser will automatically set the Content-Type to multipart/form-data when using FormData
-    } else if (method === 'GET' && data) {
-      Object.keys(data).forEach(key => url.searchParams.append(key, data[key]));
-    } else if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
-      options.headers['Content-Type'] = 'application/json';
-      options.body = JSON.stringify(data);
+    // Add headers to post object if it exists, or create a new one
+    if (data.post) {
+      data.post.headers = headers;
+    } else {
+      data.post = { headers };
     }
 
-    try {
-      const response = await fetch(url.toString(), options);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+    console.log(data);
+  }
 
-      return await response.json();
-    } catch (error) {
-      console.error("Error in API call:", error);
-      throw error;
+  try {
+    type = type.toLowerCase();
+    api = `${api_url}${api}`;
+    let response;
+
+    switch (type) {
+      case 'get':
+        const getParams = data.get || {};
+        const getConfig = {
+          params: getParams,
+          headers: { ...headers, ...(data.headers || {}) },
+        };
+        response = await axios.get(api, getConfig);
+        break;
+
+      case 'post':
+      case 'delete':
+        let postData = data.post || {};
+        const multipart = [];
+
+        Object.entries(postData).forEach(([key, value]) => {
+          if (Array.isArray(value)) {
+            value.forEach((item) => {
+              multipart.push({ name: `${key}[]`, contents: item });
+            });
+          } else {
+            multipart.push({ name: key, contents: value });
+          }
+        });
+
+        if (data.files) {
+          Object.entries(data.files).forEach(([key, file]) => {
+            multipart.push({ name: key, contents: file });
+          });
+        }
+
+        // Set headers for multipart form-data
+        const postConfig = {
+          headers: { ...headers, ...(data.headers || {}) },
+        };
+
+        response = await axios[type](api, { ...postData, multipart }, postConfig);
+        break;
+
+      case 'put':
+        // Implement PUT request logic here if needed
+        break;
+
+      default:
+        throw new Error(`Unsupported request type: ${type}`);
     }
+
+    const responseContainer = response.data;
+
+    // Clean up temporary files if necessary
+    if (response.status === 200 && data.files) {
+      Object.values(data.files).forEach((file) => {
+        URL.revokeObjectURL(file);
+      });
+    }
+
+    return responseContainer;
+  } catch (e) {
+    console.error(`apiRequest_${api}`, e);
+    if (e.response && e.response.status === 401) {
+      return {
+        StatusCode: '0',
+        Message: 'Unauthenticated User or Token expired',
+      };
+    }
+    throw e;
+  }
 }
 
+const shouldBypassToken = (api) => {
+  const bypassUrls = [
+    'merchant/login',
+    'forgot-password',
+    'check-user-reset-token',
+    'reset-password',
+  ];
+
+  return !bypassUrls.includes(api);
+};
+
 function getToken() {
-    if (typeof window !== 'undefined') {
-      const user = localStorage.getItem('user');
-      if (user) {
-        try {
-          const userObject = JSON.parse(user);
-          return userObject.token || null;
-        } catch (error) {
-          console.error('Error parsing user from localStorage:', error);
-          return null;
-        }
+  if (typeof window !== 'undefined') {
+    const user = localStorage.getItem('user');
+    if (user) {
+      try {
+        const userObject = JSON.parse(user);
+        return userObject.token || null;
+      } catch (error) {
+        console.error('Error parsing user from localStorage:', error);
+        return null;
       }
     }
-    return null;
+  }
+  return null;
 }
