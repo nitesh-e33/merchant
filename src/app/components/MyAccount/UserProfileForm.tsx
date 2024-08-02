@@ -179,7 +179,7 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ userData }) => {
     if (!formData.phone) {
       newErrors.phoneError = 'Phone number is required';
       valid = false;
-    } else if (!/^(0|\+[0-9]{1,5})?([7-9][0-9]{9})$/.test(formData.phone)) {
+    } else if (!/^(0|\+[0-9]{1,5})?([6-9][0-9]{9})$/.test(formData.phone)) {
       newErrors.phoneError = 'Invalid phone number';
       valid = false;
     }
@@ -191,7 +191,7 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ userData }) => {
     }
 
     // Validate alternative phone
-    if (formData.alt_user_phone && !/^(0|\+[0-9]{1,5})?([7-9][0-9]{9})$/.test(formData.alt_user_phone)) {
+    if (formData.alt_user_phone && !/^(0|\+[0-9]{1,5})?([6-9][0-9]{9})$/.test(formData.alt_user_phone)) {
       newErrors.altPhoneError = 'Invalid alternative phone number';
       valid = false;
     }

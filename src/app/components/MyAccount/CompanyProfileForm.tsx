@@ -70,11 +70,52 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, files } = e.target;
-    
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: files ? files[0] : value,  // Handle file input
-    }));
+
+    if (name === 'company_logo') {
+      if (files && files.length > 0) {
+        const file = files[0];
+        const ext = file.name.split('.').pop()?.toLowerCase() || '';
+        const fileSize = file.size;
+
+        // Validate file type and size
+        if (!['jpg', 'png', 'jpeg', 'webp'].includes(ext)) {
+          setErrors(prevErrors => ({
+            ...prevErrors,
+            c_logoError: 'File type must be png, jpg, jpeg, or webp',
+          }));
+        } else if (fileSize > 300 * 1024) {
+          setErrors(prevErrors => ({
+            ...prevErrors,
+            c_logoError: 'File size must be less than 300KB',
+          }));
+        } else {
+          // File is valid
+          setErrors(prevErrors => ({
+            ...prevErrors,
+            c_logoError: '',
+          }));
+          setFormData(prevData => ({
+            ...prevData,
+            company_logo: file,
+          }));
+        }
+      } else {
+        // Handle no file selected
+        setErrors(prevErrors => ({
+          ...prevErrors,
+          c_logoError: '',
+        }));
+        setFormData(prevData => ({
+          ...prevData,
+          company_logo: '',
+        }));
+      }
+    } else {
+      setFormData(prevData => ({
+        ...prevData,
+        [name]: value,
+      }));
+    }
   
     if (name === 'pincode') {
       handlePincodeInput(value);
@@ -171,7 +212,7 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
     if (!formData.company_phone) {
       newErrors.c_phoneError = 'Phone number is required';
       valid = false;
-    } else if (!/^(\+?[0-9]{1,5})?([7-9][0-9]{9})$/.test(formData.company_phone)) {
+    } else if (!/^(\+?[0-9]{1,5})?([6-9][0-9]{9})$/.test(formData.company_phone)) {
       newErrors.c_phoneError = 'Invalid phone number';
       valid = false;
     }
@@ -210,13 +251,16 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
     return valid;
   };
 
-  const generateFilename = (file) => {
-    const timestamp = Date.now();
-    const randomNum = Math.floor(Math.random() * 1000) + 1;
-    const originalName = file.name.replace(/\s+/g, '');
-    const newFilename = `${timestamp}-${randomNum}-${originalName}`;
-    const path = `/var/www/html/droompay/merchant/droom-pay/merchant/public/uploads/temp//${newFilename}`;
-    return path;
+  const generateFilename = (file?: File) => {
+    if (file) {
+      const timestamp = Date.now();
+      const randomNum = Math.floor(Math.random() * 1000) + 1;
+      const originalName = file.name.replace(/\s+/g, '');
+      const newFilename = `${timestamp}-${randomNum}-${originalName}`;
+      const path = `/var/www/html/droompay/merchant/droom-pay/merchant/public/uploads/temp//${newFilename}`;
+      return path;
+    }
+    return null;
   };
 
   const submitCompanyForm = async () => {
@@ -232,6 +276,7 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
         formDataToSend.append('company_phone', formData.company_phone || '');
         formDataToSend.append('company_address1', formData.company_address1 || '');
         formDataToSend.append('company_address2', formData.company_address2 || '');
+        // Append company_logo only if it's a file
         if (formData.company_logo instanceof File) {
           formDataToSend.append('company_logo', formData.company_logo);
         }
@@ -244,14 +289,9 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
         formDataToSend.append('company_id', companyId);
         formDataToSend.append('user_account_id', bankId);
 
-        const file = formData.company_logo;
-        const files = {
-          company_logo: generateFilename(file)
-        };
-
         const response = await apiRequest('POST', '/v1/merchant/update-company-profile', {
           post: formDataToSend,
-          files: files
+          files: formData.company_logo instanceof File ? { company_logo: generateFilename(formData.company_logo) } : undefined
         });
         if (response.StatusCode === '1') {
           toast.success('Company profile updated successfully');

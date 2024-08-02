@@ -21,8 +21,6 @@ export async function apiRequest(type, api, data = {}) {
     } else {
       data.post = { headers };
     }
-
-    console.log(data);
   }
 
   try {
