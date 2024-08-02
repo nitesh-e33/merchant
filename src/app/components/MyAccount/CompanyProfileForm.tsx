@@ -264,52 +264,53 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
   };
 
   const submitCompanyForm = async () => {
-    if (validateForm()) {
-      try {
+    if (!validateForm()) {
+        toast.error('Please fix the errors in the form');
+        return;
+    }
+    try {
         const formDataToSend = new FormData();
-
-        // Append only the required fields
-        formDataToSend.append('company_name', formData.company_name || '');
-        formDataToSend.append('company_alias_name', formData.company_alias_name || '');
-        formDataToSend.append('host_name', formData.host_name || '');
-        formDataToSend.append('company_email', formData.company_email || '');
-        formDataToSend.append('company_phone', formData.company_phone || '');
-        formDataToSend.append('company_address1', formData.company_address1 || '');
-        formDataToSend.append('company_address2', formData.company_address2 || '');
+        // Append form fields
+        Object.entries({
+            company_name: formData.company_name,
+            company_alias_name: formData.company_alias_name,
+            host_name: formData.host_name,
+            company_email: formData.company_email,
+            company_phone: formData.company_phone,
+            company_address1: formData.company_address1,
+            company_address2: formData.company_address2,
+            entity_type: formData.entity_type,
+            pincode: formData.pincode,
+            city: formData.city,
+            state: formData.state,
+            merchant_user_id: userId,
+            company_id: companyId,
+            user_account_id: bankId
+        }).forEach(([key, value]) => {
+            if (value) formDataToSend.append(key, value);
+        });
         // Append company_logo only if it's a file
         if (formData.company_logo instanceof File) {
-          formDataToSend.append('company_logo', formData.company_logo);
+            formDataToSend.append('company_logo', formData.company_logo);
         }
-        formDataToSend.append('entity_type', formData.entity_type || '');
-        formDataToSend.append('pincode', formData.pincode || '');
-        formDataToSend.append('city', formData.city || '');
-        formDataToSend.append('state', formData.state || '');
 
-        formDataToSend.append('merchant_user_id', userId);
-        formDataToSend.append('company_id', companyId);
-        formDataToSend.append('user_account_id', bankId);
+        const endpoint = companyId ? '/v1/merchant/update-company-profile' : '/v1/merchant/create-company-profile';
+        const files = formData.company_logo instanceof File ? { company_logo: generateFilename(formData.company_logo) } : undefined;
 
-        const response = await apiRequest('POST', '/v1/merchant/update-company-profile', {
-          post: formDataToSend,
-          files: formData.company_logo instanceof File ? { company_logo: generateFilename(formData.company_logo) } : undefined
+        const response = await apiRequest('POST', endpoint, {
+            post: formDataToSend,
+            files
         });
+
         if (response.StatusCode === '1') {
-          toast.success('Company profile updated successfully');
-          setTimeout(() => {
-            window.location.reload();
-          }, 2000);
+            toast.success('Company profile updated successfully');
+            setTimeout(() => window.location.reload(), 2000);
         } else {
-          if (response.Result) {
-            toast.error(response.Result);
-          } else {
-            toast.error('Something went wrong. Please try again later.');
-          }
+            toast.error(response.Result || 'Something went wrong. Please try again later.');
         }
-      } catch (error) {
+    } catch (error) {
         console.error('Error saving company profile:', error);
-      }
-    } else {
-      toast.error('Please fix the errors in the form');
+        toast.error('An error occurred while saving the company profile.');
     }
   };
 

@@ -1,5 +1,7 @@
+import { apiRequest } from '@/app/lib/apiHelper';
 import { API_ASSET_URL } from '@/app/lib/constant';
 import React, { useState } from 'react';
+import { toast } from 'react-toastify';
 
 interface BankProfileFormProps {
   userId: string;
@@ -27,9 +29,107 @@ const BankProfileForm: React.FC<BankProfileFormProps> = ({
   const [ifscCode, setIfscCode] = useState(bankData.bank_ifsc_code || '');
   const [bankName, setBankName] = useState(bankData.bank_name || '');
   const [branchName, setBranchName] = useState(bankData.bank_branch_name || '');
+  const [bankProof, setBankProof] = useState<File | null>(null);
+  const [errors, setErrors] = useState({
+    accountHolderName: '',
+    accountNumber: '',
+    ifscCode: '',
+    bankName: '',
+    branchName: '',
+    bankProof: '',
+  });
 
-  const submitBankForm = () => {
-    // Your form submission logic here
+  const validateForm = () => {
+    const newErrors: any = {};
+    let isValid = true;
+
+    if (!accountHolderName) {
+      newErrors.accountHolderName = 'Account Holder Name is required.';
+      isValid = false;
+    } else {
+      const alphabetRegex = /^[a-zA-Z\s!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]+$/;
+      if (!alphabetRegex.test(accountHolderName)) {
+        newErrors.accountHolderName = 'Account Holder Name must contain only alphabets and allowed characters.';
+        isValid = false;
+      }
+    }
+
+    if (!accountNumber) {
+      newErrors.accountNumber = 'Account Number is required.';
+      isValid = false;
+    }
+
+    if (!ifscCode) {
+      newErrors.ifscCode = 'IFSC Code is required.';
+      isValid = false;
+    } else {
+      const ifscRegex = /^[A-Z]{4}0\d{6}$/;
+      if (!ifscRegex.test(ifscCode)) {
+        newErrors.ifscCode = 'Invalid IFSC Code format.';
+        isValid = false;
+      }
+    }
+
+    if (!bankName) {
+      newErrors.bankName = 'Bank Name is required.';
+      isValid = false;
+    }
+
+    if (!branchName) {
+      newErrors.branchName = 'Branch Name is required.';
+      isValid = false;
+    }
+
+    if (bankProof) {
+      if (!['image/png', 'image/jpeg', 'image/webp', 'application/pdf'].includes(bankProof.type)) {
+        newErrors.bankProof = 'File type must be png, jpg, jpeg, webp, or pdf';
+        isValid = false;
+      } else if (bankProof.size > 500 * 1024) {
+        newErrors.bankProof = 'File size exceeds 500KB.';
+        isValid = false;
+      }
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  const submitBankForm = async () => {
+    if (!validateForm()) return;
+
+    const formData = new FormData();
+    formData.append('merchant_user_id', userId);
+    formData.append('company_id', companyId);
+    formData.append('user_account_id', bankId);
+    formData.append('ac_holder_name', accountHolderName);
+    formData.append('account_number', accountNumber);
+    formData.append('bank_ifsc_code', ifscCode);
+    formData.append('bank_name', bankName);
+    formData.append('bank_branch_name', branchName);
+    if (bankProof) formData.append('bank_proof', bankProof);
+
+    const endpoint = bankId ? '/v1/merchant/update-bank-account' : '/v1/merchant/add-bank-account';
+    const response = await apiRequest('POST', endpoint, {
+      post: formData,
+    });
+    if (response.StatusCode === '1') { 
+      toast.success('Bank profile updated successfully');
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    } else {
+      if (response.Result) {
+        toast.error(response.Result);
+      } else {
+        toast.error('Something went wrong. Please try again later.');
+      }
+    }
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files?.[0]) {
+      setBankProof(event.target.files[0]);
+    }
   };
 
   return (
@@ -51,7 +151,7 @@ const BankProfileForm: React.FC<BankProfileFormProps> = ({
               onChange={(e) => setAccountHolderName(e.target.value)}
               // readOnly={bankData.is_verified === 'yes'}
             />
-            <p id="acc_holder_nameError" className="text-danger"></p>
+            <p id="acc_holder_nameError" className="text-danger">{errors.accountHolderName}</p>
           </div>
         </div>
         <div className="col-sm-6">
@@ -67,7 +167,7 @@ const BankProfileForm: React.FC<BankProfileFormProps> = ({
               onChange={(e) => setAccountNumber(e.target.value)}
               readOnly={bankData.is_verified === 'yes'}
             />
-            <p id="accNumberError" className="text-danger"></p>
+            <p id="accNumberError" className="text-danger">{errors.accountNumber}</p>
           </div>
         </div>
         <div className="col-sm-6">
@@ -83,7 +183,7 @@ const BankProfileForm: React.FC<BankProfileFormProps> = ({
               onChange={(e) => setIfscCode(e.target.value)}
               readOnly={bankData.is_verified === 'yes'}
             />
-            <p id="ifscCodeError" className="text-danger"></p>
+            <p id="ifscCodeError" className="text-danger">{errors.ifscCode}</p>
           </div>
         </div>
         <div className="col-sm-6">
@@ -99,7 +199,7 @@ const BankProfileForm: React.FC<BankProfileFormProps> = ({
               onChange={(e) => setBankName(e.target.value)}
               readOnly={bankData.is_verified === 'yes'}
             />
-            <p id="bankNameError" className="text-danger"></p>
+            <p id="bankNameError" className="text-danger">{errors.bankName}</p>
           </div>
         </div>
         <div className="col-sm-6">
@@ -115,7 +215,7 @@ const BankProfileForm: React.FC<BankProfileFormProps> = ({
               onChange={(e) => setBranchName(e.target.value)}
               readOnly={bankData.is_verified === 'yes'}
             />
-            <p id="branchNameError" className="text-danger"></p>
+            <p id="branchNameError" className="text-danger">{errors.branchName}</p>
           </div>
         </div>
         <div className="col-sm-6">
@@ -131,8 +231,14 @@ const BankProfileForm: React.FC<BankProfileFormProps> = ({
                 Uploaded File
               </a>
             )}
-            <input type="file" name="bank_proof" id="bank_proof" className="form-control" />
-            <p id="bank_proofError" className="text-danger"></p>
+            <input
+              type="file"
+              name="bank_proof"
+              id="bank_proof"
+              className="form-control"
+              onChange={handleFileChange}
+            />
+            <p id="bank_proofError" className="text-danger">{errors.bankProof}</p>
           </div>
         </div>
       </div>
