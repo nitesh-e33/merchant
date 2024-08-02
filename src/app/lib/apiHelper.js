@@ -43,30 +43,41 @@ export async function apiRequest(type, api, data = {}) {
       case 'post':
       case 'delete':
         let postData = data.post || {};
-        const multipart = [];
 
-        Object.entries(postData).forEach(([key, value]) => {
-          if (Array.isArray(value)) {
-            value.forEach((item) => {
-              multipart.push({ name: `${key}[]`, contents: item });
-            });
-          } else {
-            multipart.push({ name: key, contents: value });
-          }
-        });
+        if (postData instanceof FormData) {
+          headers['Content-Type'] = 'multipart/form-data';
+        } else {
+          const multipart = [];
 
-        if (data.files) {
-          Object.entries(data.files).forEach(([key, file]) => {
-            multipart.push({ name: key, contents: file });
+          Object.entries(postData).forEach(([key, value]) => {
+            if (Array.isArray(value)) {
+              value.forEach((item) => {
+                multipart.push({ name: `${key}[]`, contents: item });
+              });
+            } else {
+              multipart.push({ name: key, contents: value });
+            }
           });
+
+          if (data.files) {
+            Object.entries(data.files).forEach(([key, file]) => {
+              multipart.push({ name: key, contents: file });
+            });
+          }
+
+          postData = new FormData();
+          multipart.forEach(({ name, contents }) => {
+            postData.append(name, contents);
+          });
+
+          headers['Content-Type'] = 'multipart/form-data';
         }
 
-        // Set headers for multipart form-data
         const postConfig = {
           headers: { ...headers, ...(data.headers || {}) },
         };
 
-        response = await axios[type](api, { ...postData, multipart }, postConfig);
+        response = await axios[type](api, postData, postConfig);
         break;
 
       case 'put':

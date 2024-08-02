@@ -89,7 +89,7 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
       }));
 
       try {
-        const data = await apiRequest('GET', '/city-state-pincode', { pincode });
+        const data = await apiRequest('GET', '/city-state-pincode', {get: {pincode} });
         if (data.StatusCode === '1') {
           setFormData((prevData) => ({
             ...prevData,
@@ -210,6 +210,15 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
     return valid;
   };
 
+  const generateFilename = (file) => {
+    const timestamp = Date.now();
+    const randomNum = Math.floor(Math.random() * 1000) + 1;
+    const originalName = file.name.replace(/\s+/g, '');
+    const newFilename = `${timestamp}-${randomNum}-${originalName}`;
+    const path = `/var/www/html/droompay/merchant/droom-pay/merchant/public/uploads/temp//${newFilename}`;
+    return path;
+  };
+
   const submitCompanyForm = async () => {
     if (validateForm()) {
       try {
@@ -235,11 +244,19 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
         formDataToSend.append('company_id', companyId);
         formDataToSend.append('user_account_id', bankId);
 
-        const response = await apiRequest('POST', '/v1/merchant/update-company-profile', formDataToSend);
+        const file = formData.company_logo;
+        const files = {
+          company_logo: generateFilename(file)
+        };
+
+        const response = await apiRequest('POST', '/v1/merchant/update-company-profile', {
+          post: formDataToSend,
+          files: files
+        });
         if (response.StatusCode === '1') {
           toast.success('Company profile updated successfully');
           setTimeout(() => {
-            // window.location.reload();
+            window.location.reload();
           }, 2000);
         } else {
           if (response.Result) {
