@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import UserProfileForm from "../components/MyAccount/UserProfileForm";
 import CompanyProfileForm from "../components/MyAccount/CompanyProfileForm";
 import BankProfileForm from "../components/MyAccount/BankProfileForm";
+import DocumentTypeForm from "../components/MyAccount/DocumentType";
 import { apiRequest } from "../lib/apiHelper";
 import { toast } from "react-toastify";
 
@@ -210,33 +211,17 @@ const Page: React.FC = () => {
                   className={`tab-pane fade ${activeTab === "document" ? "show active" : ""}`}
                   role="tabpanel"
                 >
-                  Pellentesque vestibulum commodo nibh nec blandit. Maecenas
-                  neque magna, iaculis tempus turpis ac, ornare sodales tellus.
-                  Mauris eget blandit dolor. Quisque tincidunt venenatis
-                  vulputate. Morbi euismod molestie tristique. Vestibulum
-                  consectetur dolor a vestibulum pharetra. Donec interdum
-                  placerat urna nec pharetra. Etiam eget dapibus orci, eget
-                  aliquet urna. Nunc at consequat diam. Nunc et felis ut nisl
-                  commodo dignissim. In hac habitasse platea dictumst. Praesent
-                  imperdiet accumsan ex sit amet facilisis.
+                  <DocumentTypeForm
+                    companyId={companyId}
+                    kycRequiredDocsList={kycRequiredDocsList}
+                  />
                 </div>
                 {services.length > 0 && (
                   <div
                     className={`tab-pane fade ${activeTab === "service" ? "show active" : ""}`}
                     role="tabpanel"
                   >
-                    Integer imperdiet finibus ipsum, quis rutrum enim iaculis
-                    eu. Quisque at eros metus. Fusce aliquam est nec massa
-                    aliquet, eget eleifend neque scelerisque. Sed eu facilisis
-                    odio. Sed sagittis mi vitae ex maximus facilisis. Vestibulum
-                    dictum consectetur quam, nec lacinia urna venenatis
-                    tincidunt. Nam vel semper odio. Pellentesque a est in dui
-                    fermentum malesuada nec vel eros. Nulla ac justo ornare,
-                    suscipit nulla sed, blandit tellus. Aenean purus libero,
-                    ultricies sed faucibus nec, mollis at odio. Nulla facilisi.
-                    Donec vulputate sem a nibh sollicitudin, quis tincidunt
-                    eros placerat. Integer ut aliquam sem. Nam aliquet urna
-                    mattis, mollis ligula quis, vehicula dui.
+                    Service Type Profile
                   </div>
                 )}
               </div>
