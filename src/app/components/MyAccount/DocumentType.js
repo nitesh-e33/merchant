@@ -40,6 +40,8 @@ const DocumentTypeForm = ({ companyId, kycRequiredDocsList }) => {
               <DocumentCategory
                 index={index}
                 doc={doc}
+                entity_type_id={kycRequiredDocsList.id}
+                company_id={companyId}
                 anyOneDocs={anyOneDocs}
                 handleFileChange={handleFileChange}
                 isFirstCategory={index === 0}
@@ -54,7 +56,7 @@ const DocumentTypeForm = ({ companyId, kycRequiredDocsList }) => {
   );
 };
 
-const DocumentCategory = memo(({ index, doc, anyOneDocs, handleFileChange, isFirstCategory }) => {
+const DocumentCategory = memo(({ index, doc, entity_type_id, company_id, anyOneDocs, handleFileChange, isFirstCategory }) => {
   const normalizedDocArray = Array.isArray(doc.doc_array)
     ? doc.doc_array
     : [doc.doc_array];
@@ -67,6 +69,9 @@ const DocumentCategory = memo(({ index, doc, anyOneDocs, handleFileChange, isFir
           <DocumentUpload
             key={idx}
             subDoc={subDoc}
+            entity_type_id={entity_type_id}
+            company_id={company_id}
+            kyc_doc_id={doc.id}
             anyOneDocs={anyOneDocs}
             handleFileChange={handleFileChange}
             isFirst={isFirstCategory && idx === 0}
@@ -79,13 +84,13 @@ const DocumentCategory = memo(({ index, doc, anyOneDocs, handleFileChange, isFir
   );
 });
 
-const DocumentUpload = ({ subDoc, anyOneDocs, handleFileChange, isFirst }) => {
+const DocumentUpload = ({ subDoc, entity_type_id, company_id, kyc_doc_id, anyOneDocs, handleFileChange, isFirst }) => {
   if (subDoc.is_required === 'Any one') {
-    return <FormSelectDocUpload docs={anyOneDocs} onChange={handleFileChange} />
+    return <FormSelectDocUpload docs={anyOneDocs} entity_type_id={entity_type_id} company_id={company_id} kyc_doc_id={kyc_doc_id} onChange={handleFileChange} />
   } else if (subDoc.is_both === 1) {
-    return <BothSidesDocUpload doc={subDoc} onChange={handleFileChange} />;
+    return <BothSidesDocUpload doc={subDoc} entity_type_id={entity_type_id} company_id={company_id} kyc_doc_id={kyc_doc_id} onChange={handleFileChange} />;
   } else {
-    return <SingleDocUpload doc={subDoc} onChange={handleFileChange} />;
+    return <SingleDocUpload doc={subDoc} entity_type_id={entity_type_id} company_id={company_id} kyc_doc_id={kyc_doc_id} onChange={handleFileChange} />;
   }
 };
 
