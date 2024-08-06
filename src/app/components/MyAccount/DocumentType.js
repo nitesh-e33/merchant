@@ -5,14 +5,32 @@ import SingleDocUpload from './Partials/SingleDocUpload';
 
 const DocumentTypeForm = ({ companyId, kycRequiredDocsList }) => {
   const [selectedDocs, setSelectedDocs] = useState({});
+  const [anyOneDocs, setAnyOneDocs] = useState([]);
 
-  // useEffect(() => {
-  //   console.log('Setting kycRequiredDocsList:', kycRequiredDocsList);
-  //   console.log('Type of kycRequiredDocsList:', Array.isArray(kycRequiredDocsList));
-  // }, [kycRequiredDocsList]);
+  useEffect(() => {
+    const aggregatedDocs = [];
+    if (kycRequiredDocsList && kycRequiredDocsList.kyc_doc_array) {
+      const normalizedDocsList = Array.isArray(kycRequiredDocsList.kyc_doc_array)
+        ? kycRequiredDocsList.kyc_doc_array
+        : [kycRequiredDocsList.kyc_doc_array];
 
-  const handleFileChange = (docType, fileId, file) => {
-    setSelectedDocs(prev => ({ ...prev, [`${docType}-${fileId}`]: file }));
+      normalizedDocsList.forEach(doc => {
+        const normalizedDocArray = Array.isArray(doc.doc_array)
+          ? doc.doc_array
+          : [doc.doc_array];
+
+        normalizedDocArray.forEach(subDoc => {
+          if (subDoc.is_required === 'Any one' && subDoc.is_both !== '1') {
+            aggregatedDocs.push(subDoc);
+          }
+        });
+      });
+    }
+    setAnyOneDocs(aggregatedDocs);
+  }, [kycRequiredDocsList]);
+
+  const handleFileChange = (docType, file) => {
+    setSelectedDocs(prev => ({ ...prev, [docType]: file }));
   };
 
   if (!kycRequiredDocsList || !kycRequiredDocsList.kyc_doc_array) {
@@ -26,14 +44,16 @@ const DocumentTypeForm = ({ companyId, kycRequiredDocsList }) => {
   return (
     <div className="row">
       <div className="col-sm-12">
-        <h1><b>{kycRequiredDocsList.name}</b></h1>
+        <h1 className="text-xl"><b>{kycRequiredDocsList.name}</b></h1>
         {normalizedDocsList.length > 0 ? (
           normalizedDocsList.map((doc, index) => (
             <div key={index} className="col-sm-6">
               <DocumentCategory
                 index={index}
                 doc={doc}
+                anyOneDocs={anyOneDocs}
                 handleFileChange={handleFileChange}
+                isFirstCategory={index === 0}
               />
             </div>
           ))
@@ -45,7 +65,7 @@ const DocumentTypeForm = ({ companyId, kycRequiredDocsList }) => {
   );
 };
 
-const DocumentCategory = ({ index, doc, handleFileChange }) => {
+const DocumentCategory = ({ index, doc, anyOneDocs, handleFileChange, isFirstCategory }) => {
   const normalizedDocArray = Array.isArray(doc.doc_array)
     ? doc.doc_array
     : [doc.doc_array];
@@ -58,7 +78,9 @@ const DocumentCategory = ({ index, doc, handleFileChange }) => {
           <DocumentUpload
             key={idx}
             subDoc={subDoc}
+            anyOneDocs={anyOneDocs}
             handleFileChange={handleFileChange}
+            isFirst={isFirstCategory && idx === 0}
           />
         ))
       ) : (
@@ -68,10 +90,11 @@ const DocumentCategory = ({ index, doc, handleFileChange }) => {
   );
 };
 
-const DocumentUpload = ({ subDoc, handleFileChange }) => {
-  console.log('subDoc', subDoc);
+const DocumentUpload = ({ subDoc, anyOneDocs, handleFileChange, isFirst }) => {
   if (subDoc.is_required === 'Any one' && subDoc.is_both !== '1') {
-    return <FormSelectDocUpload doc={subDoc} onChange={handleFileChange} />;
+      return (
+        <FormSelectDocUpload docs={anyOneDocs} onChange={handleFileChange} />
+      );
   } else if (subDoc.is_both === '1') {
     return <BothSidesDocUpload doc={subDoc} onChange={handleFileChange} />;
   } else {
