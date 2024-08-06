@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye, faUpload, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 const SingleDocUpload = ({ doc, onChange }) => {
   const [file, setFile] = useState(null);
 
@@ -12,7 +13,7 @@ const SingleDocUpload = ({ doc, onChange }) => {
   };
 
   return (
-    <div className="input-group">
+    <div className="relative input-group">
       <input
         type="text"
         className="form-control"
@@ -21,31 +22,36 @@ const SingleDocUpload = ({ doc, onChange }) => {
         disabled
       />
       
-      <span className="view-icon" data-toggle="tooltip" data-placement="top" title="View Document">
-        {uploadedDocs && (
+      <span
+        className="absolute right-[-60px] top-1/2 transform -translate-y-1/2"
+        data-toggle="tooltip"
+        data-placement="top"
+        title="View Document"
+      >
+        {uploadedDocs.length !== 0 && (
           <a
             href={`${process.env.NEXT_PUBLIC_API_ASSET_URL}${uploadedDocs.document_image_front}`}
             target="_blank"
             rel="noopener noreferrer"
           >
-            <i className="fas fa-eye"></i>
+            <FontAwesomeIcon icon={faEye} />
           </a>
         )}
       </span>
 
       <span
-        className={`${
+        className={`absolute top-1/2 transform -translate-y-1/2 ${
           uploadedDocs
             ? isVerified
-              ? 'verify-icon'
-              : 'upload-icon'
-            : 'upload-icon'
+              ? 'right-[-30px] verify-icon'
+              : 'right-[-30px] upload-icon'
+            : 'right-[-30px] upload-icon'
         }`}
         data-toggle="tooltip"
         data-placement="top"
         title={isVerified ? 'Document Verified' : 'Upload Document'}
       >
-        <i className={isVerified ? 'fa fa-check-circle' : 'fas fa-upload'}></i>
+        <FontAwesomeIcon icon={isVerified ? faCheckCircle : faUpload} />
       </span>
 
       <input

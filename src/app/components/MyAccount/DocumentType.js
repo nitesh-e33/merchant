@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, memo } from 'react';
 import FormSelectDocUpload from './Partials/FormSelectDocUpload';
 import BothSidesDocUpload from './Partials/BothSidesDocUpload';
 import SingleDocUpload from './Partials/SingleDocUpload';
@@ -8,25 +8,14 @@ const DocumentTypeForm = ({ companyId, kycRequiredDocsList }) => {
   const [anyOneDocs, setAnyOneDocs] = useState([]);
 
   useEffect(() => {
-    const aggregatedDocs = [];
-    if (kycRequiredDocsList && kycRequiredDocsList.kyc_doc_array) {
-      const normalizedDocsList = Array.isArray(kycRequiredDocsList.kyc_doc_array)
-        ? kycRequiredDocsList.kyc_doc_array
-        : [kycRequiredDocsList.kyc_doc_array];
+    if (kycRequiredDocsList?.kyc_doc_array) {
+      const aggregatedDocs = (Array.isArray(kycRequiredDocsList.kyc_doc_array) ?
+        kycRequiredDocsList.kyc_doc_array : [kycRequiredDocsList.kyc_doc_array])
+        .flatMap(doc => (Array.isArray(doc.doc_array) ? doc.doc_array : [doc.doc_array]))
+        .filter(subDoc => subDoc.is_required === 'Any one' && subDoc.is_both !== '1');
 
-      normalizedDocsList.forEach(doc => {
-        const normalizedDocArray = Array.isArray(doc.doc_array)
-          ? doc.doc_array
-          : [doc.doc_array];
-
-        normalizedDocArray.forEach(subDoc => {
-          if (subDoc.is_required === 'Any one' && subDoc.is_both !== '1') {
-            aggregatedDocs.push(subDoc);
-          }
-        });
-      });
+      setAnyOneDocs(aggregatedDocs);
     }
-    setAnyOneDocs(aggregatedDocs);
   }, [kycRequiredDocsList]);
 
   const handleFileChange = (docType, file) => {
@@ -65,7 +54,7 @@ const DocumentTypeForm = ({ companyId, kycRequiredDocsList }) => {
   );
 };
 
-const DocumentCategory = ({ index, doc, anyOneDocs, handleFileChange, isFirstCategory }) => {
+const DocumentCategory = memo(({ index, doc, anyOneDocs, handleFileChange, isFirstCategory }) => {
   const normalizedDocArray = Array.isArray(doc.doc_array)
     ? doc.doc_array
     : [doc.doc_array];
@@ -88,14 +77,12 @@ const DocumentCategory = ({ index, doc, anyOneDocs, handleFileChange, isFirstCat
       )}
     </div>
   );
-};
+});
 
 const DocumentUpload = ({ subDoc, anyOneDocs, handleFileChange, isFirst }) => {
-  if (subDoc.is_required === 'Any one' && subDoc.is_both !== '1') {
-      return (
-        <FormSelectDocUpload docs={anyOneDocs} onChange={handleFileChange} />
-      );
-  } else if (subDoc.is_both === '1') {
+  if (subDoc.is_required === 'Any one') {
+    return <FormSelectDocUpload docs={anyOneDocs} onChange={handleFileChange} />
+  } else if (subDoc.is_both === 1) {
     return <BothSidesDocUpload doc={subDoc} onChange={handleFileChange} />;
   } else {
     return <SingleDocUpload doc={subDoc} onChange={handleFileChange} />;
