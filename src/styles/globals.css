@@ -5,3 +5,13 @@
 /* Import AdminLTE CSS */
 @import '../styles/adminlte.min.css';
 @import '../styles/admin.min.css';
+
+.input-icon-wrapper {
+    position: relative;
+}
+.view-front-btn, .view-back-btn {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+}
