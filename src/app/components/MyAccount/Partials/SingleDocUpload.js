@@ -88,7 +88,7 @@ const SingleDocUpload = ({ doc, entity_type_id, company_id, kyc_doc_id, onChange
         data-toggle="tooltip"
         data-placement="top"
         title={isVerified ? 'Document Verified' : 'Upload Document'}
-        onClick={handleIconClick}
+        onClick={!isVerified ? handleIconClick : undefined}
       >
         <FontAwesomeIcon icon={isVerified ? faCheckCircle : faUpload} />
       </span>

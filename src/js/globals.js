@@ -2,6 +2,8 @@ import '../js/adminlte.min.js'
 
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 
+import '../js/select2.full.min.js'
+
 
 // import '../plugins/jquery/jquery.min.js'
 // import '../plugins/jquery-ui/jquery-ui.min.js'
