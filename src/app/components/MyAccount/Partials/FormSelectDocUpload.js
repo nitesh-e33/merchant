@@ -7,11 +7,15 @@ const FormSelectDocUpload = ({ docs, onChange }) => {
   const [selectedDoc, setSelectedDoc] = useState('');
   const [file, setFile] = useState(null);
   const [showUploadIcon, setShowUploadIcon] = useState(true);
+  const [uploadedDoc, setUploadedDoc] = useState(null);
 
   // Handle document selection
   const handleSelectChange = (e) => {
-    setSelectedDoc(e.target.value);
-    onChange('document_id', e.target.value);
+    const selectedDocId = e.target.value;
+    setSelectedDoc(selectedDocId);
+    const selectedDocument = docsArray.find(doc => doc.id === selectedDocId);
+    setUploadedDoc(selectedDocument?.uploadedDocs || null);
+    onChange('document_id', selectedDocId);
   };
 
   // Handle file change
@@ -24,8 +28,11 @@ const FormSelectDocUpload = ({ docs, onChange }) => {
   // Check if upload icon should be shown
   const checkShowUploadIcon = () => {
     for (const doc of docsArray) {
-      if (doc.uploadedDocs) {
+      if (doc.uploadedDocs && doc.uploadedDocs.length !== 0) {
         setShowUploadIcon(false);
+        setSelectedDoc(doc.id);
+        setUploadedDoc(doc.uploadedDocs);
+        onChange('document_id', doc.id);
         break;
       }
     }
@@ -56,45 +63,43 @@ const FormSelectDocUpload = ({ docs, onChange }) => {
       </select>
       <div className="selectDocError text-red-500 mt-2"></div>
 
-      {docsArray.map((doc) => (
-        doc.uploadedDocs && (
-          <div key={doc.id}>
+      {uploadedDoc && (
+        <div>
+          <span
+            className="absolute right-[-60px] top-1/2 transform -translate-y-1/2"
+            data-toggle="tooltip"
+            data-placement="top"
+            title="View Document"
+          >
+            <a
+              href={`${process.env.NEXT_PUBLIC_API_ASSET_URL}${uploadedDoc.document_image_front}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <FontAwesomeIcon icon={faEye} />
+            </a>
+          </span>
+          {uploadedDoc.is_verified === '0' ? (
             <span
-              className="absolute right-[-60px] top-1/2 transform -translate-y-1/2"
+              className="absolute right-[-30px] top-1/2 transform -translate-y-1/2"
               data-toggle="tooltip"
               data-placement="top"
-              title="View Document"
+              title="Upload Document"
             >
-              <a
-                href={`${process.env.NEXT_PUBLIC_API_ASSET_URL}${doc.uploadedDocs.document_image_front}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <FontAwesomeIcon icon={faEye} />
-              </a>
+              <FontAwesomeIcon icon={faUpload} />
             </span>
-            {doc.uploadedDocs.is_verified === '0' ? (
-              <span
-                className="absolute right-[-30px] top-1/2 transform -translate-y-1/2"
-                data-toggle="tooltip"
-                data-placement="top"
-                title="Upload Document"
-              >
-                <FontAwesomeIcon icon={faUpload} />
-              </span>
-            ) : (
-              <span
-                className="absolute right-[-30px] top-1/2 transform -translate-y-1/2"
-                data-toggle="tooltip"
-                data-placement="top"
-                title="Document Verified"
-              >
-                <FontAwesomeIcon icon={faCheckCircle} />
-              </span>
-            )}
-          </div>
-        )
-      ))}
+          ) : (
+            <span
+              className="absolute right-[-30px] top-1/2 transform -translate-y-1/2"
+              data-toggle="tooltip"
+              data-placement="top"
+              title="Document Verified"
+            >
+              <FontAwesomeIcon icon={faCheckCircle} />
+            </span>
+          )}
+        </div>
+      )}
 
       {showUploadIcon && (
         <span

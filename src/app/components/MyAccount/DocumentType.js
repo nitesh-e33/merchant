@@ -56,27 +56,37 @@ const DocumentTypeForm = ({ companyId, kycRequiredDocsList }) => {
   );
 };
 
-const DocumentCategory = memo(({ index, doc, entity_type_id, company_id, anyOneDocs, handleFileChange, isFirstCategory }) => {
+const DocumentCategory = memo(({ index, doc, entity_type_id, company_id, anyOneDocs, handleFileChange }) => {
   const normalizedDocArray = Array.isArray(doc.doc_array)
     ? doc.doc_array
     : [doc.doc_array];
+
+  let firstAnyOneFound = false; // Flag to identify the first "Any one" document
 
   return (
     <div className="form-group">
       <h5>{index + 1}. {doc.name}:</h5>
       {normalizedDocArray.length > 0 ? (
-        normalizedDocArray.map((subDoc, idx) => (
-          <DocumentUpload
-            key={idx}
-            subDoc={subDoc}
-            entity_type_id={entity_type_id}
-            company_id={company_id}
-            kyc_doc_id={doc.id}
-            anyOneDocs={anyOneDocs}
-            handleFileChange={handleFileChange}
-            isFirst={isFirstCategory && idx === 0}
-          />
-        ))
+        normalizedDocArray.map((subDoc, idx) => {
+          const isFirst = !firstAnyOneFound && subDoc.is_required === 'Any one';
+
+          if (isFirst) {
+            firstAnyOneFound = true; // Set the flag once the first "Any one" doc is found
+          }
+
+          return (
+            <DocumentUpload
+              key={idx}
+              subDoc={subDoc}
+              entity_type_id={entity_type_id}
+              company_id={company_id}
+              kyc_doc_id={doc.id}
+              anyOneDocs={anyOneDocs}
+              handleFileChange={handleFileChange}
+              isFirst={isFirst}
+            />
+          );
+        })
       ) : (
         <div>No documents available in this category.</div>
       )}
@@ -85,11 +95,11 @@ const DocumentCategory = memo(({ index, doc, entity_type_id, company_id, anyOneD
 });
 
 const DocumentUpload = ({ subDoc, entity_type_id, company_id, kyc_doc_id, anyOneDocs, handleFileChange, isFirst }) => {
-  if (subDoc.is_required === 'Any one') {
+  if (isFirst && subDoc.is_required === 'Any one') {
     return <FormSelectDocUpload docs={anyOneDocs} entity_type_id={entity_type_id} company_id={company_id} kyc_doc_id={kyc_doc_id} onChange={handleFileChange} />
   } else if (subDoc.is_both === 1) {
     return <BothSidesDocUpload doc={subDoc} entity_type_id={entity_type_id} company_id={company_id} kyc_doc_id={kyc_doc_id} onChange={handleFileChange} />;
-  } else {
+  } else if(subDoc.is_required !== 'Any one'){
     return <SingleDocUpload doc={subDoc} entity_type_id={entity_type_id} company_id={company_id} kyc_doc_id={kyc_doc_id} onChange={handleFileChange} />;
   }
 };

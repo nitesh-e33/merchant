@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faUpload, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 import { apiRequest } from "../../../lib/apiHelper";
+import { toast } from 'react-toastify';
 
 const BothSidesDocUpload = ({ doc, entity_type_id, company_id, kyc_doc_id, onChange }) => {
   const [uploadedDocs, setUploadedDocs] = useState(doc.uploadedDocs || {});
@@ -38,16 +39,12 @@ const BothSidesDocUpload = ({ doc, entity_type_id, company_id, kyc_doc_id, onCha
     try {
       const response = await apiRequest('POST', '/v1/merchant/kyc-document-upload', { post: formData });
       if (response.StatusCode === '1') {
-        toast.success(response.Message)
+        toast.success(response.Message);
         setTimeout(() => {
           window.location.reload();
         }, 2000);
       } else {
-        if (response.Result) {
-          toast.error(response.Result);
-        } else {
-          toast.error('Something went wrong. Please try again later.');
-        }
+        toast.error(response.Result || 'Something went wrong. Please try again later.');
       }
     } catch (error) {
       console.error('Error uploading files', error);
@@ -58,10 +55,10 @@ const BothSidesDocUpload = ({ doc, entity_type_id, company_id, kyc_doc_id, onCha
     <div>
       <div className="relative input-group">
         <input type="text" className="form-control" name="document_id" value={doc.name} disabled />
+        <span className="upload-btn absolute right-[-30px] top-1/2 transform -translate-y-1/2" onClick={handleUpload}>
+          <FontAwesomeIcon icon={faUpload} />
+        </span>
       </div>
-      <span className="upload-btn absolute right-[-30px] top-1/8 transform -translate-y-1/2" onClick={handleUpload}>
-        <FontAwesomeIcon icon={faUpload} />
-      </span>
       {errorMessage && <div id="error-message" style={{ color: 'red' }}>{errorMessage}</div>}
       <div className="input-group">
         <label htmlFor="doc_front">{doc.name} Front</label>
@@ -101,14 +98,10 @@ const BothSidesDocUpload = ({ doc, entity_type_id, company_id, kyc_doc_id, onCha
           )}
         </div>
       </div>
-      {uploadedDocs && (
-        <div>
-          {isVerified && (
-            <span className="verify-icon" title="Document Verified">
-              <FontAwesomeIcon icon={faCheckCircle} />
-            </span>
-          )}
-        </div>
+      {uploadedDocs && isVerified && (
+        <span className="verify-icon" title="Document Verified">
+          <FontAwesomeIcon icon={faCheckCircle} />
+        </span>
       )}
     </div>
   );
@@ -116,6 +109,9 @@ const BothSidesDocUpload = ({ doc, entity_type_id, company_id, kyc_doc_id, onCha
 
 BothSidesDocUpload.propTypes = {
   doc: PropTypes.object.isRequired,
+  entity_type_id: PropTypes.string.isRequired,
+  company_id: PropTypes.string.isRequired,
+  kyc_doc_id: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
 };
 
