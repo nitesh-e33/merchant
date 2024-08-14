@@ -4,6 +4,7 @@ import UserProfileForm from "../components/MyAccount/UserProfileForm";
 import CompanyProfileForm from "../components/MyAccount/CompanyProfileForm";
 import BankProfileForm from "../components/MyAccount/BankProfileForm";
 import DocumentTypeForm from "../components/MyAccount/DocumentType";
+import ServiceTab from "../components/MyAccount/ServiceTab";
 import { apiRequest } from "../lib/apiHelper";
 import { toast } from "react-toastify";
 
@@ -221,7 +222,7 @@ const Page: React.FC = () => {
                     className={`tab-pane fade ${activeTab === "service" ? "show active" : ""}`}
                     role="tabpanel"
                   >
-                    Service Type Profile
+                    <ServiceTab services={services} />
                   </div>
                 )}
               </div>

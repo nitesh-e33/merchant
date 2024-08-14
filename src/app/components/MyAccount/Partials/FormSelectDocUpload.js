@@ -24,7 +24,7 @@ const FormSelectDocUpload = ({ docs, entity_type_id, company_id, kyc_doc_id, onC
       setUploadedDoc(existingDoc.uploadedDocs);
       onChange('document_id', existingDoc.id);
     }
-  }, [docsArray, onChange]);
+  }, [docsArray, selectedDoc]);
 
   const handleSelectChange = (e) => {
     const selectedDocId = e.target.value;
@@ -81,6 +81,7 @@ const FormSelectDocUpload = ({ docs, entity_type_id, company_id, kyc_doc_id, onC
           onChange={handleSelectChange}
           value={selectedDoc}
           disabled={!!uploadedDoc}
+          style={{ width: '100%' }}
         >
           <option value="">--Select Document--</option>
           {docsArray.map((doc) => (
