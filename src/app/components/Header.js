@@ -32,9 +32,15 @@ const Header = () => {
     }
   };
 
-  const merchantSetting = async () => {
-    
-  }
+  const merchantSetting = (event) => {
+    const isKYCVerified = event.currentTarget.getAttribute('data-is-verified');
+    if (isKYCVerified !== "true") {
+      toast.error('Your Profile is Under Verification.');
+      return;
+    }
+
+    router.push('/settings');
+  };
 
   return (
     <nav className="main-header navbar navbar-expand navbar-white navbar-light">
@@ -65,7 +71,7 @@ const Header = () => {
                 <FontAwesomeIcon icon={faCog} className="mr-2" /> Settings
               </button>
               <button onClick={handleLogout} className="dropdown-item">
-              <FontAwesomeIcon icon={faSignOutAlt} className="mr-2" /> Logout
+                <FontAwesomeIcon icon={faSignOutAlt} className="mr-2" /> Logout
               </button>
             </div>
           </li>

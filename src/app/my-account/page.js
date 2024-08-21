@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import React, { useState, useEffect } from "react";
 import UserProfileForm from "../components/MyAccount/UserProfileForm";
 import CompanyProfileForm from "../components/MyAccount/CompanyProfileForm";
@@ -8,19 +8,19 @@ import ServiceTab from "../components/MyAccount/ServiceTab";
 import { apiRequest } from "../lib/apiHelper";
 import { toast } from "react-toastify";
 
-const Page: React.FC = () => {
+const Page = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("user");
-  const [userId, setUserId] = useState<string>('');
-  const [companyId, setCompanyId] = useState<string>('');
-  const [bankId, setBankId] = useState<string>('');
-  const [companyData, setCompanyData] = useState<any>({});
-  const [entityList, setEntityList] = useState<any[]>([]);
-  const [kycRequiredDocsList, setKycRequiredDocsList] = useState<any[]>([]);
-  const [bankData, setBankData] = useState<any>({});
-  const [services, setServices] = useState<any[]>([]);
-  const [userData, setUserData] = useState<any>({});
-  const [error, setError] = useState<string | null>(null);
+  const [userId, setUserId] = useState('');
+  const [companyId, setCompanyId] = useState('');
+  const [bankId, setBankId] = useState('');
+  const [companyData, setCompanyData] = useState({});
+  const [entityList, setEntityList] = useState([]);
+  const [kycRequiredDocsList, setKycRequiredDocsList] = useState([]);
+  const [bankData, setBankData] = useState({});
+  const [services, setServices] = useState([]);
+  const [userData, setUserData] = useState({});
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchMerchantProfile = async () => {
@@ -107,7 +107,7 @@ const Page: React.FC = () => {
       </div>
     );
   }
-  const handleTabClick = (tab: string) => {
+  const handleTabClick = (tab) => {
     // Control tab navigation based on data availability
     if (tab === "company" && !userId) return;
     if (tab === "bank" && (!userId || !companyId)) return;
