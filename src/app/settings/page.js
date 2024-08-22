@@ -1,8 +1,47 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import TokenSetting from '../components/Settings/TokenSetting'
+import { apiRequest } from "../lib/apiHelper";
+import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
 
 function Page() {
   const [activeTab, setActiveTab] = useState("token");
+  const [credentials, setCredentials] = useState(null);
+  const [webhookList, setWebhookList] = useState([]);
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const storedUser = localStorage.getItem('user');
+        const userData = storedUser ? JSON.parse(storedUser) : null;
+
+        if (!userData?.isKYCVerified) {
+          toast.error('Your Profile is Under Verification');
+          return;
+        }
+
+        const [credentialsResponse, webhookListResponse] = await Promise.all([
+          apiRequest('GET', '/v1/merchant/get-client-setting'),
+          apiRequest('POST', '/v1/merchant/webhook/list'),
+        ]);
+
+        const cacheKey = `ClientId_${credentialsResponse.Result.client_id}`;
+        if (localStorage.getItem(cacheKey)) {
+          credentialsResponse.data.client_secret = 'xxxxxxxxxxxxxxx';
+        }
+
+        setCredentials(credentialsResponse.Result);
+        setWebhookList(webhookListResponse.Result);
+      } catch (error) {
+        console.error('Error fetching settings:', error);
+        toast.error('Failed to fetch settings. Please try again later.');
+      }
+    };
+
+    fetchSettings();
+  }, [router]);
 
   const handleTabClick = (tab) => {
     setActiveTab(tab);
@@ -55,7 +94,7 @@ function Page() {
                   className={`tab-pane fade ${activeTab === "token" ? "show active" : ""}`}
                   role="tabpanel"
                 >
-                  Token Setting
+                  {credentials && <TokenSetting credentials={credentials} />}
                 </div>
                 <div
                   className={`tab-pane fade ${activeTab === "webhook" ? "show active" : ""}`}
