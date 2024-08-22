@@ -1,51 +1,26 @@
-'use client'
-import React, { useState, useEffect } from 'react'
-import TokenSetting from '../components/Settings/TokenSetting'
-import { apiRequest } from "../lib/apiHelper";
-import { useRouter } from 'next/navigation';
-import { toast } from 'react-toastify';
+'use client';
+import React, { useState } from 'react';
+import TokenSetting from '../components/Settings/TokenSetting';
+import useFetchSettings from '../lib/useFetchSettings';
 
 function Page() {
-  const [activeTab, setActiveTab] = useState("token");
-  const [credentials, setCredentials] = useState(null);
-  const [webhookList, setWebhookList] = useState([]);
-  const router = useRouter();
-
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const storedUser = localStorage.getItem('user');
-        const userData = storedUser ? JSON.parse(storedUser) : null;
-
-        if (!userData?.isKYCVerified) {
-          toast.error('Your Profile is Under Verification');
-          return;
-        }
-
-        const [credentialsResponse, webhookListResponse] = await Promise.all([
-          apiRequest('GET', '/v1/merchant/get-client-setting'),
-          apiRequest('POST', '/v1/merchant/webhook/list'),
-        ]);
-
-        const cacheKey = `ClientId_${credentialsResponse.Result.client_id}`;
-        if (localStorage.getItem(cacheKey)) {
-          credentialsResponse.data.client_secret = 'xxxxxxxxxxxxxxx';
-        }
-
-        setCredentials(credentialsResponse.Result);
-        setWebhookList(webhookListResponse.Result);
-      } catch (error) {
-        console.error('Error fetching settings:', error);
-        toast.error('Failed to fetch settings. Please try again later.');
-      }
-    };
-
-    fetchSettings();
-  }, [router]);
+  const [activeTab, setActiveTab] = useState('token');
+  const { credentials, webhookList, loading } = useFetchSettings();
 
   const handleTabClick = (tab) => {
     setActiveTab(tab);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <i className="fas fa-spinner fa-spin text-3xl text-blue-500"></i>
+          <p className="mt-4 text-lg text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <>
@@ -61,8 +36,8 @@ function Page() {
               <ul className="nav nav-tabs" role="tablist">
                 <li className="nav-item">
                   <a
-                    className={`nav-link ${activeTab === "token" ? "active" : ""}`}
-                    onClick={() => handleTabClick("token")}
+                    className={`nav-link ${activeTab === 'token' ? 'active' : ''}`}
+                    onClick={() => handleTabClick('token')}
                     role="tab"
                   >
                     Token Setting
@@ -70,8 +45,8 @@ function Page() {
                 </li>
                 <li className="nav-item">
                   <a
-                    className={`nav-link ${activeTab === "webhook" ? "active" : ""}`}
-                    onClick={() => handleTabClick("webhook")}
+                    className={`nav-link ${activeTab === 'webhook' ? 'active' : ''}`}
+                    onClick={() => handleTabClick('webhook')}
                     role="tab"
                   >
                     Webhook Setting
@@ -79,8 +54,8 @@ function Page() {
                 </li>
                 <li className="nav-item">
                   <a
-                    className={`nav-link ${activeTab === "changePassword" ? "active" : ""}`}
-                    onClick={() => handleTabClick("changePassword")}
+                    className={`nav-link ${activeTab === 'changePassword' ? 'active' : ''}`}
+                    onClick={() => handleTabClick('changePassword')}
                     role="tab"
                   >
                     Change Password
@@ -91,19 +66,19 @@ function Page() {
             <div className="card-body">
               <div className="tab-content">
                 <div
-                  className={`tab-pane fade ${activeTab === "token" ? "show active" : ""}`}
+                  className={`tab-pane fade ${activeTab === 'token' ? 'show active' : ''}`}
                   role="tabpanel"
                 >
                   {credentials && <TokenSetting credentials={credentials} />}
                 </div>
                 <div
-                  className={`tab-pane fade ${activeTab === "webhook" ? "show active" : ""}`}
+                  className={`tab-pane fade ${activeTab === 'webhook' ? 'show active' : ''}`}
                   role="tabpanel"
                 >
                   Webhook Setting
                 </div>
                 <div
-                  className={`tab-pane fade ${activeTab === "changePassword" ? "show active" : ""}`}
+                  className={`tab-pane fade ${activeTab === 'changePassword' ? 'show active' : ''}`}
                   role="tabpanel"
                 >
                   Change Password
