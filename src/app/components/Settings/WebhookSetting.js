@@ -3,12 +3,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck, faEdit, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { apiRequest } from '@/app/lib/apiHelper';
 import { toast } from 'react-toastify';
+import WebhookStatusChangeModal from './Modal/WebhookStatusChangeModal'
 
 function WebhookSetting({ webhookList }) {
   const [editModes, setEditModes] = useState({}); // Object to track edit mode for each row
   const [editValues, setEditValues] = useState({}); // Object to track edit values for each row
   const [hasTransactionWebhook, setHasTransactionWebhook] = useState(false);
   const [hasRefundWebhook, setHasRefundWebhook] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     // Initialize webhook presence checks
@@ -81,6 +83,31 @@ function WebhookSetting({ webhookList }) {
     }
   };
 
+
+  const handleWebhookStatus = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleModalConfirm = async () => {
+    try {
+      const requestData = {
+        webhook_id: '',
+        status: ''
+      }
+      const response = await apiRequest('POST', '/v1/merchant/webhook/status', { post: requestData });
+
+    } catch (error) {
+      toast.error('An error occurred. Please try again later.');
+      console.error(error);
+    } finally {
+      setIsModalOpen(false); // Close the modal after the process
+    }
+  };
+
   return (
     <div className="bg-white shadow-md rounded-lg overflow-hidden">
       <div className="bg-gray-200 p-3">
@@ -137,7 +164,10 @@ function WebhookSetting({ webhookList }) {
                       data-webhook-type={webhook.webhook_type}
                       defaultChecked={webhook.status === '1'}
                     />
-                    <div className="w-10 h-5 bg-gray-300 rounded-full peer-focus:ring-blue-500 peer-checked:bg-blue-600 transition-colors duration-300 ease-in-out flex items-center">
+                    <div
+                    className="w-10 h-5 bg-gray-300 rounded-full peer-focus:ring-blue-500 peer-checked:bg-blue-600 transition-colors duration-300 ease-in-out flex items-center"
+                    onClick={handleWebhookStatus}
+                    >
                       <span className="block w-4 h-4 bg-white rounded-full transform transition-transform duration-300 ease-in-out peer-checked:translate-x-5"></span>
                     </div>
                   </label>
@@ -242,6 +272,11 @@ function WebhookSetting({ webhookList }) {
           </tbody>
         </table>
       </div>
+      <WebhookStatusChangeModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        onConfirm={handleModalConfirm}
+      />
     </div>
   );
 
