@@ -15,6 +15,8 @@ function WebhookSetting({ webhookList }) {
     let transactionFound = false;
     let refundFound = false;
 
+    console.log(webhookList);
+
     webhookList.forEach((webhook) => {
       const webhookType = webhook.webhook_type;
       if (webhookType === 'transaction') {
@@ -44,17 +46,20 @@ function WebhookSetting({ webhookList }) {
   };
 
   const handleSaveClick = async (id, webhookType, flag) => {
-    // Use the current value if it exists, otherwise use the original webhook URL
-    const urlToSave = editValues[id] !== undefined ? editValues[id] : webhookList.find(webhook => webhook.id === id).webhook_url;
+    // Use the current value if it exists, otherwise use the original webhook URL or an empty string
+    const key = id || webhookType;
+    const urlToSave = editValues[key] !== undefined ? editValues[key] : webhookList.find(webhook => webhook.id === id)?.webhook_url || '';
+
+    if(urlToSave == '') {
+      toast.error('webhook url is not empty')
+      return;
+    }
 
     const requestData = {
       webhook_url: urlToSave,
       webhook_type: webhookType,
       flag: flag,
     };
-
-    console.log(requestData);
-    return;
     try {
       const response = await apiRequest('POST', '/v1/merchant/webhook/setting', { post: requestData });
       if (response.StatusCode === "1") {
@@ -69,7 +74,7 @@ function WebhookSetting({ webhookList }) {
       // Disable edit mode after saving
       setEditModes((prevModes) => ({
         ...prevModes,
-        [id]: false,
+        [key]: false,
       }));
     } catch (error) {
       console.error('Error saving webhook URL:', error);
@@ -77,61 +82,64 @@ function WebhookSetting({ webhookList }) {
   };
 
   return (
-    <div className="card">
-      <div className="card-header">
-        <h3 className="card-title">Webhook Setting</h3>
+    <div className="bg-white shadow-md rounded-lg overflow-hidden">
+      <div className="bg-gray-200 p-3">
+        <h3 className="text-lg font-semibold">Webhook Setting</h3>
       </div>
-      <div className="card-body webhook-table">
-        <table className="table table-bordered table-striped">
-          <thead>
+      <div className="p-4">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
             <tr>
-              <th>Description</th>
-              <th>URL with your registered domain</th>
-              <th>Settings</th>
-              <th>Enable</th>
+              <th className="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+              <th className="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">URL with your registered domain</th>
+              <th className="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Settings</th>
+              <th className="px-6 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Enable</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="bg-white divide-y divide-gray-200">
             {webhookList && webhookList.map((webhook) => (
               <tr key={webhook.id}>
-                <td>{`${webhook.webhook_type.charAt(0).toUpperCase() + webhook.webhook_type.slice(1)} Webhook`}</td>
-                <td>
-                  <div className="webhook-url-container">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{`${webhook.webhook_type.charAt(0).toUpperCase() + webhook.webhook_type.slice(1)} Webhook`}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <div className="relative">
                     <input
                       type="text"
-                      className="webhook-url"
+                      className={`block w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm ${!editModes[webhook.id] ? 'cursor-not-allowed bg-gray-100' : ''}`}
                       value={editModes[webhook.id] ? (editValues[webhook.id] !== undefined ? editValues[webhook.id] : webhook.webhook_url) : webhook.webhook_url}
                       disabled={!editModes[webhook.id]} // Disable input based on edit mode
                       onChange={(e) => handleInputChange(webhook.id, e.target.value)}
                     />
-                    <span
-                      className="right-click-icon"
-                      style={{ display: editModes[webhook.id] ? 'inline-block' : 'none' }}
-                      onClick={() => handleSaveClick(webhook.id, webhook.webhook_type, 1)}
-                    >
-                      <FontAwesomeIcon icon={faCheck} />
-                    </span>
+                    {editModes[webhook.id] && (
+                      <span
+                        className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer text-light-blue hover:text-blue-500"
+                        onClick={() => handleSaveClick(webhook.id, webhook.webhook_type, 1)}
+                      >
+                        <FontAwesomeIcon icon={faCheck} />
+                      </span>
+                    )}
                   </div>
                 </td>
-                <td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                   <span
-                    className="webhook-edit-icon"
+                    className="cursor-pointer text-blue-500 hover:text-blue-700"
                     onClick={() => handleEditClick(webhook.id)} // Handle edit icon click
                   >
                     <FontAwesomeIcon icon={editModes[webhook.id] ? faTimes : faEdit} />
                   </span>
                 </td>
-                <td>
-                  <label className="switch">
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <label className="relative inline-flex items-center cursor-pointer">
                     <input
                       type="checkbox"
-                      className="toggle-switch"
+                      className="sr-only peer"
                       data-webhook-id={webhook.id}
                       data-status={webhook.status}
                       data-webhook-type={webhook.webhook_type}
-                      defaultChecked={webhook.status === 1}
+                      defaultChecked={webhook.status === '1'}
                     />
-                    <span className="slider"></span>
+                    <div className="w-10 h-5 bg-gray-300 rounded-full peer-focus:ring-blue-500 peer-checked:bg-blue-600 transition-colors duration-300 ease-in-out flex items-center">
+                      <span className="block w-4 h-4 bg-white rounded-full transform transition-transform duration-300 ease-in-out peer-checked:translate-x-5"></span>
+                    </div>
                   </label>
                 </td>
               </tr>
@@ -140,43 +148,46 @@ function WebhookSetting({ webhookList }) {
             {/* Handle missing webhooks */}
             {!hasTransactionWebhook && (
               <tr>
-                <td>Transaction Webhook</td>
-                <td>
-                  <div className="webhook-url-container">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Transaction Webhook</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <div className="relative">
                     <input
                       type="text"
-                      className="webhook-url"
+                      className={`block w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm ${!editModes['transaction'] ? 'cursor-not-allowed bg-gray-100' : ''}`}
                       value={editModes['transaction'] ? (editValues['transaction'] !== undefined ? editValues['transaction'] : '') : ''}
                       disabled={!editModes['transaction']}
                       onChange={(e) => handleInputChange('transaction', e.target.value)}
                     />
-                    <span
-                      className="right-click-icon"
-                      style={{ display: editModes['transaction'] ? 'inline-block' : 'none' }}
-                      onClick={() => handleSaveClick('', 'transaction', 0)}
-                    >
-                      <FontAwesomeIcon icon={faCheck} />
-                    </span>
+                    {editModes['transaction'] && (
+                      <span
+                        className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer text-light-blue hover:text-blue-500"
+                        onClick={() => handleSaveClick('', 'transaction', 0)}
+                      >
+                        <FontAwesomeIcon icon={faCheck} />
+                      </span>
+                    )}
                   </div>
                 </td>
-                <td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                   <span
-                    className="webhook-edit-icon"
+                    className="cursor-pointer text-blue-500 hover:text-blue-700"
                     onClick={() => handleEditClick('transaction')}
                   >
                     <FontAwesomeIcon icon={editModes['transaction'] ? faTimes : faEdit} />
                   </span>
                 </td>
-                <td>
-                  <label className="switch">
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <label className="relative inline-flex items-center cursor-pointer">
                     <input
                       type="checkbox"
-                      className="toggle-switch"
+                      className="sr-only peer"
                       data-webhook-id=""
                       data-status="0"
                       data-webhook-type="transaction"
                     />
-                    <span className="slider"></span>
+                    <div className="w-10 h-5 bg-gray-300 rounded-full peer-focus:ring-blue-500 peer-checked:bg-blue-600 transition-colors duration-300 ease-in-out flex items-center">
+                      <span className="block w-4 h-4 bg-white rounded-full transform transition-transform duration-300 ease-in-out peer-checked:translate-x-5"></span>
+                    </div>
                   </label>
                 </td>
               </tr>
@@ -184,43 +195,46 @@ function WebhookSetting({ webhookList }) {
 
             {!hasRefundWebhook && (
               <tr>
-                <td>Refund Webhook</td>
-                <td>
-                  <div className="webhook-url-container">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Refund Webhook</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <div className="relative">
                     <input
                       type="text"
-                      className="webhook-url"
+                      className={`block w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm ${!editModes['refund'] ? 'cursor-not-allowed bg-gray-100' : ''}`}
                       value={editModes['refund'] ? (editValues['refund'] !== undefined ? editValues['refund'] : '') : ''}
                       disabled={!editModes['refund']}
                       onChange={(e) => handleInputChange('refund', e.target.value)}
                     />
-                    <span
-                      className="right-click-icon"
-                      style={{ display: editModes['refund'] ? 'inline-block' : 'none' }}
-                      onClick={() => handleSaveClick('', 'refund', 0)}
-                    >
-                      <FontAwesomeIcon icon={faCheck} />
-                    </span>
+                    {editModes['refund'] && (
+                      <span
+                        className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer text-light-blue hover:text-blue-500"
+                        onClick={() => handleSaveClick('', 'refund', 0)}
+                      >
+                        <FontAwesomeIcon icon={faCheck} />
+                      </span>
+                    )}
                   </div>
                 </td>
-                <td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                   <span
-                    className="webhook-edit-icon"
+                    className="cursor-pointer text-blue-500 hover:text-blue-700"
                     onClick={() => handleEditClick('refund')}
                   >
                     <FontAwesomeIcon icon={editModes['refund'] ? faTimes : faEdit} />
                   </span>
                 </td>
-                <td>
-                  <label className="switch">
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <label className="relative inline-flex items-center cursor-pointer">
                     <input
                       type="checkbox"
-                      className="toggle-switch"
+                      className="sr-only peer"
                       data-webhook-id=""
                       data-status="0"
                       data-webhook-type="refund"
                     />
-                    <span className="slider"></span>
+                    <div className="w-10 h-5 bg-gray-300 rounded-full peer-focus:ring-blue-500 peer-checked:bg-blue-600 transition-colors duration-300 ease-in-out flex items-center">
+                      <span className="block w-4 h-4 bg-white rounded-full transform transition-transform duration-300 ease-in-out peer-checked:translate-x-5"></span>
+                    </div>
                   </label>
                 </td>
               </tr>
@@ -230,6 +244,7 @@ function WebhookSetting({ webhookList }) {
       </div>
     </div>
   );
+
 }
 
 export default WebhookSetting;
