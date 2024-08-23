@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import TokenSetting from '../components/Settings/TokenSetting';
+import WebhookSetting from '../components/Settings/WebhookSetting'
 import useFetchSettings from '../lib/useFetchSettings';
 
 function Page() {
@@ -75,7 +76,7 @@ function Page() {
                   className={`tab-pane fade ${activeTab === 'webhook' ? 'show active' : ''}`}
                   role="tabpanel"
                 >
-                  Webhook Setting
+                  {webhookList && <WebhookSetting webhookList={webhookList} />}
                 </div>
                 <div
                   className={`tab-pane fade ${activeTab === 'changePassword' ? 'show active' : ''}`}
