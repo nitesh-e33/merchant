@@ -76,7 +76,7 @@ function Page() {
                   className={`tab-pane fade ${activeTab === 'webhook' ? 'show active' : ''}`}
                   role="tabpanel"
                 >
-                  {webhookList && <WebhookSetting webhookList={webhookList} />}
+                  {<WebhookSetting webhookList={webhookList} />}
                 </div>
                 <div
                   className={`tab-pane fade ${activeTab === 'changePassword' ? 'show active' : ''}`}

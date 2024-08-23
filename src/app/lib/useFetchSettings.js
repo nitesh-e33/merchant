@@ -19,6 +19,7 @@ const useFetchSettings = () => {
           toast.error('Your Profile is Under Verification');
           setLoading(false);
           router.back();
+          return;
         }
 
         const [credentialsResponse, webhookListResponse] = await Promise.all([
@@ -32,7 +33,7 @@ const useFetchSettings = () => {
         }
 
         setCredentials(credentialsResponse.Result);
-        setWebhookList(webhookListResponse.Result);
+        setWebhookList(webhookListResponse.Result || []);
       } catch (error) {
         console.error('Error fetching settings:', error);
         toast.error('Failed to fetch settings. Please try again later.');

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck, faEdit, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { apiRequest } from '@/app/lib/apiHelper';
+import { toast } from 'react-toastify';
 
 function WebhookSetting({ webhookList }) {
   const [editModes, setEditModes] = useState({}); // Object to track edit mode for each row
@@ -41,18 +43,37 @@ function WebhookSetting({ webhookList }) {
     }));
   };
 
-  const handleSaveClick = (id) => {
+  const handleSaveClick = async (id, webhookType, flag) => {
     // Use the current value if it exists, otherwise use the original webhook URL
     const urlToSave = editValues[id] !== undefined ? editValues[id] : webhookList.find(webhook => webhook.id === id).webhook_url;
 
-    // Here you would send the updated URL to your server
-    console.log(`Save URL for webhook ${id}: ${urlToSave}`);
+    const requestData = {
+      webhook_url: urlToSave,
+      webhook_type: webhookType,
+      flag: flag,
+    };
 
-    // Disable edit mode after saving
-    setEditModes((prevModes) => ({
-      ...prevModes,
-      [id]: false,
-    }));
+    console.log(requestData);
+    return;
+    try {
+      const response = await apiRequest('POST', '/v1/merchant/webhook/setting', { post: requestData });
+      if (response.StatusCode === "1") {
+        toast.success(response.Message);
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else {
+        toast.error(response.Result || 'Something went wrong. Please try again later.');
+      }
+
+      // Disable edit mode after saving
+      setEditModes((prevModes) => ({
+        ...prevModes,
+        [id]: false,
+      }));
+    } catch (error) {
+      console.error('Error saving webhook URL:', error);
+    }
   };
 
   return (
@@ -81,12 +102,12 @@ function WebhookSetting({ webhookList }) {
                       className="webhook-url"
                       value={editModes[webhook.id] ? (editValues[webhook.id] !== undefined ? editValues[webhook.id] : webhook.webhook_url) : webhook.webhook_url}
                       disabled={!editModes[webhook.id]} // Disable input based on edit mode
-                      onChange={(e) => handleInputChange(webhook.id, e.target.value)} // Handle URL input change
+                      onChange={(e) => handleInputChange(webhook.id, e.target.value)}
                     />
                     <span
                       className="right-click-icon"
                       style={{ display: editModes[webhook.id] ? 'inline-block' : 'none' }}
-                      onClick={() => handleSaveClick(webhook.id)} // Handle save click
+                      onClick={() => handleSaveClick(webhook.id, webhook.webhook_type, 1)}
                     >
                       <FontAwesomeIcon icon={faCheck} />
                     </span>
@@ -122,20 +143,39 @@ function WebhookSetting({ webhookList }) {
                 <td>Transaction Webhook</td>
                 <td>
                   <div className="webhook-url-container">
-                    <input type="text" className="webhook-url" value="" disabled />
-                    <span className="right-click-icon" style={{ display: 'none' }}>
+                    <input
+                      type="text"
+                      className="webhook-url"
+                      value={editModes['transaction'] ? (editValues['transaction'] !== undefined ? editValues['transaction'] : '') : ''}
+                      disabled={!editModes['transaction']}
+                      onChange={(e) => handleInputChange('transaction', e.target.value)}
+                    />
+                    <span
+                      className="right-click-icon"
+                      style={{ display: editModes['transaction'] ? 'inline-block' : 'none' }}
+                      onClick={() => handleSaveClick('', 'transaction', 0)}
+                    >
                       <FontAwesomeIcon icon={faCheck} />
                     </span>
                   </div>
                 </td>
                 <td>
-                  <span className="webhook-edit-icon">
-                    <FontAwesomeIcon icon={faEdit} />
+                  <span
+                    className="webhook-edit-icon"
+                    onClick={() => handleEditClick('transaction')}
+                  >
+                    <FontAwesomeIcon icon={editModes['transaction'] ? faTimes : faEdit} />
                   </span>
                 </td>
                 <td>
                   <label className="switch">
-                    <input type="checkbox" className="toggle-switch" data-webhook-id="" data-status="0" data-webhook-type="transaction" />
+                    <input
+                      type="checkbox"
+                      className="toggle-switch"
+                      data-webhook-id=""
+                      data-status="0"
+                      data-webhook-type="transaction"
+                    />
                     <span className="slider"></span>
                   </label>
                 </td>
@@ -147,20 +187,39 @@ function WebhookSetting({ webhookList }) {
                 <td>Refund Webhook</td>
                 <td>
                   <div className="webhook-url-container">
-                    <input type="text" className="webhook-url" value="" disabled />
-                    <span className="right-click-icon" style={{ display: 'none' }}>
+                    <input
+                      type="text"
+                      className="webhook-url"
+                      value={editModes['refund'] ? (editValues['refund'] !== undefined ? editValues['refund'] : '') : ''}
+                      disabled={!editModes['refund']}
+                      onChange={(e) => handleInputChange('refund', e.target.value)}
+                    />
+                    <span
+                      className="right-click-icon"
+                      style={{ display: editModes['refund'] ? 'inline-block' : 'none' }}
+                      onClick={() => handleSaveClick('', 'refund', 0)}
+                    >
                       <FontAwesomeIcon icon={faCheck} />
                     </span>
                   </div>
                 </td>
                 <td>
-                  <span className="webhook-edit-icon">
-                    <FontAwesomeIcon icon={faEdit} />
+                  <span
+                    className="webhook-edit-icon"
+                    onClick={() => handleEditClick('refund')}
+                  >
+                    <FontAwesomeIcon icon={editModes['refund'] ? faTimes : faEdit} />
                   </span>
                 </td>
                 <td>
                   <label className="switch">
-                    <input type="checkbox" className="toggle-switch" data-webhook-id="" data-status="0" data-webhook-type="refund" />
+                    <input
+                      type="checkbox"
+                      className="toggle-switch"
+                      data-webhook-id=""
+                      data-status="0"
+                      data-webhook-type="refund"
+                    />
                     <span className="slider"></span>
                   </label>
                 </td>
