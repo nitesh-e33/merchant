@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck, faEdit, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { apiRequest } from '@/app/lib/apiHelper';
 import { toast } from 'react-toastify';
-import WebhookStatusChangeModal from './Modal/WebhookStatusChangeModal'
+import WebhookStatusChangeModal from './Modal/WebhookStatusChangeModal';
 
 function WebhookSetting({ webhookList }) {
   const [editModes, setEditModes] = useState({}); // Object to track edit mode for each row
@@ -11,7 +11,8 @@ function WebhookSetting({ webhookList }) {
   const [hasTransactionWebhook, setHasTransactionWebhook] = useState(false);
   const [hasRefundWebhook, setHasRefundWebhook] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedWebhook, setSelectedWebhook] = useState(null); // Store selected webhook details
+  const [selectedWebhook, setSelectedWebhook] = useState(null);
+  const [originalStatus, setOriginalStatus] = useState(null);
 
   useEffect(() => {
     // Initialize webhook presence checks
@@ -49,12 +50,11 @@ function WebhookSetting({ webhookList }) {
   };
 
   const handleSaveClick = async (id, webhookType, flag) => {
-    // Use the current value if it exists, otherwise use the original webhook URL or an empty string
     const key = id || webhookType;
     const urlToSave = editValues[key] !== undefined ? editValues[key] : webhookList.find(webhook => webhook.id === id)?.webhook_url || '';
 
-    if(urlToSave == '') {
-      toast.error('webhook url is not empty')
+    if (urlToSave === '') {
+      toast.error('webhook url is not empty');
       return;
     }
 
@@ -84,13 +84,20 @@ function WebhookSetting({ webhookList }) {
     }
   };
 
-
   const handleWebhookStatus = (webhook) => {
     setSelectedWebhook(webhook);
+    setOriginalStatus(webhook.status); // Store the original status
     setIsModalOpen(true);
   };
 
   const handleModalClose = () => {
+    if (selectedWebhook) {
+      // Reset the status if the modal is canceled
+      const webhookElement = document.querySelector(`input[data-webhook-id="${selectedWebhook.id}"]`);
+      if (webhookElement) {
+        webhookElement.checked = originalStatus === '1';
+      }
+    }
     setIsModalOpen(false);
   };
 
@@ -178,8 +185,8 @@ function WebhookSetting({ webhookList }) {
                       defaultChecked={webhook.status === '1'}
                     />
                     <div
-                    className="w-10 h-5 bg-gray-300 rounded-full peer-focus:ring-blue-500 peer-checked:bg-blue-600 transition-colors duration-300 ease-in-out flex items-center"
-                    onClick={()=>handleWebhookStatus(webhook)}
+                      className="w-10 h-5 bg-gray-300 rounded-full peer-focus:ring-blue-500 peer-checked:bg-blue-600 transition-colors duration-300 ease-in-out flex items-center"
+                      onClick={() => handleWebhookStatus(webhook)}
                     >
                       <span className="block w-4 h-4 bg-white rounded-full transform transition-transform duration-300 ease-in-out peer-checked:translate-x-5"></span>
                     </div>
@@ -204,7 +211,7 @@ function WebhookSetting({ webhookList }) {
                     {editModes['transaction'] && (
                       <span
                         className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer text-light-blue hover:text-blue-500"
-                        onClick={() => handleSaveClick('', 'transaction', 0)}
+                        onClick={() => handleSaveClick(null, 'transaction', 0)}
                       >
                         <FontAwesomeIcon icon={faCheck} />
                       </span>
@@ -224,11 +231,17 @@ function WebhookSetting({ webhookList }) {
                     <input
                       type="checkbox"
                       className="sr-only peer"
-                      data-webhook-id=""
-                      data-status="0"
-                      data-webhook-type="transaction"
+                      data-webhook-id="transaction"
+                      defaultChecked={false}
                     />
-                    <div className="w-10 h-5 bg-gray-300 rounded-full peer-focus:ring-blue-500 peer-checked:bg-blue-600 transition-colors duration-300 ease-in-out flex items-center">
+                    <div
+                      className="w-10 h-5 bg-gray-300 rounded-full peer-focus:ring-blue-500 peer-checked:bg-blue-600 transition-colors duration-300 ease-in-out flex items-center"
+                      onClick={() => handleWebhookStatus({
+                        id: 'transaction',
+                        status: '0',
+                        webhook_type: 'transaction',
+                      })}
+                    >
                       <span className="block w-4 h-4 bg-white rounded-full transform transition-transform duration-300 ease-in-out peer-checked:translate-x-5"></span>
                     </div>
                   </label>
@@ -251,7 +264,7 @@ function WebhookSetting({ webhookList }) {
                     {editModes['refund'] && (
                       <span
                         className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer text-light-blue hover:text-blue-500"
-                        onClick={() => handleSaveClick('', 'refund', 0)}
+                        onClick={() => handleSaveClick(null, 'refund', 0)}
                       >
                         <FontAwesomeIcon icon={faCheck} />
                       </span>
@@ -271,11 +284,17 @@ function WebhookSetting({ webhookList }) {
                     <input
                       type="checkbox"
                       className="sr-only peer"
-                      data-webhook-id=""
-                      data-status="0"
-                      data-webhook-type="refund"
+                      data-webhook-id="refund"
+                      defaultChecked={false}
                     />
-                    <div className="w-10 h-5 bg-gray-300 rounded-full peer-focus:ring-blue-500 peer-checked:bg-blue-600 transition-colors duration-300 ease-in-out flex items-center">
+                    <div
+                      className="w-10 h-5 bg-gray-300 rounded-full peer-focus:ring-blue-500 peer-checked:bg-blue-600 transition-colors duration-300 ease-in-out flex items-center"
+                      onClick={() => handleWebhookStatus({
+                        id: 'refund',
+                        status: '0',
+                        webhook_type: 'refund',
+                      })}
+                    >
                       <span className="block w-4 h-4 bg-white rounded-full transform transition-transform duration-300 ease-in-out peer-checked:translate-x-5"></span>
                     </div>
                   </label>
@@ -285,14 +304,17 @@ function WebhookSetting({ webhookList }) {
           </tbody>
         </table>
       </div>
-      <WebhookStatusChangeModal
-        isOpen={isModalOpen}
-        onClose={handleModalClose}
-        onConfirm={handleModalConfirm}
-      />
+
+      {isModalOpen && (
+        <WebhookStatusChangeModal
+          isOpen={isModalOpen}
+          onClose={handleModalClose}
+          onConfirm={handleModalConfirm}
+          webhook={selectedWebhook}
+        />
+      )}
     </div>
   );
-
 }
 
 export default WebhookSetting;
