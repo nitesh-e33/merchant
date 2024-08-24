@@ -11,6 +11,7 @@ function WebhookSetting({ webhookList }) {
   const [hasTransactionWebhook, setHasTransactionWebhook] = useState(false);
   const [hasRefundWebhook, setHasRefundWebhook] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedWebhook, setSelectedWebhook] = useState(null); // Store selected webhook details
 
   useEffect(() => {
     // Initialize webhook presence checks
@@ -84,7 +85,8 @@ function WebhookSetting({ webhookList }) {
   };
 
 
-  const handleWebhookStatus = () => {
+  const handleWebhookStatus = (webhook) => {
+    setSelectedWebhook(webhook);
     setIsModalOpen(true);
   };
 
@@ -93,13 +95,24 @@ function WebhookSetting({ webhookList }) {
   };
 
   const handleModalConfirm = async () => {
-    try {
-      const requestData = {
-        webhook_id: '',
-        status: ''
-      }
-      const response = await apiRequest('POST', '/v1/merchant/webhook/status', { post: requestData });
+    if (!selectedWebhook) return;
+    const { id, status } = selectedWebhook;
 
+    const newStatus = status === '1' ? '0' : '1';
+    const requestData = {
+      webhook_id: id,
+      status: newStatus,
+    };
+    try {
+      const response = await apiRequest('POST', '/v1/merchant/webhook/status', { post: requestData });
+      if (response.StatusCode === "1") {
+        toast.success(response.Message);
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else {
+        toast.error(response.Result || 'Something went wrong. Please try again later.');
+      }
     } catch (error) {
       toast.error('An error occurred. Please try again later.');
       console.error(error);
@@ -166,7 +179,7 @@ function WebhookSetting({ webhookList }) {
                     />
                     <div
                     className="w-10 h-5 bg-gray-300 rounded-full peer-focus:ring-blue-500 peer-checked:bg-blue-600 transition-colors duration-300 ease-in-out flex items-center"
-                    onClick={handleWebhookStatus}
+                    onClick={()=>handleWebhookStatus(webhook)}
                     >
                       <span className="block w-4 h-4 bg-white rounded-full transform transition-transform duration-300 ease-in-out peer-checked:translate-x-5"></span>
                     </div>
