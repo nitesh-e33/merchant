@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 
 function ChangePassword() {
   const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     old_password: '',
     new_password: '',
@@ -78,6 +79,7 @@ function ChangePassword() {
 
   const changePassword = async () => {
     if (validateForm()) {
+      setIsSubmitting(true);
       const requestData = {
         old_password: formData.old_password,
         new_password: formData.new_password,
@@ -87,19 +89,21 @@ function ChangePassword() {
       try {
         const response = await apiRequest('POST', '/v1/merchant/change-password', { post: requestData });
         if (response.StatusCode == '1') {
-            localStorage.removeItem('user');
-            toast.success(response.Message);
-            setTimeout(() => {
-              router.push('/')
-            }, 2000);    
+          localStorage.removeItem('user');
+          toast.success(response.Message);
+          setTimeout(() => {
+            router.push('/');
+          }, 2000);
         } else {
-            if(response.Result) {
-                toast.error(response.Result);
-            } else {
-                toast.error('Something error. Please try again later.');
-            }
+          setIsSubmitting(false);
+          if (response.Result) {
+            toast.error(response.Result);
+          } else {
+            toast.error('Something went wrong. Please try again later.');
+          }
         }
       } catch (error) {
+        setIsSubmitting(false);
         console.error('Error changing password:', error);
       }
     }
@@ -189,7 +193,13 @@ function ChangePassword() {
 
           <div className="row">
             <div className="col-sm-2">
-              <input className="btn btn-success btn-block change-password" type="button" value="Confirm" onClick={changePassword} />
+              <input
+                className="btn btn-success btn-block change-password"
+                type="button"
+                value="Confirm"
+                onClick={changePassword}
+                disabled={isSubmitting}
+              />
             </div>
           </div>
         </form>
