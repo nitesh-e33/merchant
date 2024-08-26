@@ -183,12 +183,20 @@ function WebhookSetting({ webhookList }) {
                       data-status={webhook.status}
                       data-webhook-type={webhook.webhook_type}
                       defaultChecked={webhook.status === '1'}
+                      onChange={() => handleWebhookStatus(webhook)}
                     />
                     <div
-                      className="w-10 h-5 bg-gray-300 rounded-full peer-focus:ring-blue-500 peer-checked:bg-blue-600 transition-colors duration-300 ease-in-out flex items-center"
-                      onClick={() => handleWebhookStatus(webhook)}
+                      className="relative w-10 h-5 bg-gray-300 rounded-full transition-colors duration-300 ease-in-out"
+                      style={{
+                        backgroundColor: webhook.status === '1' ? 'blue' : 'gray',
+                      }}
                     >
-                      <span className="block w-4 h-4 bg-white rounded-full transform transition-transform duration-300 ease-in-out peer-checked:translate-x-5"></span>
+                      <span
+                        className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transform transition-transform duration-300 ease-in-out"
+                        style={{
+                          transform: webhook.status === '1' ? 'translateX(1.25rem)' : 'translateX(0)',
+                        }}
+                      ></span>
                     </div>
                   </label>
                 </td>
