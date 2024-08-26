@@ -21,6 +21,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/components/MyAccount/DocumentType.js", "src/app/components/MyAccount/Partials/BothSidesDocUpload.js", "src/app/components/MyAccount/Partials/FormSelectDocUpload.js", "src/app/components/MyAccount/Partials/SingleDocUpload.js", "src/app/components/Header.js", "src/app/settings/page.js", "src/app/my-account/page.js", "src/app/components/LoginForm.js"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/components/MyAccount/DocumentType.js", "src/app/components/MyAccount/Partials/BothSidesDocUpload.js", "src/app/components/MyAccount/Partials/FormSelectDocUpload.js", "src/app/components/MyAccount/Partials/SingleDocUpload.js", "src/app/components/Header.js", "src/app/settings/page.js", "src/app/my-account/page.js", "src/app/components/LoginForm.js", "src/app/components/Sidebar.js"],
   "exclude": ["node_modules"]
 }
