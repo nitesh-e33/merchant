@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiRequest } from '../lib/apiHelper';
 import { toast } from "react-toastify";
+import Cookies from 'js-cookie';
 
 export default function LoginForm() {
   const [email, setEmail] = useState('');
@@ -36,7 +37,7 @@ export default function LoginForm() {
 
     if (isValid) {
       try {
-        const loginData = { 
+        const loginData = {
           email: email,
           password: password,
           isLoginProcess: 'email'
@@ -46,6 +47,8 @@ export default function LoginForm() {
           const user = response.Result;
           if (user.token) {
             localStorage.setItem('user', JSON.stringify(user));
+            // Set user data in a cookie
+            Cookies.set('user', JSON.stringify(user), { expires: 7 }); // Set cookie to expire in 7 days
             if (user.isKYCVerified) {
               router.push('/dashboard');
             } else {

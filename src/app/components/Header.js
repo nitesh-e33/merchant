@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { apiRequest } from '../lib/apiHelper';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
+import Cookies from 'js-cookie';
 
 const Header = () => {
   const [user, setUser] = useState(null);
@@ -21,7 +22,10 @@ const Header = () => {
     try {
       const response = await apiRequest('GET', '/v1/merchant/logout');
       if (response.StatusCode === '1') {
+        // Remove user data from localStorage
         localStorage.removeItem('user');
+        // Remove user cookie
+        Cookies.remove('user');
         toast.success(response.Message);
         router.push('/');
       } else {
