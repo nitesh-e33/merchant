@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import TokenSetting from '../components/Settings/TokenSetting';
 import WebhookSetting from '../components/Settings/WebhookSetting'
+import ChangePassword from '../components/Settings/ChangePassword'
 import useFetchSettings from '../lib/useFetchSettings';
 
 function Page() {
@@ -82,7 +83,7 @@ function Page() {
                   className={`tab-pane fade ${activeTab === 'changePassword' ? 'show active' : ''}`}
                   role="tabpanel"
                 >
-                  Change Password
+                  <ChangePassword />
                 </div>
               </div>
             </div>
