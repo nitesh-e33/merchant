@@ -6,39 +6,30 @@ import { toast } from 'react-toastify';
 import WebhookStatusChangeModal from './Modal/WebhookStatusChangeModal';
 
 function WebhookSetting({ webhookList }) {
-  const [editModes, setEditModes] = useState({}); // Object to track edit mode for each row
-  const [editValues, setEditValues] = useState({}); // Object to track edit values for each row
-  const [hasTransactionWebhook, setHasTransactionWebhook] = useState(false);
-  const [hasRefundWebhook, setHasRefundWebhook] = useState(false);
+  const [editModes, setEditModes] = useState({});
+  const [editValues, setEditValues] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedWebhook, setSelectedWebhook] = useState(null);
   const [originalStatus, setOriginalStatus] = useState(null);
 
   useEffect(() => {
-    // Initialize webhook presence checks
-    let transactionFound = false;
-    let refundFound = false;
-
-    console.log(webhookList);
+    // Initialize edit modes and values based on the webhook list
+    const initialEditModes = {};
+    const initialEditValues = {};
 
     webhookList.forEach((webhook) => {
-      const webhookType = webhook.webhook_type;
-      if (webhookType === 'transaction') {
-        transactionFound = true;
-      }
-      if (webhookType === 'refund') {
-        refundFound = true;
-      }
+      initialEditModes[webhook.id] = false;
+      initialEditValues[webhook.id] = webhook.webhook_url;
     });
 
-    setHasTransactionWebhook(transactionFound);
-    setHasRefundWebhook(refundFound);
+    setEditModes(initialEditModes);
+    setEditValues(initialEditValues);
   }, [webhookList]);
 
   const handleEditClick = (id) => {
     setEditModes((prevModes) => ({
       ...prevModes,
-      [id]: !prevModes[id], // Toggle edit mode
+      [id]: !prevModes[id],
     }));
   };
 
@@ -50,21 +41,18 @@ function WebhookSetting({ webhookList }) {
   };
 
   const handleSaveClick = async (id, webhookType, flag) => {
-    const key = id || webhookType;
-    const urlToSave = editValues[key] !== undefined ? editValues[key] : webhookList.find(webhook => webhook.id === id)?.webhook_url || '';
+    const urlToSave = editValues[id] || '';
 
-    if (urlToSave === '') {
-      toast.error('webhook url is not empty');
+    if (!urlToSave) {
+      toast.error('Webhook URL cannot be empty');
       return;
     }
 
-    const requestData = {
-      webhook_url: urlToSave,
-      webhook_type: webhookType,
-      flag: flag,
-    };
     try {
-      const response = await apiRequest('POST', '/v1/merchant/webhook/setting', { post: requestData });
+      const response = await apiRequest('POST', '/v1/merchant/webhook/setting', {
+        post: { webhook_url: urlToSave, webhook_type: webhookType, flag },
+      });
+
       if (response.StatusCode === "1") {
         toast.success(response.Message);
         setTimeout(() => {
@@ -74,11 +62,7 @@ function WebhookSetting({ webhookList }) {
         toast.error(response.Result || 'Something went wrong. Please try again later.');
       }
 
-      // Disable edit mode after saving
-      setEditModes((prevModes) => ({
-        ...prevModes,
-        [key]: false,
-      }));
+      setEditModes((prevModes) => ({ ...prevModes, [id]: false }));
     } catch (error) {
       console.error('Error saving webhook URL:', error);
     }
@@ -86,13 +70,12 @@ function WebhookSetting({ webhookList }) {
 
   const handleWebhookStatus = (webhook) => {
     setSelectedWebhook(webhook);
-    setOriginalStatus(webhook.status); // Store the original status
+    setOriginalStatus(webhook.status);
     setIsModalOpen(true);
   };
 
   const handleModalClose = () => {
     if (selectedWebhook) {
-      // Reset the status if the modal is canceled
       const webhookElement = document.querySelector(`input[data-webhook-id="${selectedWebhook.id}"]`);
       if (webhookElement) {
         webhookElement.checked = originalStatus === '1';
@@ -103,15 +86,17 @@ function WebhookSetting({ webhookList }) {
 
   const handleModalConfirm = async () => {
     if (!selectedWebhook) return;
-    const { id, status } = selectedWebhook;
-
-    const newStatus = status === '1' ? '0' : '1';
-    const requestData = {
-      webhook_id: id,
-      status: newStatus,
-    };
+    const newStatus = selectedWebhook.status === '1' ? '0' : '1';
+    if(selectedWebhook.webhook_url === '') {
+      setIsModalOpen(false);
+      toast.error('The webhook id field is required.');
+      return;
+    }
     try {
-      const response = await apiRequest('POST', '/v1/merchant/webhook/status', { post: requestData });
+      const response = await apiRequest('POST', '/v1/merchant/webhook/status', {
+        post: { webhook_id: selectedWebhook.id, status: newStatus },
+      });
+
       if (response.StatusCode === "1") {
         toast.success(response.Message);
         setTimeout(() => {
@@ -124,8 +109,72 @@ function WebhookSetting({ webhookList }) {
       toast.error('An error occurred. Please try again later.');
       console.error(error);
     } finally {
-      setIsModalOpen(false); // Close the modal after the process
+      setIsModalOpen(false);
     }
+  };
+
+  const renderWebhookRow = (webhook, isMissing) => {
+    const id = webhook.id || webhook.webhook_type;
+    const isEditMode = editModes[id];
+
+    return (
+      <tr key={id}>
+        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+          {`${webhook.webhook_type.charAt(0).toUpperCase() + webhook.webhook_type.slice(1)} Webhook`}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+          <div className="relative">
+            <input
+              type="text"
+              className={`block w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm ${!isEditMode ? 'cursor-not-allowed bg-gray-100' : ''}`}
+              value={isEditMode ? editValues[id] : webhook.webhook_url}
+              disabled={!isEditMode}
+              onChange={(e) => handleInputChange(id, e.target.value)}
+            />
+            {isEditMode && (
+              <span
+                className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer text-light-blue hover:text-blue-500"
+                onClick={() => handleSaveClick(id, webhook.webhook_type, isMissing ? 0 : 1)}
+              >
+                <FontAwesomeIcon icon={faCheck} />
+              </span>
+            )}
+          </div>
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+          <span
+            className="cursor-pointer text-blue-500 hover:text-blue-700"
+            onClick={() => handleEditClick(id)}
+          >
+            <FontAwesomeIcon icon={isEditMode ? faTimes : faEdit} />
+          </span>
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap">
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              className="sr-only peer"
+              data-webhook-id={id}
+              defaultChecked={webhook.status === '1'}
+              onChange={() => handleWebhookStatus(webhook)}
+            />
+            <div
+              className="relative w-10 h-5 bg-gray-300 rounded-full transition-colors duration-300 ease-in-out flex items-center"
+              style={{
+                backgroundColor: webhook.status === '1' ? 'blue' : 'gray',
+              }}
+            >
+              <span
+                className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transform transition-transform duration-300 ease-in-out"
+                style={{
+                  transform: webhook.status === '1' ? 'translateX(1.25rem)' : 'translateX(0)',
+                }}
+              ></span>
+            </div>
+          </label>
+        </td>
+      </tr>
+    );
   };
 
   return (
@@ -144,171 +193,15 @@ function WebhookSetting({ webhookList }) {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {webhookList && webhookList.map((webhook) => (
-              <tr key={webhook.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{`${webhook.webhook_type.charAt(0).toUpperCase() + webhook.webhook_type.slice(1)} Webhook`}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      className={`block w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm ${!editModes[webhook.id] ? 'cursor-not-allowed bg-gray-100' : ''}`}
-                      value={editModes[webhook.id] ? (editValues[webhook.id] !== undefined ? editValues[webhook.id] : webhook.webhook_url) : webhook.webhook_url}
-                      disabled={!editModes[webhook.id]} // Disable input based on edit mode
-                      onChange={(e) => handleInputChange(webhook.id, e.target.value)}
-                    />
-                    {editModes[webhook.id] && (
-                      <span
-                        className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer text-light-blue hover:text-blue-500"
-                        onClick={() => handleSaveClick(webhook.id, webhook.webhook_type, 1)}
-                      >
-                        <FontAwesomeIcon icon={faCheck} />
-                      </span>
-                    )}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  <span
-                    className="cursor-pointer text-blue-500 hover:text-blue-700"
-                    onClick={() => handleEditClick(webhook.id)} // Handle edit icon click
-                  >
-                    <FontAwesomeIcon icon={editModes[webhook.id] ? faTimes : faEdit} />
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      className="sr-only peer"
-                      data-webhook-id={webhook.id}
-                      data-status={webhook.status}
-                      data-webhook-type={webhook.webhook_type}
-                      defaultChecked={webhook.status === '1'}
-                      onChange={() => handleWebhookStatus(webhook)}
-                    />
-                    <div
-                      className="relative w-10 h-5 bg-gray-300 rounded-full transition-colors duration-300 ease-in-out"
-                      style={{
-                        backgroundColor: webhook.status === '1' ? 'blue' : 'gray',
-                      }}
-                    >
-                      <span
-                        className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transform transition-transform duration-300 ease-in-out"
-                        style={{
-                          transform: webhook.status === '1' ? 'translateX(1.25rem)' : 'translateX(0)',
-                        }}
-                      ></span>
-                    </div>
-                  </label>
-                </td>
-              </tr>
-            ))}
+            {webhookList.map((webhook) => renderWebhookRow(webhook, false))}
 
             {/* Handle missing webhooks */}
-            {!hasTransactionWebhook && (
-              <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Transaction Webhook</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      className={`block w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm ${!editModes['transaction'] ? 'cursor-not-allowed bg-gray-100' : ''}`}
-                      value={editModes['transaction'] ? (editValues['transaction'] !== undefined ? editValues['transaction'] : '') : ''}
-                      disabled={!editModes['transaction']}
-                      onChange={(e) => handleInputChange('transaction', e.target.value)}
-                    />
-                    {editModes['transaction'] && (
-                      <span
-                        className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer text-light-blue hover:text-blue-500"
-                        onClick={() => handleSaveClick(null, 'transaction', 0)}
-                      >
-                        <FontAwesomeIcon icon={faCheck} />
-                      </span>
-                    )}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  <span
-                    className="cursor-pointer text-blue-500 hover:text-blue-700"
-                    onClick={() => handleEditClick('transaction')}
-                  >
-                    <FontAwesomeIcon icon={editModes['transaction'] ? faTimes : faEdit} />
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      className="sr-only peer"
-                      data-webhook-id="transaction"
-                      defaultChecked={false}
-                    />
-                    <div
-                      className="w-10 h-5 bg-gray-300 rounded-full peer-focus:ring-blue-500 peer-checked:bg-blue-600 transition-colors duration-300 ease-in-out flex items-center"
-                      onClick={() => handleWebhookStatus({
-                        id: 'transaction',
-                        status: '0',
-                        webhook_type: 'transaction',
-                      })}
-                    >
-                      <span className="block w-4 h-4 bg-white rounded-full transform transition-transform duration-300 ease-in-out peer-checked:translate-x-5"></span>
-                    </div>
-                  </label>
-                </td>
-              </tr>
-            )}
-
-            {!hasRefundWebhook && (
-              <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Refund Webhook</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      className={`block w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm ${!editModes['refund'] ? 'cursor-not-allowed bg-gray-100' : ''}`}
-                      value={editModes['refund'] ? (editValues['refund'] !== undefined ? editValues['refund'] : '') : ''}
-                      disabled={!editModes['refund']}
-                      onChange={(e) => handleInputChange('refund', e.target.value)}
-                    />
-                    {editModes['refund'] && (
-                      <span
-                        className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer text-light-blue hover:text-blue-500"
-                        onClick={() => handleSaveClick(null, 'refund', 0)}
-                      >
-                        <FontAwesomeIcon icon={faCheck} />
-                      </span>
-                    )}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  <span
-                    className="cursor-pointer text-blue-500 hover:text-blue-700"
-                    onClick={() => handleEditClick('refund')}
-                  >
-                    <FontAwesomeIcon icon={editModes['refund'] ? faTimes : faEdit} />
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      className="sr-only peer"
-                      data-webhook-id="refund"
-                      defaultChecked={false}
-                    />
-                    <div
-                      className="w-10 h-5 bg-gray-300 rounded-full peer-focus:ring-blue-500 peer-checked:bg-blue-600 transition-colors duration-300 ease-in-out flex items-center"
-                      onClick={() => handleWebhookStatus({
-                        id: 'refund',
-                        status: '0',
-                        webhook_type: 'refund',
-                      })}
-                    >
-                      <span className="block w-4 h-4 bg-white rounded-full transform transition-transform duration-300 ease-in-out peer-checked:translate-x-5"></span>
-                    </div>
-                  </label>
-                </td>
-              </tr>
-            )}
+            {!webhookList.some(webhook => webhook.webhook_type === 'transaction') &&
+              renderWebhookRow({ webhook_type: 'transaction', webhook_url: '', status: '0' }, true)
+            }
+            {!webhookList.some(webhook => webhook.webhook_type === 'refund') &&
+              renderWebhookRow({ webhook_type: 'refund', webhook_url: '', status: '0' }, true)
+            }
           </tbody>
         </table>
       </div>
