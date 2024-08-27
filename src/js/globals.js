@@ -9,18 +9,7 @@ import '../js/select2.full.min.js';
 // import '../plugins/bootstrap/js/bootstrap.bundle.min.js'
 
 // DataTables & Plugins
-// import '../plugins/datatables/jquery.dataTables.min.js';
-// import '../plugins/datatables-bs4/js/dataTables.bootstrap4.min.js';
-// // import '../plugins/datatables-buttons/js/dataTables.buttons.min.js';
-// import '../plugins/datatables-buttons/js/buttons.bootstrap4.min.js';
-// import '../plugins/datatables-buttons/js/buttons.colVis.min.js';
-// import '../plugins/datatables-responsive/js/dataTables.responsive.min.js';
-// import '../plugins/datatables-responsive/js/responsive.bootstrap4.min.js';
-// import '../plugins/jszip/jszip.min.js';
-// import '../plugins/pdfmake/pdfmake.min.js';
-// import '../plugins/pdfmake/vfs_fonts.js';
-// import '../plugins/datatables-buttons/js/buttons.html5.min.js';
-// import '../plugins/datatables-buttons/js/buttons.print.min.js';
+import 'datatables.net';
 
 // // daterangepicker
 // import '../plugins/moment/moment.min.js'
