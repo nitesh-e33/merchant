@@ -3,11 +3,11 @@
 @tailwind utilities;
 
 /* Import AdminLTE CSS */
-@import '../styles/adminlte.min.css';
-@import '../styles/admin.min.css';
-@import '../styles/select2.min.css';
+@import 'adminlte/adminlte.min.css';
+@import 'adminlte/admin.min.css';
+@import 'select2/select2.min.css';
 
-@import 'cdn.datatables.net/css/dataTables.dataTables.css';
+@import 'dataTables/dataTables.min.css';
 
 .input-icon-wrapper {
     position: relative;

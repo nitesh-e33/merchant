@@ -59,8 +59,6 @@ function Page() {
     const searchParams = {
       [searchName]: searchValue
     };
-    console.log('searchParams', searchParams); // Debugging line to check the search parameters
-    // return;
     const data = await fetchMerchantTransactions(searchParams);
     setTransactions(data);
   };
