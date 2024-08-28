@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import $ from 'jquery';
 import { apiRequest } from '../lib/apiHelper';
 import { toast } from 'react-toastify';
@@ -27,6 +27,7 @@ function Page() {
   const [transactions, setTransactions] = useState([]);
   const [searchName, setSearchName] = useState('');
   const [searchValue, setSearchValue] = useState('');
+  const tableRef = useRef(null);
 
   useEffect(() => {
     async function loadData() {
@@ -42,13 +43,27 @@ function Page() {
   }, []);
 
   useEffect(() => {
-    if (transactions.length > 0) {
-      $('#example').DataTable({
-        scrollX: true,
-        order: [[0, 'desc']],
-        destroy: true,
-      });
+    const table = $(tableRef.current);
+    if ($.fn.DataTable.isDataTable(table)) {
+      table.DataTable().clear().destroy();
     }
+    table.DataTable({
+      scrollX: true,
+      order: [[0, 'desc']],
+      data: transactions, // Data will be populated here
+      columns: [
+        { title: 'DP Transaction ID', data: 'dp_trans_id' },
+        { title: 'Customer Name', data: 'customer_name' },
+        { title: 'Phone', data: 'customer_phone' },
+        { title: 'Email', data: 'customer_email' },
+        { title: 'Amount', data: 'amount' },
+        { title: 'Payment Status', data: 'payment_status' },
+        { title: 'Payment Mode', data: 'payment_method' },
+        { title: 'Reference ID', data: 'reference_id' },
+        { title: 'Date', data: 'created_at', render: (data) => new Date(data).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'short', timeStyle: 'long' }) },
+        { title: 'View', data: null, render: (data, type, row) => `<button class="btn btn-info btn-sm order-details" data-order-id="${row.order_id}">View</button>` }
+      ],
+    });
   }, [transactions]);
 
   const handleSearch = async () => {
@@ -56,9 +71,7 @@ function Page() {
       toast.error('Please select a search criteria and enter a search value.');
       return;
     }
-    const searchParams = {
-      [searchName]: searchValue
-    };
+    const searchParams = { [searchName]: searchValue };
     const data = await fetchMerchantTransactions(searchParams);
     setTransactions(data);
   };
@@ -129,7 +142,7 @@ function Page() {
         </form>
       </div>
 
-      <TransactionTable transactions={transactions} />
+      <TransactionTable transactions={transactions} tableRef={tableRef} />
     </>
   );
 }
