@@ -27,20 +27,47 @@ function Page() {
   const [transactions, setTransactions] = useState([]);
   const [searchName, setSearchName] = useState('');
   const [searchValue, setSearchValue] = useState('');
+  const [paymentStatus, setPaymentStatus] = useState('');
+  const [paymentMode, setPaymentMode] = useState('');
   const tableRef = useRef(null);
 
   useEffect(() => {
-    async function loadData() {
-      const data = await fetchMerchantTransactions();
-      setTransactions(data);
-    }
-    $('.select2').select2().on('change', function () {
-      // This ensures that when a value is selected in the dropdown, the state is updated.
-      setSearchName($(this).val());
-    });
+    // Initialize select2 and set up event listeners
+    const initSelect2 = () => {
+      $('.select2').select2();
 
-    loadData();
-  }, []);
+      $('.select2').on('change', function () {
+        const name = $(this).attr('name');
+        const value = $(this).val();
+        if (name === 'searchName') {
+          setSearchName(value);
+        } else if (name === 'paymentStatus') {
+          setPaymentStatus(value);
+        } else if (name === 'paymentMode') {
+          setPaymentMode(value);
+        }
+      });
+    };
+
+    // Fetch data based on initial states
+    const fetchData = async () => {
+      const searchParams = {
+        payment_status: paymentStatus,
+        payment_method: paymentMode,
+        [searchName]: searchValue
+      };
+      const data = await fetchMerchantTransactions(searchParams);
+      setTransactions(data);
+    };
+
+    initSelect2();
+    fetchData();
+
+    // Cleanup select2 event listeners on component unmount
+    return () => {
+      $('.select2').off('change');
+    };
+  }, [paymentStatus, paymentMode]);
 
   useEffect(() => {
     const table = $(tableRef.current);
@@ -60,10 +87,16 @@ function Page() {
         { title: 'Payment Status', data: 'payment_status' },
         { title: 'Payment Mode', data: 'payment_method' },
         { title: 'Reference ID', data: 'reference_id' },
-        { title: 'Date', data: 'created_at', render: (data) => new Date(data).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'short', timeStyle: 'long' }) },
+        { title: 'Date', data: 'created_at', render: (data) => new Date(data).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'short', timeStyle: 'short' }) },
         { title: 'View', data: null, render: (data, type, row) => `<button class="btn btn-info btn-sm order-details" data-order-id="${row.order_id}">View</button>` }
       ],
     });
+    // Cleanup DataTable on component unmount
+    return () => {
+      if ($.fn.DataTable.isDataTable(table)) {
+        table.DataTable().destroy();
+      }
+    };
   }, [transactions]);
 
   const handleSearch = async () => {
@@ -71,7 +104,7 @@ function Page() {
       toast.error('Please select a search criteria and enter a search value.');
       return;
     }
-    const searchParams = { [searchName]: searchValue };
+    const searchParams = { [searchName]: searchValue, payment_status: paymentStatus, payment_method: paymentMode };
     const data = await fetchMerchantTransactions(searchParams);
     setTransactions(data);
   };
@@ -79,6 +112,9 @@ function Page() {
   const resetSearch = async () => {
     setSearchName('');
     setSearchValue('');
+    setPaymentStatus('');
+    setPaymentMode('');
+    $('.select2').val('').trigger('change');
     const data = await fetchMerchantTransactions();
     setTransactions(data);
   };
@@ -105,9 +141,9 @@ function Page() {
               <div className="form-group">
                 <label htmlFor="search">Search By:</label>
                 <select
-                  className="form-control select2 searchName"
+                  className="form-control select2"
+                  name="searchName"
                   value={searchName}
-                  onChange={(e) => setSearchName(e.target.value)}
                 >
                   <option value="">--Select--</option>
                   <option value="dp_trans_id">Droompay Transaction ID</option>
@@ -118,7 +154,6 @@ function Page() {
                   <option value="customer_email">Customer Email</option>
                   <option value="customer_phone">Customer Phone</option>
                 </select>
-                <p id="searchError" className="text-danger"></p>
               </div>
             </div>
             <div className="col-3">
@@ -137,6 +172,51 @@ function Page() {
             </div>
             <div className="col-2">
               <button className="btn btn-danger btn-sm" onClick={resetSearch}>Reset</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div className="row">
+        <form id="data-range-form" onSubmit={(e) => e.preventDefault()} className="col-md-12">
+          <div className="row align-items-center">
+            <div className="col-3">
+              <div className="form-group">
+                <label htmlFor="paymentStatus">Payment Status:</label>
+                <select
+                  className="form-control select2"
+                  name="paymentStatus"
+                  value={paymentStatus}
+                >
+                  <option value="">Status: All</option>
+                  <option value="pending">Pending</option>
+                  <option value="success">Success</option>
+                  <option value="failed">Failed</option>
+                  <option value="usercancel">User Cancel</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="col-3">
+              <div className="form-group">
+                <label htmlFor="paymentMode">Payment Mode:</label>
+                <select
+                  className="form-control select2"
+                  name="paymentMode"
+                  value={paymentMode}
+                >
+                  <option value="">Payment Method: All</option>
+                  <option value="CC">CC</option>
+                  <option value="DC">DC</option>
+                  <option value="NB">NB</option>
+                  <option value="MW">MW</option>
+                  <option value="UPI">UPI</option>
+                  <option value="OM">OM</option>
+                  <option value="EMI">EMI</option>
+                  <option value="CBT">CBT</option>
+                  <option value="BT">BT</option>
+                </select>
+              </div>
             </div>
           </div>
         </form>
