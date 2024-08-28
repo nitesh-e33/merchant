@@ -1,6 +1,6 @@
 import React from 'react';
 
-function TransactionTable({ transactions, tableRef }) {
+function TransactionTable({ tableRef }) {
   return (
     <div className='card'>
       <div className="card-header">
