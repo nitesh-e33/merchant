@@ -11,7 +11,7 @@ import FilterForm from '../components/Transactions/FilterForm';
 async function fetchMerchantTransactions(searchParams = {}) {
   try {
     const response = await apiRequest('POST', '/v1/merchant/transactions', {
-      post: { dto: 'lifetime', ...searchParams }
+      post: searchParams
     });
     if (response.StatusCode === "1") {
       return response.Result.transaction_history;
@@ -32,6 +32,8 @@ function Page() {
   const [searchValue, setSearchValue] = useState('');
   const [paymentStatus, setPaymentStatus] = useState('');
   const [paymentMode, setPaymentMode] = useState('');
+  const [dto, setDto] = useState('lifetime');
+  const [dateRange, setDateRange] = useState([null, null]);
   const tableRef = useRef(null);
 
   useEffect(() => {
@@ -52,9 +54,17 @@ function Page() {
     };
 
     const fetchData = async () => {
+      if (dto === 'custom_range' && (!dateRange || !dateRange[0] || !dateRange[1])) {
+        return;
+      }
       const searchParams = {
         payment_status: paymentStatus,
         payment_method: paymentMode,
+        dto,
+        ...(dto === 'custom_range' && dateRange && dateRange[0] && dateRange[1] && {
+          start_date: dateRange[0].toISOString().split('T')[0],
+          end_date: dateRange[1].toISOString().split('T')[0],
+        }),
         [searchName]: searchValue,
       };
       const data = await fetchMerchantTransactions(searchParams);
@@ -67,7 +77,7 @@ function Page() {
     return () => {
       $('.select2').off('change');
     };
-  }, [paymentStatus, paymentMode]);
+  }, [paymentStatus, paymentMode, dto, dateRange]);
 
   useEffect(() => {
     const table = $(tableRef.current);
@@ -103,7 +113,14 @@ function Page() {
       toast.error('Please select a search criteria and enter a search value.');
       return;
     }
-    const searchParams = { [searchName]: searchValue, payment_status: paymentStatus, payment_method: paymentMode };
+    const searchParams = {
+      [searchName]: searchValue,
+      payment_status: paymentStatus,
+      payment_method: paymentMode,
+      dto,
+      start_date: dto === 'custom_range' ? dateRange[0]?.toISOString().split('T')[0] : undefined,
+      end_date: dto === 'custom_range' ? dateRange[1]?.toISOString().split('T')[0] : undefined,
+    };
     const data = await fetchMerchantTransactions(searchParams);
     setTransactions(data);
   };
@@ -113,9 +130,16 @@ function Page() {
     setSearchValue('');
     setPaymentStatus('');
     setPaymentMode('');
+    setDto('lifetime');
+    setDateRange([null, null]);
     $('.select2').val('').trigger('change');
     const data = await fetchMerchantTransactions();
     setTransactions(data);
+  };
+
+  const handleDateRangeChange = (dtoValue, dateRangeValue) => {
+    setDto(dtoValue);
+    setDateRange(dateRangeValue);
   };
 
   return (
@@ -146,6 +170,7 @@ function Page() {
           setPaymentStatus={setPaymentStatus}
           paymentMode={paymentMode}
           setPaymentMode={setPaymentMode}
+          onDateRangeChange={handleDateRangeChange}
         />
       </div>
 
