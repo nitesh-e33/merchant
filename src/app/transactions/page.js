@@ -32,7 +32,7 @@ function Page() {
   const [searchValue, setSearchValue] = useState('');
   const [paymentStatus, setPaymentStatus] = useState('');
   const [paymentMode, setPaymentMode] = useState('');
-  const [dto, setDto] = useState('lifetime');
+  const [dto, setDto] = useState('this_month');
   const [dateRange, setDateRange] = useState([null, null]);
   const tableRef = useRef(null);
 
@@ -77,7 +77,7 @@ function Page() {
     return () => {
       $('.select2').off('change');
     };
-  }, [paymentStatus, paymentMode, dto, dateRange]);
+  }, [paymentStatus, paymentMode, dto]);
 
   useEffect(() => {
     const table = $(tableRef.current);
@@ -114,12 +114,14 @@ function Page() {
       return;
     }
     const searchParams = {
-      [searchName]: searchValue,
       payment_status: paymentStatus,
       payment_method: paymentMode,
       dto,
-      start_date: dto === 'custom_range' ? dateRange[0]?.toISOString().split('T')[0] : undefined,
-      end_date: dto === 'custom_range' ? dateRange[1]?.toISOString().split('T')[0] : undefined,
+      ...(dto === 'custom_range' && dateRange && dateRange[0] && dateRange[1] && {
+        start_date: dateRange[0].toISOString().split('T')[0],
+        end_date: dateRange[1].toISOString().split('T')[0],
+      }),
+      ...(searchName && searchValue && { [searchName]: searchValue }),
     };
     const data = await fetchMerchantTransactions(searchParams);
     setTransactions(data);
@@ -130,10 +132,14 @@ function Page() {
     setSearchValue('');
     setPaymentStatus('');
     setPaymentMode('');
-    setDto('lifetime');
+    setDto('this_month');
     setDateRange([null, null]);
     $('.select2').val('').trigger('change');
-    const data = await fetchMerchantTransactions();
+    const data = await fetchMerchantTransactions({
+      dto: 'this_month',
+      payment_status: '',
+      payment_method: '',
+    });
     setTransactions(data);
   };
 
