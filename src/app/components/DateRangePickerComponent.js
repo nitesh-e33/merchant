@@ -62,18 +62,26 @@ const predefinedRanges = [
 
 function DateRangePickerComponent({ onShortcutClick, onChange }) {
   const [customRange, setCustomRange] = useState([null, null]);
+  const [selectedLabel, setSelectedLabel] = useState('Select Date Range');
 
   const handleShortcutClick = (shortcut) => {
     if (shortcut.custom) {
       onShortcutClick('custom_range', customRange);
+      setSelectedLabel('Custom Range');
     } else {
       onShortcutClick(shortcut.dto, shortcut.value);
+      setSelectedLabel(shortcut.label);
     }
   };
 
   const handleCustomRangeChange = (value) => {
     setCustomRange(value);
     onChange('custom_range', value);
+    setSelectedLabel('Custom Range');
+  };
+
+  const renderSelectedValue = () => {
+    return selectedLabel;
   };
 
   return (
@@ -82,9 +90,10 @@ function DateRangePickerComponent({ onShortcutClick, onChange }) {
         ranges={predefinedRanges}
         showOneCalendar
         placeholder="Select Date Range"
-        style={{ width: 300 }}
+        className="w-full sm:w-52 mt-2"
         onShortcutClick={handleShortcutClick}
         onChange={handleCustomRangeChange}
+        renderValue={renderSelectedValue}
       />
     </Stack>
   );

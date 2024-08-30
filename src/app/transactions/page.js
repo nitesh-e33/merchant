@@ -7,6 +7,7 @@ import TransactionTable from '../components/Transactions/TransactionTable';
 import Breadcrumb from '../components/Transactions/Breadcrumb';
 import SearchForm from '../components/Transactions/SearchForm';
 import FilterForm from '../components/Transactions/FilterForm';
+import TransactionDetailsModal from '../components/Transactions/TransactionDetailsModal';
 
 async function fetchMerchantTransactions(searchParams = {}) {
   try {
@@ -34,6 +35,8 @@ function Page() {
   const [paymentMode, setPaymentMode] = useState('');
   const [dto, setDto] = useState('this_month');
   const [dateRange, setDateRange] = useState([null, null]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [transactionDetails, setTransactionDetails] = useState(null);
   const tableRef = useRef(null);
 
   useEffect(() => {
@@ -101,6 +104,25 @@ function Page() {
         { title: 'View', data: null, render: (data, type, row) => `<button class="btn btn-info btn-sm order-details" data-order-id="${row.order_id}">View</button>` },
       ],
     });
+
+    table.on('click', '.order-details', async function () {
+      const orderId = $(this).data('order-id');
+      try {
+        const response = await apiRequest('POST', '/v1/merchant/transactions-details', {
+          post: { order_id: orderId }
+        });
+        if (response.StatusCode === "1") {
+          setTransactionDetails(response.Result);
+          setIsModalOpen(true);
+        } else {
+          toast.error(response.Result || 'Failed to fetch transaction details.');
+        }
+      } catch (error) {
+        toast.error('An error occurred while fetching transaction details.');
+        console.error('Error fetching transaction details:', error);
+      }
+    });
+
     return () => {
       if ($.fn.DataTable.isDataTable(table)) {
         table.DataTable().destroy();
@@ -181,6 +203,12 @@ function Page() {
       </div>
 
       <TransactionTable tableRef={tableRef} />
+
+      <TransactionDetailsModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        order={transactionDetails}
+      />
     </>
   );
 }
