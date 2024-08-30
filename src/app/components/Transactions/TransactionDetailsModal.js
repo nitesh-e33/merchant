@@ -1,10 +1,45 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Drawer, Button } from 'rsuite';
+import { apiRequest } from '@/app/lib/apiHelper';
 
 function TransactionDetailsModal({ isOpen, onClose, order }) {
   const [showTransactionDetails, setShowTransactionDetails] = useState(false);
   const [showRefundDetails, setShowRefundDetails] = useState(false);
+  const [orderStatusHistory, setOrderStatusHistory] = useState([]);
+  const [loadingStatus, setLoadingStatus] = useState(false);
+  const [isOrderStatusFetched, setIsOrderStatusFetched] = useState(false);
+  const [showOrderStatus, setShowOrderStatus] = useState(false);
   const getValue = (value) => (value ? value : '');
+
+  useEffect(() => {
+    if (!isOpen) {
+      setShowTransactionDetails(false);
+      setShowRefundDetails(false);
+      setOrderStatusHistory([]);
+      setIsOrderStatusFetched(false);
+      setShowOrderStatus(false);
+    }
+  }, [isOpen]);
+
+  const fetchOrderStatusHistory = async () => {
+    if (!isOrderStatusFetched) {
+      setLoadingStatus(true);
+      try {
+        const response = await apiRequest('GET', '/v1/merchant/order-status-history', {
+          get: { order_id: order?.order_id }
+        });
+        setOrderStatusHistory(response.Result);
+        setIsOrderStatusFetched(true);
+        setShowOrderStatus(true);
+      } catch (error) {
+        console.error('Failed to fetch order status history', error);
+      } finally {
+        setLoadingStatus(false);
+      }
+    } else {
+      setShowOrderStatus((prev) => !prev);
+    }
+  };
 
   return (
     <Drawer
@@ -69,8 +104,9 @@ function TransactionDetailsModal({ isOpen, onClose, order }) {
                   appearance="primary"
                   className="mt-3 mr-4"
                   onClick={() => {
-                    setShowTransactionDetails(true);
+                    setShowTransactionDetails((prev) => !prev);
                     setShowRefundDetails(false);
+                    setShowOrderStatus(false);
                   }}
                 >
                   Transaction Details
@@ -81,8 +117,9 @@ function TransactionDetailsModal({ isOpen, onClose, order }) {
                   appearance="primary"
                   className="mt-3 mr-4"
                   onClick={() => {
+                    setShowRefundDetails((prev) => !prev);
                     setShowTransactionDetails(false);
-                    setShowRefundDetails(true);
+                    setShowOrderStatus(false);
                   }}
                 >
                   Refund Details
@@ -91,7 +128,11 @@ function TransactionDetailsModal({ isOpen, onClose, order }) {
               <Button
                 appearance="primary"
                 className="mt-3"
-                onClick={() => {}}
+                onClick={() => {
+                  fetchOrderStatusHistory();
+                  setShowTransactionDetails(false);
+                  setShowRefundDetails(false);
+                }}
               >
                 Order Status Flow
               </Button>
@@ -156,6 +197,33 @@ function TransactionDetailsModal({ isOpen, onClose, order }) {
                     </tr>
                   </tbody>
                 </table>
+              </div>
+            )}
+            {/* Order Status Flow */}
+            {showOrderStatus && (
+              <div className="mt-6">
+                {loadingStatus ? (
+                  <p>Loading...</p>
+                ) : (
+                  <ul className="list-none p-0">
+                    <h5 className="text-lg font-semibold mb-4">Order Status Flow</h5>
+                    {orderStatusHistory.map((status, index) => (
+                      <li key={index} className="relative pl-8 mb-4">
+                        <div className="absolute left-0 top-0 bg-green-500 h-2 w-2 rounded-full"></div>
+                        <div className="ml-4">
+                          <p><strong>Order Status: </strong> {status.status}</p>
+                          <p><strong>Payment Status: </strong> {status.payment_status}</p>
+                          {status.refund_status && (
+                            <>
+                              <p><strong>Refund Status: </strong> {status.refund_status}</p>
+                            </>
+                          )}
+                          <p><strong>Order Time: </strong> {new Date(status.order_time).toLocaleString('en-IN')}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             )}
           </div>

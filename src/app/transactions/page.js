@@ -114,6 +114,7 @@ function Page() {
       ],
     });
 
+    table.off('click', '.order-details');
     table.on('click', '.order-details', async function () {
       const orderId = $(this).data('order-id');
       try {
