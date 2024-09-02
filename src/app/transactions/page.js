@@ -8,6 +8,7 @@ import Breadcrumb from '../components/Transactions/Breadcrumb';
 import SearchForm from '../components/Transactions/SearchForm';
 import FilterForm from '../components/Transactions/FilterForm';
 import TransactionDetailsModal from '../components/Transactions/TransactionDetailsModal';
+import Loader from '../components/Loader';
 
 async function fetchMerchantTransactions(searchParams = {}) {
   try {
@@ -37,6 +38,7 @@ function Page() {
   const [dateRange, setDateRange] = useState([null, null]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [transactionDetails, setTransactionDetails] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const tableRef = useRef(null);
 
   useEffect(() => {
@@ -116,6 +118,7 @@ function Page() {
 
     table.off('click', '.order-details');
     table.on('click', '.order-details', async function () {
+      setIsLoading(true);
       const orderId = $(this).data('order-id');
       try {
         const response = await apiRequest('POST', '/v1/merchant/transactions-details', {
@@ -130,6 +133,8 @@ function Page() {
       } catch (error) {
         toast.error('An error occurred while fetching transaction details.');
         console.error('Error fetching transaction details:', error);
+      } finally {
+        setIsLoading(false);
       }
     });
 
@@ -182,6 +187,7 @@ function Page() {
 
   return (
     <>
+      {isLoading && <Loader />}
       <div className="row mb-2">
         <div className="col-sm-6">
           <h1 className="text-xl mt-2">Transactions</h1>

@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Drawer, Button } from 'rsuite';
 import { apiRequest } from '@/app/lib/apiHelper';
+import TransactionDetails from './TransactionDetailsView/TransactionDetails';
+import OrderStatusFlow from './TransactionDetailsView/OrderStatusFlow';
+import RefundDetails from './TransactionDetailsView/RefundDetails';
 
 function TransactionDetailsModal({ isOpen, onClose, order }) {
   const [showTransactionDetails, setShowTransactionDetails] = useState(false);
@@ -42,12 +45,7 @@ function TransactionDetailsModal({ isOpen, onClose, order }) {
   };
 
   return (
-    <Drawer
-      placement="right"
-      open={isOpen}
-      onClose={onClose}
-      size="md"
-    >
+    <Drawer placement="right" open={isOpen} onClose={onClose} size="md">
       <Drawer.Header>
         <Drawer.Title>Transaction Details</Drawer.Title>
         <Drawer.Actions>
@@ -138,94 +136,10 @@ function TransactionDetailsModal({ isOpen, onClose, order }) {
               </Button>
             </div>
 
-            {/* Conditional Rendering for Transaction and Refund Details */}
-            {showTransactionDetails && (
-              <div className="mt-6">
-                <h5 className="text-lg font-semibold mb-4">Transaction Details</h5>
-                <table className="table w-full table-fixed">
-                  <tbody>
-                    <tr>
-                      <th>Company Name:</th>
-                      <td>{getValue(order.companyName)}</td>
-                      <th>Reference ID:</th>
-                      <td>{getValue(order.payment_data?.reference_id)}</td>
-                    </tr>
-                    <tr>
-                      <th>Payment Mode:</th>
-                      <td>{getValue(order.payment_data?.payment_method)}</td>
-                      <th>Amount:</th>
-                      <td>{getValue(order.payment_data?.currency)} {getValue(order.payment_data?.amount)}</td>
-                    </tr>
-                    <tr>
-                      <th>Transaction Date:</th>
-                      <td>{new Date(order.payment_data?.transaction_date).toLocaleDateString('en-IN')}</td>
-                      <th>Message:</th>
-                      <td>{getValue(order.payment_data?.error_Message)}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            )}
-            {showRefundDetails && (
-              <div className="mt-6">
-                <h5 className="text-lg font-semibold mb-4">Refund Details</h5>
-                <table className="table w-full table-fixed">
-                  <tbody>
-                    <tr>
-                      <th>ID:</th>
-                      <td>{getValue(order.refunds?.id)}</td>
-                      <th>Payment ID:</th>
-                      <td>{getValue(order.refunds?.payment_id)}</td>
-                    </tr>
-                    <tr>
-                      <th>Refund ID:</th>
-                      <td>{getValue(order.refunds?.refund_id)}</td>
-                      <th>Droompay Transaction ID:</th>
-                      <td>{getValue(order.refunds?.order_id)}</td>
-                    </tr>
-                    <tr>
-                      <th>Refund Amount:</th>
-                      <td>{getValue(order.refunds?.refund_amount)}</td>
-                      <th>Refund Amount Request:</th>
-                      <td>{getValue(order.refunds?.refund_amount_request)}</td>
-                    </tr>
-                    <tr>
-                      <th>Reason:</th>
-                      <td>{getValue(order.refunds?.reason)}</td>
-                      <th></th>
-                      <td></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            )}
-            {/* Order Status Flow */}
-            {showOrderStatus && (
-              <div className="mt-6">
-                {loadingStatus ? (
-                  <p>Loading...</p>
-                ) : (
-                  <ul className="list-none p-0">
-                    <h5 className="text-lg font-semibold mb-4">Order Status Flow</h5>
-                    {orderStatusHistory.map((status, index) => (
-                      <li key={index} className="relative pl-8 mb-4">
-                        <div className="absolute left-0 top-0 bg-green-500 h-2 w-2 rounded-full"></div>
-                        <div className="ml-4">
-                          <p><strong>Order Status: </strong> {status.status}</p>
-                          <p><strong>Payment Status: </strong> {status.payment_status}</p>
-                          {status.refund_status && (
-                            <>
-                              <p><strong>Refund Status: </strong> {status.refund_status}</p>
-                            </>
-                          )}
-                          <p><strong>Order Time: </strong> {new Date(status.order_time).toLocaleString('en-IN')}</p>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            )}
+            {/* Displaying Corresponding Details */}
+            {showTransactionDetails && <TransactionDetails order={order} getValue={getValue} />}
+            {showRefundDetails && <RefundDetails order={order} getValue={getValue} />}
+            {showOrderStatus && <OrderStatusFlow orderStatusHistory={orderStatusHistory} loadingStatus={loadingStatus} />}
           </div>
         ) : (
           <p>Loading...</p>
