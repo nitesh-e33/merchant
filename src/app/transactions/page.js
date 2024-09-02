@@ -3,12 +3,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import $ from 'jquery';
 import { apiRequest } from '../lib/apiHelper';
 import { toast } from 'react-toastify';
-import TransactionTable from '../components/Transactions/TransactionTable';
 import Breadcrumb from '../components/Transactions/Breadcrumb';
 import SearchForm from '../components/Transactions/SearchForm';
 import FilterForm from '../components/Transactions/FilterForm';
 import TransactionDetailsModal from '../components/Transactions/TransactionDetailsModal';
 import Loader from '../components/Loader';
+import PaymentTable from '../components/Transactions/PaymentTable';
 
 async function fetchMerchantTransactions(searchParams = {}) {
   try {
@@ -218,7 +218,7 @@ function Page() {
         />
       </div>
 
-      <TransactionTable tableRef={tableRef} />
+      <PaymentTable tableRef={tableRef} title="Transaction List"/>
 
       <TransactionDetailsModal
         isOpen={isModalOpen}
