@@ -120,6 +120,23 @@ function Page() {
     table.on('click', '.order-details', async function () {
       setIsLoading(true);
       const orderId = $(this).data('order-id');
+      const cacheKey = `transactionData_${orderId}`;
+      const cachedData = localStorage.getItem(cacheKey);
+      const cacheExpiry = 60 * 60 * 1000; // 1 hour in milliseconds
+
+      if (cachedData) {
+        const { data, timestamp } = JSON.parse(cachedData);
+        const currentTime = new Date().getTime();
+
+        if (currentTime - timestamp < cacheExpiry) {
+          setTransactionDetails(data);
+          setIsModalOpen(true);
+          setIsLoading(false);
+          return;
+        } else {
+          localStorage.removeItem(cacheKey);
+        }
+      }
       try {
         const response = await apiRequest('POST', '/v1/merchant/transactions-details', {
           post: { order_id: orderId }
@@ -127,6 +144,13 @@ function Page() {
         if (response.StatusCode === "1") {
           setTransactionDetails(response.Result);
           setIsModalOpen(true);
+          localStorage.setItem(
+            cacheKey,
+            JSON.stringify({
+              data: response.Result,
+              timestamp: new Date().getTime()
+            })
+          );
         } else {
           toast.error(response.Result || 'Failed to fetch transaction details.');
         }
