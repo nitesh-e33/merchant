@@ -83,7 +83,13 @@ function TransactionDetailsModal({ isOpen, onClose, order }) {
                   <th>Refund Status:</th>
                   <td>{getValue(order.refund_status)}</td>
                   <th>Created At:</th>
-                  <td>{new Date(order.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'short', timeStyle: 'short' })}</td>
+                  <td>
+                    {new Date(order.created_at).toLocaleDateString('en-IN', {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric',
+                    })}
+                  </td>
                 </tr>
                 {Array.from({ length: 10 }).map((_, index) => (
                   order[`udf${index + 1}`] ? (

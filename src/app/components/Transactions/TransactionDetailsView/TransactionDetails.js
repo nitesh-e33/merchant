@@ -19,7 +19,15 @@ const TransactionDetails = ({ order, getValue }) => (
         </tr>
         <tr>
           <th>Transaction Date:</th>
-          <td>{new Date(order.payment_data?.transaction_date).toLocaleDateString('en-IN')}</td>
+          <td>
+            {new Date(order.payment_data?.transaction_date).toLocaleDateString("en-IN",
+              {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              }
+            )}
+          </td>
           <th>Message:</th>
           <td>{getValue(order.payment_data?.error_Message)}</td>
         </tr>

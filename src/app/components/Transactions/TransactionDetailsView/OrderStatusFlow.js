@@ -18,7 +18,17 @@ const OrderStatusFlow = ({ orderStatusHistory, loadingStatus }) => (
               {status.refund_status && (
                 <p><strong>Refund Status: </strong> {status.refund_status}</p>
               )}
-              <p><strong>Date: </strong> {new Date(status.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'short', timeStyle: 'short' })}</p>
+              <p><strong>Date: </strong>
+                {new Date(status.created_at).toLocaleDateString('en-IN', {
+                  day: '2-digit',
+                  month: 'short',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit',
+                  hour12: true,
+                })}
+              </p>
             </div>
           </li>
           ))}

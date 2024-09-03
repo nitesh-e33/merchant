@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import Breadcrumb from '../components/Refunds/Breadcrumb';
 import SearchForm from '../components/Refunds/SearchForm';
 import PaymentTable from '../components/Transactions/PaymentTable';
+import Loader from '../components/Loader';
 
 async function fetchMerchantRefunds(searchParams = {}) {
   try {
@@ -30,6 +31,7 @@ function Page() {
   const [searchName, setSearchName] = useState('');
   const [searchValue, setSearchValue] = useState('');
   const tableRef = useRef(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const initSelect2 = () => {
@@ -50,7 +52,7 @@ function Page() {
         };
         const data = await fetchMerchantRefunds(searchParams);
         setRefunds(data);
-      };
+    };
 
     initSelect2();
     fetchData();
@@ -120,6 +122,7 @@ function Page() {
 
   return (
     <>
+      {isLoading && <Loader />}
       <div className="row mb-2">
         <div className="col-sm-6">
           <h1 className="text-xl mt-2">Refund Transaction</h1>
