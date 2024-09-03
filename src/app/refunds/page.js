@@ -5,6 +5,7 @@ import { apiRequest } from '../lib/apiHelper';
 import { toast } from 'react-toastify';
 import Breadcrumb from '../components/Refunds/Breadcrumb';
 import SearchForm from '../components/Refunds/SearchForm';
+import RefundDetailModal from '../components/Refunds/RefundDetailsModal'
 import PaymentTable from '../components/Transactions/PaymentTable';
 import Loader from '../components/Loader';
 
@@ -30,6 +31,8 @@ function Page() {
   const [refunds, setRefunds] = useState([]);
   const [searchName, setSearchName] = useState('');
   const [searchValue, setSearchValue] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [refundDetails, setRefundDetails] = useState(null);
   const tableRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -93,6 +96,52 @@ function Page() {
       ],
     });
 
+    table.off('click', '.refund-details');
+    table.on('click', '.refund-details', async function () {
+      setIsLoading(true);
+      const orderId = $(this).data('order-id');
+      const cacheKey = `refundData_${orderId}`;
+      const cachedData = localStorage.getItem(cacheKey);
+      const cacheExpiry = 60 * 60 * 1000; // 1 hour in milliseconds
+
+      if (cachedData) {
+        const { data, timestamp } = JSON.parse(cachedData);
+        const currentTime = new Date().getTime();
+
+        if (currentTime - timestamp < cacheExpiry) {
+          setRefundDetails(data);
+          setIsModalOpen(true);
+          setIsLoading(false);
+          return;
+        } else {
+          localStorage.removeItem(cacheKey);
+        }
+      }
+      try {
+        const response = await apiRequest('POST', '/v1/merchant/refund-details', {
+          post: { order_id: orderId }
+        });
+        if (response.StatusCode === "1") {
+          setRefundDetails(response.Result);
+          setIsModalOpen(true);
+          localStorage.setItem(
+            cacheKey,
+            JSON.stringify({
+              data: response.Result,
+              timestamp: new Date().getTime()
+            })
+          );
+        } else {
+          toast.error(response.Result || 'Failed to fetch refund details.');
+        }
+      } catch (error) {
+        toast.error('An error occurred while fetching refund details.');
+        console.error('Error fetching refund details:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    });
+
     return () => {
       if ($.fn.DataTable.isDataTable(table)) {
         table.DataTable().destroy();
@@ -144,6 +193,12 @@ function Page() {
       </div>
 
       <PaymentTable tableRef={tableRef} title="Refund Transaction List" />
+
+      <RefundDetailModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        refund={refundDetails}
+      />
     </>
   );
 }

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Drawer, Button } from 'rsuite';
+import 'rsuite/dist/rsuite.min.css';
 
 function RefundDetailsModal({ isOpen, onClose, refund }) {
   const getValue = (value) => (value ? value : '');
@@ -17,39 +18,39 @@ function RefundDetailsModal({ isOpen, onClose, refund }) {
       <Drawer.Body>
         {refund ? (
           <div>
-            {/* Order Details Table */}
+            {/* Refund Details Table */}
             <h5 className="main-modal-title text-lg font-semibold mb-4">Refund Details</h5>
-            <table className="table w-full table-fixed">
+            <table className="table-auto w-full border-collapse border border-gray-300">
               <tbody>
                 <tr>
-                  <th>ID :</th>
-                  <td>{getValue(refund.id)}</td>
-                  <th>Droompay Transaction ID:</th>
-                  <td>{getValue(refund.order_id)}</td>
+                  <th className="border border-gray-300 p-2 text-left bg-gray-100">ID :</th>
+                  <td className="border border-gray-300 p-2">{getValue(refund.id)}</td>
+                  <th className="border border-gray-300 p-2 text-left bg-gray-100">Droompay Transaction ID:</th>
+                  <td className="border border-gray-300 p-2">{getValue(refund.order_id)}</td>
                 </tr>
                 <tr>
-                  <th>Payment ID:</th>
-                  <td>{getValue(refund.payment_id)}</td>
-                  <th>Refund ID:</th>
-                  <td>{getValue(refund.refund_id)}</td>
+                  <th className="border border-gray-300 p-2 text-left bg-gray-100">Payment ID:</th>
+                  <td className="border border-gray-300 p-2">{getValue(refund.payment_id)}</td>
+                  <th className="border border-gray-300 p-2 text-left bg-gray-100">Refund ID:</th>
+                  <td className="border border-gray-300 p-2">{getValue(refund.refund_id)}</td>
                 </tr>
                 <tr>
-                  <th>Refund Amount:</th>
-                  <td>{getValue(refund.refund_amount)}</td>
-                  <th>Refund Type:</th>
-                  <td>{getValue(refund.refund_type)}</td>
+                  <th className="border border-gray-300 p-2 text-left bg-gray-100">Refund Amount:</th>
+                  <td className="border border-gray-300 p-2">{getValue(refund.refund_amount)}</td>
+                  <th className="border border-gray-300 p-2 text-left bg-gray-100">Refund Type:</th>
+                  <td className="border border-gray-300 p-2">{getValue(refund.refund_type)}</td>
                 </tr>
                 <tr>
-                  <th>Refund Amount Request:</th>
-                  <td>{getValue(refund.refund_amount_request)}</td>
-                  <th>Status:</th>
-                  <td>{getValue(refund.status)}</td>
+                  <th className="border border-gray-300 p-2 text-left bg-gray-100">Refund Amount Request:</th>
+                  <td className="border border-gray-300 p-2">{getValue(refund.refund_amount_request)}</td>
+                  <th className="border border-gray-300 p-2 text-left bg-gray-100">Status:</th>
+                  <td className="border border-gray-300 p-2">{getValue(refund.status)}</td>
                 </tr>
                 <tr>
-                  <th>Refund Date:</th>
-                  <td>{new Date(refund.refund_date).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'short', timeStyle: 'short' })}</td>
-                  <th>Reason:</th>
-                  <td>{getValue(refund.reason)}</td>
+                  <th className="border border-gray-300 p-2 text-left bg-gray-100">Refund Date:</th>
+                  <td className="border border-gray-300 p-2">{new Date(refund.refund_date).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'short', timeStyle: 'short' })}</td>
+                  <th className="border border-gray-300 p-2 text-left bg-gray-100">Reason:</th>
+                  <td className="border border-gray-300 p-2">{getValue(refund.reason)}</td>
                 </tr>
               </tbody>
             </table>
