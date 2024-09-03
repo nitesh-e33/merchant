@@ -59,31 +59,31 @@ function TransactionDetailsModal({ isOpen, onClose, order }) {
           <div>
             {/* Order Details Table */}
             <h5 className="main-modal-title text-lg font-semibold mb-4">Order Details</h5>
-            <table className="table w-full table-fixed">
+            <table className="table-auto w-full border-collapse border border-gray-300">
               <tbody>
                 <tr>
-                  <th>Droompay Transaction ID:</th>
-                  <td>{getValue(order.dp_trans_id)}</td>
-                  <th>Customer Name:</th>
-                  <td>{getValue(order.customer_name)}</td>
+                  <th className="border border-gray-300 p-2 text-left bg-gray-100">Droompay Transaction ID:</th>
+                  <td className="border border-gray-300 p-2">{getValue(order.dp_trans_id)}</td>
+                  <th className="border border-gray-300 p-2 text-left bg-gray-100">Customer Name:</th>
+                  <td className="border border-gray-300 p-2">{getValue(order.customer_name)}</td>
                 </tr>
                 <tr>
-                  <th>Customer Email:</th>
-                  <td>{getValue(order.customer_email)}</td>
-                  <th>Customer Mobile:</th>
-                  <td>{getValue(order.customer_phone)}</td>
+                  <th className="border border-gray-300 p-2 text-left bg-gray-100">Customer Email:</th>
+                  <td className="border border-gray-300 p-2">{getValue(order.customer_email)}</td>
+                  <th className="border border-gray-300 p-2 text-left bg-gray-100">Customer Mobile:</th>
+                  <td className="border border-gray-300 p-2">{getValue(order.customer_phone)}</td>
                 </tr>
                 <tr>
-                  <th>Product Name:</th>
-                  <td>{getValue(order.item_name)}</td>
-                  <th>Payment Status:</th>
-                  <td>{getValue(order.payment_status)}</td>
+                  <th className="border border-gray-300 p-2 text-left bg-gray-100">Product Name:</th>
+                  <td className="border border-gray-300 p-2">{getValue(order.item_name)}</td>
+                  <th className="border border-gray-300 p-2 text-left bg-gray-100">Payment Status:</th>
+                  <td className="border border-gray-300 p-2">{getValue(order.payment_status)}</td>
                 </tr>
                 <tr>
-                  <th>Refund Status:</th>
-                  <td>{getValue(order.refund_status)}</td>
-                  <th>Created At:</th>
-                  <td>
+                  <th className="border border-gray-300 p-2 text-left bg-gray-100">Refund Status:</th>
+                  <td className="border border-gray-300 p-2">{getValue(order.refund_status)}</td>
+                  <th className="border border-gray-300 p-2 text-left bg-gray-100">Created At:</th>
+                  <td className="border border-gray-300 p-2">
                     {new Date(order.created_at).toLocaleDateString('en-IN', {
                       day: '2-digit',
                       month: 'short',
@@ -91,14 +91,14 @@ function TransactionDetailsModal({ isOpen, onClose, order }) {
                     })}
                   </td>
                 </tr>
-                {Array.from({ length: 10 }).map((_, index) => (
+                {Array.from({ length: 10 }).map((_, index) =>
                   order[`udf${index + 1}`] ? (
                     <tr key={index}>
-                      <th>UDF{index + 1}:</th>
-                      <td>{getValue(order[`udf${index + 1}`])}</td>
+                      <th className="border border-gray-300 p-2 text-left bg-gray-100">UDF{index + 1}:</th>
+                      <td className="border border-gray-300 p-2">{getValue(order[`udf${index + 1}`])}</td>
                     </tr>
                   ) : null
-                ))}
+                )}
               </tbody>
             </table>
             {/* Buttons */}
