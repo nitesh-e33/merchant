@@ -1,37 +1,49 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Drawer, Button } from 'rsuite';
 import 'rsuite/dist/rsuite.min.css';
 import { apiRequest } from '@/app/lib/apiHelper';
+import OrderStatusFlow from '../Transactions/TransactionDetailsView/OrderStatusFlow';
 
 function RefundDetailsModal({ isOpen, onClose, refund }) {
-  const [orderStatus, setOrderStatus] = useState(null);
-  const [loadingOrderStatus, setLoadingOrderStatus] = useState(false);
+  const [orderStatusHistory, setOrderStatusHistory] = useState([]);
+  const [loadingStatus, setLoadingStatus] = useState(false);
+  const [isOrderStatusFetched, setIsOrderStatusFetched] = useState(false);
+  const [showOrderStatus, setShowOrderStatus] = useState(false);
 
   const getValue = (value) => (value ? value : '');
 
+  useEffect(() => {
+    if (!isOpen) {
+      setOrderStatusHistory([]);
+      setIsOrderStatusFetched(false);
+      setShowOrderStatus(false);
+    }
+  }, [isOpen]);
+
   const handleOrderStatusFlowClick = async (orderId) => {
-    if (orderStatus) {
-      setOrderStatus(null); // Toggle to hide if clicked again
-    } else {
-      setLoadingOrderStatus(true);
+    if (!isOrderStatusFetched) {
+      setLoadingStatus(true);
       try {
         const response = await apiRequest('GET', '/v1/merchant/order-status-history', {
           get: { order_id: orderId }
         });
-
-        if (response.data.code === 'success') {
-          setOrderStatus(response.Result);
+        if (response.StatusCode === '1') {
+          setOrderStatusHistory(response.Result);
+          setIsOrderStatusFetched(true);
+          setShowOrderStatus(true);
           scrollToOrderStatus();
         } else {
-          console.error(response.data.data || 'Something went wrong. Please try again later.');
+          console.error(response.Message || 'Something went wrong. Please try again later.');
         }
       } catch (error) {
-        console.error('Error fetching order status:', error);
+        console.error('Failed to fetch order status history', error);
       } finally {
-        setLoadingOrderStatus(false);
+        setLoadingStatus(false);
       }
+    } else {
+      setShowOrderStatus((prev) => !prev);
     }
-  };
+  }
 
   const scrollToOrderStatus = () => {
     const modalBody = document.querySelector('.rs-drawer-body');
@@ -193,19 +205,13 @@ function RefundDetailsModal({ isOpen, onClose, refund }) {
                 appearance="primary"
                 className="mt-3"
                 onClick={() => handleOrderStatusFlowClick(refund.payments.order_id)}
-                loading={loadingOrderStatus}
+                loading={loadingStatus}
               >
                 Order Status Flow
               </Button>
             </div>
 
-            {/* Order Status Content */}
-            {orderStatus && (
-              <div className="order-status mt-4">
-                {/* Render order status content here */}
-                <div dangerouslySetInnerHTML={{ __html: orderStatus }} />
-              </div>
-            )}
+            {showOrderStatus && <OrderStatusFlow orderStatusHistory={orderStatusHistory} loadingStatus={loadingStatus} />}
           </div>
         ) : (
           <p>Loading...</p>

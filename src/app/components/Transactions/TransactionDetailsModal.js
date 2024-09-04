@@ -31,9 +31,13 @@ function TransactionDetailsModal({ isOpen, onClose, order }) {
         const response = await apiRequest('GET', '/v1/merchant/order-status-history', {
           get: { order_id: order?.order_id }
         });
-        setOrderStatusHistory(response.Result);
-        setIsOrderStatusFetched(true);
-        setShowOrderStatus(true);
+        if (response.StatusCode === '1') {
+          setOrderStatusHistory(response.Result);
+          setIsOrderStatusFetched(true);
+          setShowOrderStatus(true);
+        } else {
+          console.error(response.Message || 'Something went wrong. Please try again later.');
+        }
       } catch (error) {
         console.error('Failed to fetch order status history', error);
       } finally {
