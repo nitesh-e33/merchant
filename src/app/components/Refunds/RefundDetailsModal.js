@@ -113,7 +113,7 @@ function RefundDetailsModal({ isOpen, onClose, refund }) {
                 <tr>
                   <th className="border border-gray-300 p-2 text-left bg-gray-100">Reference Id:</th>
                   <td className="border border-gray-300 p-2">{getValue(refund.orders.reference_id)}</td>
-                  <th className="border border-gray-300 p-2 text-left bg-gray-100">Amount::</th>
+                  <th className="border border-gray-300 p-2 text-left bg-gray-100">Amount:</th>
                   <td className="border border-gray-300 p-2">
                     {getValue(refund.orders.currency)} {getValue(refund.orders.amount)}
                   </td>
@@ -134,7 +134,7 @@ function RefundDetailsModal({ isOpen, onClose, refund }) {
                   <th className="border border-gray-300 p-2 text-left bg-gray-100">Refund Id:</th>
                   <td className="border border-gray-300 p-2">{getValue(refund.orders.refund_id)}</td>
                   <th className="border border-gray-300 p-2 text-left bg-gray-100">Payment Method:</th>
-                  <td className="border border-gray-300 p-2">{getValue(refund.orders.item_name)}</td>
+                  <td className="border border-gray-300 p-2">{getValue(refund.orders.payment_method)}</td>
                 </tr>
                 <tr>
                   <th className="border border-gray-300 p-2 text-left bg-gray-100">Refund Status:</th>
@@ -148,6 +148,21 @@ function RefundDetailsModal({ isOpen, onClose, refund }) {
                     })}
                   </td>
                 </tr>
+                {/* Dynamically Add UDF Fields */}
+                {Array.from({ length: 10 }).map((_, index) => {
+                  const udfKey = `udf${index + 1}`;
+                  if (refund.orders[udfKey]) {
+                    return (
+                      <React.Fragment key={udfKey}>
+                        {index % 2 === 0 && <tr></tr>}
+                        <th className="border border-gray-300 p-2 text-left bg-gray-100">UDF{index + 1}:</th>
+                        <td className="border border-gray-300 p-2">{getValue(refund.orders[udfKey])}</td>
+                        {index % 2 === 1 && <tr></tr>}
+                      </React.Fragment>
+                    );
+                  }
+                  return null;
+                })}
               </tbody>
             </table>
 
