@@ -8,6 +8,10 @@ const Sidebar = () => {
   const pathname = usePathname() || '';
   const isActive = (path) => pathname.startsWith(path);
 
+  // Retrieve user services from local storage
+  const user = JSON.parse(localStorage.getItem('user'));
+  const userServices = user?.services ? Object.values(user.services) : [];
+
   return (
     <aside className="main-sidebar sidebar-dark-primary elevation-4">
       <a href="/dashboard" className="brand-link">
@@ -78,6 +82,50 @@ const Sidebar = () => {
                 </li>
               </ul>
             </li>
+
+            {/* Conditionally render Auto Debit panel */}
+            {userServices.includes('AD') && (
+              <li className={`nav-item ${isActive('/directdebit') ? 'menu-open' : ''}`}>
+                <a href="#" className={`nav-link ${isActive('/directdebit') ? 'active' : ''}`} title="Auto Debit">
+                <FontAwesomeIcon icon={faTachometerAlt} className="nav-icon" />
+                  <span>Auto Debit</span>
+                  <FontAwesomeIcon icon={faAngleLeft} className="right" />
+                </a>
+                <ul className="nav nav-treeview">
+                  <li className="nav-item">
+                    <Link href="/directdebit/authorization" className={`nav-link sub-nav-link ${isActive('/directdebit/authorization') ? 'active' : ''}`}>
+                      <FontAwesomeIcon icon={faCircle} className="nav-icon" />
+                      <p>Authorization</p>
+                    </Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link href="/directdebit/debitrequests" className={`nav-link sub-nav-link ${isActive('/directdebit/debitrequests') ? 'active' : ''}`}>
+                      <FontAwesomeIcon icon={faCircle} className="nav-icon" />
+                      <p>Customer Requests</p>
+                    </Link>
+                  </li>
+                </ul>
+              </li>
+            )}
+
+            {/* Conditionally render Easy Collect panel */}
+            {userServices.includes('EC') && (
+              <li className={`nav-item ${isActive('/easycollect') ? 'menu-open' : ''}`}>
+                <a href="#" className={`nav-link ${isActive('/easycollect') ? 'active' : ''}`} title="Easy Collect">
+                <FontAwesomeIcon icon={faTachometerAlt} className="nav-icon" />
+                  <span>Easy Collect</span>
+                  <FontAwesomeIcon icon={faAngleLeft} className="right" />
+                </a>
+                <ul className="nav nav-treeview">
+                  <li className="nav-item">
+                    <Link href="/easycollect" className={`nav-link sub-nav-link ${isActive('/easycollect') ? 'active' : ''}`}>
+                      <FontAwesomeIcon icon={faCircle} className="nav-icon" />
+                      <p>Easy Collect List</p>
+                    </Link>
+                  </li>
+                </ul>
+              </li>
+            )}
           </ul>
         </nav>
       </div>
