@@ -31,7 +31,6 @@ function RefundDetailsModal({ isOpen, onClose, refund }) {
           setOrderStatusHistory(response.Result);
           setIsOrderStatusFetched(true);
           setShowOrderStatus(true);
-          scrollToOrderStatus();
         } else {
           console.error(response.Message || 'Something went wrong. Please try again later.');
         }
@@ -44,16 +43,6 @@ function RefundDetailsModal({ isOpen, onClose, refund }) {
       setShowOrderStatus((prev) => !prev);
     }
   }
-
-  const scrollToOrderStatus = () => {
-    const modalBody = document.querySelector('.rs-drawer-body');
-    const orderStatusDiv = document.querySelector('.order-status');
-
-    if (modalBody && orderStatusDiv) {
-      const yOffset = orderStatusDiv.offsetTop - modalBody.offsetTop;
-      modalBody.scrollTop = yOffset;
-    }
-  };
 
   return (
     <Drawer placement="right" open={isOpen} onClose={onClose} size="md">
@@ -99,7 +88,7 @@ function RefundDetailsModal({ isOpen, onClose, refund }) {
                 <tr>
                   <th className="border border-gray-300 p-2 text-left bg-gray-100">Refund Date:</th>
                   <td className="border border-gray-300 p-2">
-                    {new Date(refund.refund_date).toLocaleString('en-IN', {
+                    {refund.refund_date && new Date(refund.refund_date).toLocaleString('en-IN', {
                       day: "2-digit",
                       month: "short",
                       year: "numeric",
@@ -187,7 +176,7 @@ function RefundDetailsModal({ isOpen, onClose, refund }) {
                 <tr>
                   <th className="border border-gray-300 p-2 text-left bg-gray-100">Transaction Date:</th>
                   <td className="border border-gray-300 p-2">
-                  {new Date(refund.payments.transaction_date).toLocaleString('en-IN', {
+                  {refund.payments.transaction_date && new Date(refund.payments.transaction_date).toLocaleString('en-IN', {
                       day: "2-digit",
                       month: "short",
                       year: "numeric",
