@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import $ from 'jquery';
 import { apiRequest } from '../lib/apiHelper';
 import { toast } from 'react-toastify';
-import Breadcrumb from '../components/Refunds/Breadcrumb';
+import Breadcrumb from '../components/Transactions/Breadcrumb';
 import SearchForm from '../components/Refunds/SearchForm';
 import RefundDetailModal from '../components/Refunds/RefundDetailsModal'
 import PaymentTable from '../components/Transactions/PaymentTable';
@@ -177,7 +177,7 @@ function Page() {
           <h1 className="text-xl mt-2">Refund Transaction</h1>
         </div>
         <div className="col-sm-6 mt-2">
-          <Breadcrumb />
+          <Breadcrumb title="Refund List"/>
         </div>
       </div>
 

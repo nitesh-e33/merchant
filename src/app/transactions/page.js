@@ -217,7 +217,7 @@ function Page() {
           <h1 className="text-xl mt-2">Transactions</h1>
         </div>
         <div className="col-sm-6 mt-2">
-          <Breadcrumb />
+          <Breadcrumb title="Transaction List"/>
         </div>
       </div>
 
