@@ -24,7 +24,7 @@ function AuthorizationDetailsModal({ isOpen, onClose, authorizations }) {
       <Drawer.Body>
       {authorizations ? (
           <div>
-            {/* Refund Details Table */}
+            {/* Debit Information Table */}
             <h5 className="main-modal-title text-lg font-semibold mb-2">Debit Information</h5>
             <table className="table-auto w-full border-collapse border border-gray-300">
               <tbody>
