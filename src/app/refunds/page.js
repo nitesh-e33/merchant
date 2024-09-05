@@ -8,6 +8,7 @@ import SearchForm from '../components/Refunds/SearchForm';
 import RefundDetailModal from '../components/Refunds/RefundDetailsModal'
 import PaymentTable from '../components/Transactions/PaymentTable';
 import Loader from '../components/Loader';
+import { formatDate } from '../lib/helper';
 
 async function fetchMerchantRefunds(searchParams = {}) {
   try {
@@ -64,14 +65,6 @@ function Page() {
       $('.select2').off('change');
     };
   }, []);
-
-  const formatDate = (data) => {
-    const date = new Date(data);
-    const day = date.toLocaleString('en-IN', { day: '2-digit', timeZone: 'Asia/Kolkata' });
-    const month = date.toLocaleString('en-IN', { month: 'short', timeZone: 'Asia/Kolkata' });
-    const year = date.toLocaleString('en-IN', { year: 'numeric', timeZone: 'Asia/Kolkata' });
-    return `${day}-${month}-${year}`;
-  };
 
   useEffect(() => {
     const table = $(tableRef.current);

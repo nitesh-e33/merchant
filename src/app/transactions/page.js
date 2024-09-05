@@ -9,6 +9,7 @@ import FilterForm from '../components/Transactions/FilterForm';
 import TransactionDetailsModal from '../components/Transactions/TransactionDetailsModal';
 import Loader from '../components/Loader';
 import PaymentTable from '../components/Transactions/PaymentTable';
+import { formatDateTime } from '../lib/helper';
 
 async function fetchMerchantTransactions(searchParams = {}) {
   try {
@@ -84,15 +85,6 @@ function Page() {
     };
   }, [paymentStatus, paymentMode, dto]);
 
-  const formatDate = (data) => {
-    const date = new Date(data);
-    const day = date.toLocaleString('en-IN', { day: '2-digit', timeZone: 'Asia/Kolkata' });
-    const month = date.toLocaleString('en-IN', { month: 'short', timeZone: 'Asia/Kolkata' });
-    const year = date.toLocaleString('en-IN', { year: 'numeric', timeZone: 'Asia/Kolkata' });
-    const time = date.toLocaleString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' });
-    return `${month}-${day}-${year} ${time}`;
-  };
-
   useEffect(() => {
     const table = $(tableRef.current);
     if ($.fn.DataTable.isDataTable(table)) {
@@ -111,7 +103,7 @@ function Page() {
         { title: 'Payment Status', data: 'payment_status' },
         { title: 'Payment Mode', data: 'payment_method' },
         { title: 'Reference ID', data: 'reference_id' },
-        { title: 'Date', data: 'created_at', render: formatDate },
+        { title: 'Date', data: 'created_at', render: formatDateTime },
         { title: 'View', data: null, render: (data, type, row) => `<button class="btn btn-info btn-sm order-details" data-order-id="${row.order_id}">View</button>` },
       ],
     });

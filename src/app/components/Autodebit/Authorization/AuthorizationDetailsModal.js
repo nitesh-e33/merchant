@@ -1,6 +1,6 @@
 import React from 'react';
 import { Drawer, Button } from 'rsuite';
-import 'rsuite/dist/rsuite.min.css';
+import { formatDate, formatDateTime } from '../../../lib/helper';
 
 function AuthorizationDetailsModal({ isOpen, onClose, authorizations }) {
   const debitInfo = [
@@ -9,7 +9,7 @@ function AuthorizationDetailsModal({ isOpen, onClose, authorizations }) {
     { label: 'Auto Debit Auth Error', value: authorizations?.auto_debit_auth_error },
   ];
 
-  const getValue = (value) => (value && value !== 'null' && value !== 'NA' ? value : 'N/A');
+  const getValue = (value) => (value ? value : '');
 
   return (
     <Drawer placement="right" open={isOpen} onClose={onClose} size="md">
@@ -38,13 +38,7 @@ function AuthorizationDetailsModal({ isOpen, onClose, authorizations }) {
                 </tr>
                 <tr>
                   <th className="border border-gray-300 p-2 text-left bg-gray-100">Start Date:</th>
-                  <td className="border border-gray-300 p-2">
-                    {authorizations.start_date && new Date(authorizations.start_date).toLocaleString('en-IN', {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </td>
+                  <td className="border border-gray-300 p-2">{formatDate(authorizations.start_date)}</td>
                 </tr>
                 <tr>
                   <th className="border border-gray-300 p-2 text-left bg-gray-100">Frequency:</th>
@@ -52,23 +46,11 @@ function AuthorizationDetailsModal({ isOpen, onClose, authorizations }) {
                 </tr>
                 <tr>
                   <th className="border border-gray-300 p-2 text-left bg-gray-100">Next Transaction Date:</th>
-                  <td className="border border-gray-300 p-2">
-                    {authorizations.next_transaction_date && new Date(authorizations.next_transaction_date).toLocaleString('en-IN', {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </td>
+                  <td className="border border-gray-300 p-2">{formatDate(authorizations.next_transaction_date)}</td>
                 </tr>
                 <tr>
                   <th className="border border-gray-300 p-2 text-left bg-gray-100">Final Collection Date:</th>
-                  <td className="border border-gray-300 p-2">
-                    {authorizations.final_collection_date && new Date(authorizations.final_collection_date).toLocaleString('en-IN', {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </td>
+                  <td className="border border-gray-300 p-2">{formatDate(authorizations.final_collection_date)}</td>
                 </tr>
                 <tr>
                   <th className="border border-gray-300 p-2 text-left bg-gray-100">Amount:</th>
@@ -102,18 +84,7 @@ function AuthorizationDetailsModal({ isOpen, onClose, authorizations }) {
                 {authorizations.authorization_status && (
                   <tr>
                     <th className="border border-gray-300 p-2 text-left bg-gray-100">Auto Debit Authorization Date:</th>
-                    <td className="border border-gray-300 p-2">
-                      {authorizations.auto_debit_access_key_datetime &&
-                        new Date(authorizations.auto_debit_access_key_datetime).toLocaleString('en-IN', {
-                          day: '2-digit',
-                          month: 'short',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          second: '2-digit',
-                          hour12: true,
-                        })}
-                    </td>
+                    <td className="border border-gray-300 p-2">{formatDateTime(authorizations.auto_debit_access_key_datetime)}</td>
                   </tr>
                 )}
                 {authorizations.authorization_status === 'rejected' && (
@@ -159,18 +130,7 @@ function AuthorizationDetailsModal({ isOpen, onClose, authorizations }) {
                   <th className="border border-gray-300 p-2 text-left bg-gray-100">Service Type:</th>
                   <td className="border border-gray-300 p-2">{getValue(authorizations.transaction_details.service_type)}</td>
                   <th className="border border-gray-300 p-2 text-left bg-gray-100">Date of Transaction:</th>
-                  <td className="border border-gray-300 p-2">
-                    {new Date(authorizations.transaction_details.created_at).toLocaleString('en-IN', {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      second: '2-digit',
-                      hour12: true,
-                    })}
-                  </td>
-                </tr>
+                  <td className="border border-gray-300 p-2">{formatDateTime(authorizations.transaction_details.created_at)}</td></tr>
               </tbody>
             </table>
 
@@ -220,18 +180,7 @@ function AuthorizationDetailsModal({ isOpen, onClose, authorizations }) {
                         {getValue(authorizations.transaction_details.merchant_payments?.id)}
                       </td>
                       <th className="border border-gray-300 p-2 text-left bg-gray-100">Transaction Date:</th>
-                      <td className="border border-gray-300 p-2">
-                        {authorizations.transaction_details.merchant_payments?.transaction_date &&
-                          new Date(authorizations.transaction_details.merchant_payments.transaction_date).toLocaleString('en-IN', {
-                            day: '2-digit',
-                            month: 'short',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            second: '2-digit',
-                            hour12: true,
-                          })}
-                      </td>
+                      <td className="border border-gray-300 p-2">{formatDateTime(authorizations.transaction_details.merchant_payments?.transaction_date)}</td>
                     </tr>
                     <tr>
                       <th className="border border-gray-300 p-2 text-left bg-gray-100">Status:</th>

@@ -76,14 +76,6 @@ function Page() {
     };
   }, [dto]);
 
-  const formatDate = (data) => {
-    const date = new Date(data);
-    const day = date.toLocaleString('en-IN', { day: '2-digit', timeZone: 'Asia/Kolkata' });
-    const month = date.toLocaleString('en-IN', { month: 'short', timeZone: 'Asia/Kolkata' });
-    const year = date.toLocaleString('en-IN', { year: 'numeric', timeZone: 'Asia/Kolkata' });
-    return `${day}-${month}-${year}`;
-  };
-
   useEffect(() => {
     const table = $(tableRef.current);
     if ($.fn.DataTable.isDataTable(table)) {

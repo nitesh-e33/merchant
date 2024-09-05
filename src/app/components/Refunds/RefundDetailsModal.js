@@ -3,6 +3,7 @@ import { Drawer, Button } from 'rsuite';
 import 'rsuite/dist/rsuite.min.css';
 import { apiRequest } from '@/app/lib/apiHelper';
 import OrderStatusFlow from '../Transactions/TransactionDetailsView/OrderStatusFlow';
+import { formatDate } from '../../lib/helper';
 
 function RefundDetailsModal({ isOpen, onClose, refund }) {
   const [orderStatusHistory, setOrderStatusHistory] = useState([]);
@@ -87,13 +88,7 @@ function RefundDetailsModal({ isOpen, onClose, refund }) {
                 </tr>
                 <tr>
                   <th className="border border-gray-300 p-2 text-left bg-gray-100">Refund Date:</th>
-                  <td className="border border-gray-300 p-2">
-                    {refund.refund_date && new Date(refund.refund_date).toLocaleString('en-IN', {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </td>
+                  <td className="border border-gray-300 p-2">{formatDate(refund.refund_date)}</td>
                   <th className="border border-gray-300 p-2 text-left bg-gray-100">Reason:</th>
                   <td className="border border-gray-300 p-2">{getValue(refund.reason)}</td>
                 </tr>
@@ -140,13 +135,7 @@ function RefundDetailsModal({ isOpen, onClose, refund }) {
                   <th className="border border-gray-300 p-2 text-left bg-gray-100">Refund Status:</th>
                   <td className="border border-gray-300 p-2">{getValue(refund.orders.refund_status)}</td>
                   <th className="border border-gray-300 p-2 text-left bg-gray-100">Created At:</th>
-                  <td className="border border-gray-300 p-2">
-                    {new Date(refund.orders.created_at).toLocaleString('en-IN', {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </td>
+                  <td className="border border-gray-300 p-2">{formatDate(refund.orders.created_at)}</td>
                 </tr>
                 {/* Dynamically Add UDF Fields */}
                 {Array.from({ length: 10 }).map((_, index) => {
@@ -190,13 +179,7 @@ function RefundDetailsModal({ isOpen, onClose, refund }) {
                 </tr>
                 <tr>
                   <th className="border border-gray-300 p-2 text-left bg-gray-100">Transaction Date:</th>
-                  <td className="border border-gray-300 p-2">
-                  {refund.payments.transaction_date && new Date(refund.payments.transaction_date).toLocaleString('en-IN', {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </td>
+                  <td className="border border-gray-300 p-2">{formatDate(refund.payments.transaction_date)}</td>
                   <th className="border border-gray-300 p-2 text-left bg-gray-100">Message:</th>
                   <td className="border border-gray-300 p-2">{getValue(refund.payments.error_Message)}</td>
                 </tr>
