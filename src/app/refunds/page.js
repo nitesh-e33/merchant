@@ -21,8 +21,8 @@ async function fetchMerchantRefunds(searchParams = {}) {
       return [];
     }
   } catch (error) {
-    toast.error('An error occurred while fetching the transactions');
-    console.error('Error fetching transactions:', error);
+    toast.error('An error occurred while fetching the refund transactions');
+    console.error('Error fetching refund transactions:', error);
     return [];
   }
 }

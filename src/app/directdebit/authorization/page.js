@@ -11,9 +11,6 @@ import Loader from '../../components/Loader';
 
 async function fetchMerchantAuthorizationsData(searchParams = {}) {
   try {
-    searchParams = {
-      'dto': 'lifetime'
-    }
     const response = await apiRequest('POST', '/v1/merchant/auto-debit-authorizations-list', {
       post: searchParams
     });
@@ -24,8 +21,8 @@ async function fetchMerchantAuthorizationsData(searchParams = {}) {
       return [];
     }
   } catch (error) {
-    toast.error('An error occurred while fetching the transactions');
-    console.error('Error fetching transactions:', error);
+    toast.error('An error occurred while fetching the authorizations');
+    console.error('Error fetching authorizations:', error);
     return [];
   }
 }
@@ -36,6 +33,8 @@ function Page() {
   const [searchValue, setSearchValue] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [authorizationDetails, setAuthorizationDetails] = useState(null);
+  const [dto, setDto] = useState('this_month');
+  const [dateRange, setDateRange] = useState([null, null]);
   const tableRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -53,11 +52,20 @@ function Page() {
     };
 
     const fetchData = async () => {
-        const searchParams = {
-          [searchName]: searchValue,
-        };
-        const data = await fetchMerchantAuthorizationsData(searchParams);
-        setAuthorizations(data);
+      if (dto === 'custom_range' && (!dateRange || !dateRange[0] || !dateRange[1])) {
+        return;
+      }
+      const searchParams = {
+        dto,
+        ...(dto === 'custom_range' && dateRange && dateRange[0] && dateRange[1] && {
+          start_date: dateRange[0].toISOString().split('T')[0],
+          end_date: dateRange[1].toISOString().split('T')[0],
+        }),
+        [searchName]: searchValue,
+      };
+
+      const data = await fetchMerchantAuthorizationsData(searchParams);
+      setAuthorizations(data);
     };
 
     initSelect2();
@@ -66,7 +74,7 @@ function Page() {
     return () => {
       $('.select2').off('change');
     };
-  }, []);
+  }, [dto]);
 
   const formatDate = (data) => {
     const date = new Date(data);
@@ -155,7 +163,12 @@ function Page() {
       return;
     }
     const searchParams = {
-        [searchName]: searchValue,
+      dto,
+      ...(dto === 'custom_range' && dateRange && dateRange[0] && dateRange[1] && {
+        start_date: dateRange[0].toISOString().split('T')[0],
+        end_date: dateRange[1].toISOString().split('T')[0],
+      }),
+      ...(searchName && searchValue && { [searchName]: searchValue }),
     };
     const data = await fetchMerchantAuthorizationsData(searchParams);
     setAuthorizations(data);
@@ -164,11 +177,17 @@ function Page() {
   const resetSearch = async () => {
     setSearchName('');
     setSearchValue('');
+    setDto('this_month');
+    setDateRange([null, null]);
     $('.select2').val('').trigger('change');
-    const data = await fetchMerchantAuthorizationsData();
+    const data = await fetchMerchantAuthorizationsData({dto: 'this_month'});
     setAuthorizations(data);
   };
 
+  const handleDateRangeChange = (dtoValue, dateRangeValue) => {
+    setDto(dtoValue);
+    setDateRange(dateRangeValue);
+  };
   return (
     <>
       {isLoading && <Loader />}
@@ -189,6 +208,7 @@ function Page() {
           setSearchValue={setSearchValue}
           handleSearch={handleSearch}
           resetSearch={resetSearch}
+          onDateRangeChange={handleDateRangeChange}
         />
       </div>
 

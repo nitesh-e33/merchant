@@ -1,4 +1,5 @@
-function SearchForm({ searchName, searchValue, setSearchName, setSearchValue, handleSearch, resetSearch }) {
+import DateRangePickerComponent from '../../DateRangePickerComponent';
+function SearchForm({ searchName, searchValue, setSearchName, setSearchValue, handleSearch, resetSearch, onDateRangeChange }) {
   return (
     <form id="searchForm" onSubmit={(e) => e.preventDefault()} className="col-md-12">
       <div className="row align-items-center">
@@ -32,8 +33,15 @@ function SearchForm({ searchName, searchValue, setSearchName, setSearchValue, ha
             </span>
           </div>
         </div>
-        <div className="col-2 mt-4">
+        <div className="col-1 mt-4">
           <button className="btn btn-danger btn-sm" onClick={resetSearch}>Reset</button>
+        </div>
+
+        <div className="col-1 mt-3">
+          <DateRangePickerComponent
+            onShortcutClick={onDateRangeChange}
+            onChange={onDateRangeChange}
+          />
         </div>
       </div>
     </form>
