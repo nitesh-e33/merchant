@@ -33,7 +33,7 @@ function Page() {
   const [searchValue, setSearchValue] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [authorizationDetails, setAuthorizationDetails] = useState(null);
-  const [dto, setDto] = useState('this_month');
+  const [dto, setDto] = useState('lifetime');
   const [dateRange, setDateRange] = useState([null, null]);
   const tableRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
