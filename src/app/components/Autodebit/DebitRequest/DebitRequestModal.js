@@ -2,7 +2,7 @@ import React from 'react';
 import { Drawer, Button } from 'rsuite';
 import { formatDate, formatDateTime } from '../../../lib/helper';
 
-function AuthorizationDetailsModal({ isOpen, onClose, debitRequest }) {
+function DebitRequestModal({ isOpen, onClose, debitRequest }) {
   const getValue = (value) => (value ? value : '');
 
   return (
@@ -52,7 +52,7 @@ function AuthorizationDetailsModal({ isOpen, onClose, debitRequest }) {
                 </tr>
                 <tr>
                   <th className="border border-gray-300 p-2 text-left bg-gray-100">Created At:</th>
-                  <td className="border border-gray-300 p-2">{formatDate(debitRequest.created_at)}</td>
+                  <td className="border border-gray-300 p-2">{formatDateTime(debitRequest.created_at)}</td>
                 </tr>
               </tbody>
             </table>
@@ -159,4 +159,4 @@ function AuthorizationDetailsModal({ isOpen, onClose, debitRequest }) {
   );
 }
 
-export default AuthorizationDetailsModal;
+export default DebitRequestModal;

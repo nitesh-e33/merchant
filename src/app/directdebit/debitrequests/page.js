@@ -87,22 +87,22 @@ function Page() {
       order: [[0, 'desc']],
       data: debitRequests,
       columns: [
-        { title: 'DP Transaction ID', data: 'txnid' },
-        { title: 'First Name', data: 'first_name' },
+        { title: 'DP Transaction ID', data: 'txnid', className: 'whitespace-nowrap' },
+        { title: 'First Name', data: 'first_name', className: 'whitespace-nowrap' },
         { title: 'Email', data: 'email' },
         { title: 'Phone', data: 'phone' },
         { title: 'Amount', data: 'amount' },
-        { title: 'Request State', data: 'request_state' },
-        { title: 'Created At', data: 'created_at', render: formatDateTime },
-        { title: 'Extra Details', data: null, render: (data, type, row) => `<button class="btn btn-info btn-sm request-details" data-mandate-id="${row.id}">View</button>` },
+        { title: 'Request State', data: 'request_state', className: 'whitespace-nowrap' },
+        { title: 'Created At', data: 'created_at', render: formatDateTime, className: 'whitespace-nowrap' },
+        { title: 'Extra Details', data: null, render: (data, type, row) => `<button class="btn btn-info btn-sm request-details" data-request-id="${row.id}">View</button>`, className: 'whitespace-nowrap' },
       ],
     });
 
     table.off('click', '.request-details');
     table.on('click', '.request-details', async function () {
       setIsLoading(true);
-      const eMandateId = $(this).data('mandate-id');
-      const cacheKey = `debitRequestData_${eMandateId}`;
+      const requestId = $(this).data('request-id');
+      const cacheKey = `debitRequestData_${requestId}`;
       const cachedData = localStorage.getItem(cacheKey);
       const cacheExpiry = 60 * 60 * 1000; // 1 hour in milliseconds
 
@@ -120,8 +120,8 @@ function Page() {
         }
       }
       try {
-        const response = await apiRequest('POST', '/v1/merchant/get-auto-debit-auth-details', {
-          post: { eMandate_id: eMandateId }
+        const response = await apiRequest('POST', '/v1/merchant/get-auto-debit-requests-details', {
+          post: { request_id: requestId }
         });
         if (response.StatusCode === "1") {
           setDebitRequestDetails(response.Result);

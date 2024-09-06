@@ -81,10 +81,10 @@ function Page() {
         { title: 'Name', data: 'customer_name' },
         { title: 'Email', data: 'customer_email' },
         { title: 'Phone', data: 'customer_phone' },
-        { title: 'Refund Amount', data: 'refund_amount' },
-        { title: 'Refund  Request', data: 'refund_amount_request' },
+        { title: 'Refund Amount', data: 'refund_amount', className: 'whitespace-nowrap' },
+        { title: 'Refund  Request', data: 'refund_amount_request', className: 'whitespace-nowrap' },
         { title: 'Status', data: 'status' },
-        { title: 'Order Created', data: 'created_at', render: formatDate },
+        { title: 'Order Created', data: 'created_at', render: formatDate, className: 'whitespace-nowrap' },
         { title: 'View', data: null, render: (data, type, row) => `<button class="btn btn-info btn-sm refund-details" data-order-id="${row.order_id}">View</button>` },
       ],
     });

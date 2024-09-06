@@ -92,7 +92,7 @@ function Page() {
         { title: 'Email', data: 'transaction_merchant_details.customer_email' },
         { title: 'Phone', data: 'transaction_merchant_details.customer_phone' },
         { title: 'Status', data: 'status' },
-        { title: 'Extra Details', data: null, render: (data, type, row) => `<button class="btn btn-info btn-sm authorization-details" data-mandate-id="${row.id}">View</button>` },
+        { title: 'Extra Details', data: null, render: (data, type, row) => `<button class="btn btn-info btn-sm authorization-details" data-mandate-id="${row.id}">View</button>`, className: 'whitespace-nowrap'},
       ],
     });
 
