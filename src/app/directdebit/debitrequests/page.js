@@ -34,7 +34,7 @@ function Page() {
   const [searchValue, setSearchValue] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [debitRequestDetails, setDebitRequestDetails] = useState(null);
-  const [dto, setDto] = useState('lifetime');
+  const [dto, setDto] = useState('this_month');
   const [dateRange, setDateRange] = useState([null, null]);
   const tableRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);

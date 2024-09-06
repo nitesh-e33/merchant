@@ -7,7 +7,7 @@ import startOfMonth from 'date-fns/startOfMonth';
 import endOfMonth from 'date-fns/endOfMonth';
 import addMonths from 'date-fns/addMonths';
 import subWeeks from 'date-fns/subWeeks';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const predefinedRanges = [
   {
@@ -61,8 +61,12 @@ const predefinedRanges = [
 ];
 
 function DateRangePickerComponent({ onShortcutClick, onChange }) {
-  const [customRange, setCustomRange] = useState([null, null]);
-  const [selectedLabel, setSelectedLabel] = useState('Select Date Range');
+  const [customRange, setCustomRange] = useState([startOfMonth(new Date()), new Date()]); // Default to 'This month'
+  const [selectedLabel, setSelectedLabel] = useState('This month');
+
+  useEffect(() => {
+    onShortcutClick('this_month', customRange);
+  }, []);
 
   const handleShortcutClick = (shortcut) => {
     if (shortcut.custom) {
@@ -94,6 +98,7 @@ function DateRangePickerComponent({ onShortcutClick, onChange }) {
         onShortcutClick={handleShortcutClick}
         onChange={handleCustomRangeChange}
         renderValue={renderSelectedValue}
+        value={customRange}
       />
     </Stack>
   );
