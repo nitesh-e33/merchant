@@ -7,10 +7,10 @@ import { apiRequest } from '../lib/apiHelper';
 import { toast } from 'react-toastify';
 import Breadcrumb from '../components/Transactions/Breadcrumb';
 import SearchForm from '../components/EasyCollect/SearchForm';
-import AuthorizationDetailsModal from '../components/Autodebit/Authorization/AuthorizationDetailsModal'
 import PaymentTable from '../components/Transactions/PaymentTable';
 import { formatDateTime } from '../lib/helper';
 import Loader from '../components/Loader';
+import QrCodeModal from '../components/EasyCollect/QrCodeModal'
 
 async function fetchEasyCollectData(searchParams = {}) {
   try {
@@ -35,11 +35,11 @@ function Page() {
   const [searchName, setSearchName] = useState('');
   const [searchValue, setSearchValue] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [authorizationDetails, setAuthorizationDetails] = useState(null);
   const [dto, setDto] = useState('this_month');
   const [dateRange, setDateRange] = useState([null, null]);
   const tableRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [qrCodeContent, setQrCodeContent] = useState(null);
 
   useEffect(() => {
     const initSelect2 = () => {
@@ -166,6 +166,26 @@ function Page() {
         ],
     });
 
+    table.off('click', '.qr-code-generate');
+    table.on('click', '.qr-code-generate', async function () {
+      const dpLink = $(this).data('dp-link');
+      if (!dpLink) { return; }
+      try {
+        const response = await fetch(`/api/generate-qr-code?url=${encodeURIComponent(dpLink)}`);
+        const result = await response.json();
+
+        if (result.qrCodeDataUrl) {
+          setQrCodeContent(`<img src="${result.qrCodeDataUrl}" alt="QR Code" />`);
+          setIsModalOpen(true);
+        } else {
+          toast.error('Failed to generate QR code');
+        }
+      } catch (error) {
+        console.error('Error fetching QR code:', error);
+        toast.error('Error generating QR code');
+      }
+    });
+
     return () => {
       if ($.fn.DataTable.isDataTable(table)) {
         table.DataTable().destroy();
@@ -230,10 +250,11 @@ function Page() {
 
       <PaymentTable tableRef={tableRef} title="Easy Collect" />
 
-      <AuthorizationDetailsModal
+      {/* QrCode Modal */}
+      <QrCodeModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        easyCollects={authorizationDetails}
+        qrCodeContent={qrCodeContent}
       />
     </>
   );
