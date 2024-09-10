@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { Drawer, Button, Input } from 'rsuite';
 
@@ -14,6 +14,16 @@ function LinkGenerationForm({ open, onClose }) {
     udfFields: []
   });
   const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    const defaultExpiryDate = new Date();
+    defaultExpiryDate.setDate(defaultExpiryDate.getDate() + 5);
+    const formattedDate = defaultExpiryDate.toISOString().split('T')[0];
+    setFormValue((prevFormValue) => ({
+      ...prevFormValue,
+      linkExpiry: formattedDate,
+    }));
+  }, []);
 
   const handleSubmit = () => {
     const formErrors = validateFormData();
@@ -50,8 +60,8 @@ function LinkGenerationForm({ open, onClose }) {
     setFormValue({ ...formValue, udfFields: updatedUdfs });
   };
 
-  const handleFieldChange = (e) => {
-    const { name, value } = e.target;
+  // Updated handleFieldChange to take value directly and handle name separately
+  const handleFieldChange = (value, name) => {
     setFormValue({ ...formValue, [name]: value });
   };
 
@@ -76,69 +86,118 @@ function LinkGenerationForm({ open, onClose }) {
           <Drawer.Title>Payment Generation Link</Drawer.Title>
         </Drawer.Header>
         <Drawer.Body>
-          <div className="form-group">
-            <label>Name:</label>
-            <Input name="name" value={formValue.name} onChange={handleFieldChange} />
-            {errors.name && <span className="text-danger">{errors.name}</span>}
+          {/* Name Field */}
+          <div className="mb-4">
+            <label className="block text-gray-700">Name:</label>
+            <Input
+              name="name"
+              value={formValue.name}
+              onChange={(value) => handleFieldChange(value, 'name')}
+              className="mt-1 block w-full"
+            />
+            {errors.name && <span className="text-red-500 text-sm">{errors.name}</span>}
           </div>
 
-          <div className="form-group">
-            <label>Email:</label>
-            <Input name="email" value={formValue.email} onChange={handleFieldChange} />
-            {errors.email && <span className="text-danger">{errors.email}</span>}
+          {/* Email Field */}
+          <div className="mb-4">
+            <label className="block text-gray-700">Email:</label>
+            <Input
+              name="email"
+              value={formValue.email}
+              onChange={(value) => handleFieldChange(value, 'email')}
+              className="mt-1 block w-full"
+            />
+            {errors.email && <span className="text-red-500 text-sm">{errors.email}</span>}
           </div>
 
-          <div className="form-group">
-            <label>Phone:</label>
-            <Input name="phone" value={formValue.phone} onChange={handleFieldChange} />
-            {errors.phone && <span className="text-danger">{errors.phone}</span>}
+          {/* Phone Field */}
+          <div className="mb-4">
+            <label className="block text-gray-700">Phone:</label>
+            <Input
+              name="phone"
+              value={formValue.phone}
+              onChange={(value) => handleFieldChange(value, 'phone')}
+              className="mt-1 block w-full"
+            />
+            {errors.phone && <span className="text-red-500 text-sm">{errors.phone}</span>}
           </div>
 
-          <div className="form-group">
-            <label>Product Title:</label>
-            <Input name="productTitle" value={formValue.productTitle} onChange={handleFieldChange} />
-            {errors.productTitle && <span className="text-danger">{errors.productTitle}</span>}
+          {/* Product Title Field */}
+          <div className="mb-4">
+            <label className="block text-gray-700">Product Title:</label>
+            <Input
+              name="productTitle"
+              value={formValue.productTitle}
+              onChange={(value) => handleFieldChange(value, 'productTitle')}
+              className="mt-1 block w-full"
+            />
+            {errors.productTitle && <span className="text-red-500 text-sm">{errors.productTitle}</span>}
           </div>
 
-          <div className="form-group">
-            <label>Amount (Rs):</label>
-            <Input name="amount" value={formValue.amount} onChange={handleFieldChange} />
-            {errors.amount && <span className="text-danger">{errors.amount}</span>}
+          {/* Amount Field */}
+          <div className="mb-4">
+            <label className="block text-gray-700">Amount (Rs):</label>
+            <Input
+              name="amount"
+              value={formValue.amount}
+              onChange={(value) => handleFieldChange(value, 'amount')}
+              className="mt-1 block w-full"
+            />
+            {errors.amount && <span className="text-red-500 text-sm">{errors.amount}</span>}
           </div>
 
-          <div className="form-group">
-            <label>Reference ID (Optional):</label>
-            <Input name="reference_id" value={formValue.reference_id} onChange={handleFieldChange} />
+          {/* Reference ID Field */}
+          <div className="mb-4">
+            <label className="block text-gray-700">Reference ID (Optional):</label>
+            <Input
+              name="reference_id"
+              value={formValue.reference_id}
+              onChange={(value) => handleFieldChange(value, 'reference_id')}
+              className="mt-1 block w-full"
+            />
           </div>
 
-          <div className="form-group">
-            <label>Link Expiry:</label>
-            <Input type="date" name="linkExpiry" value={formValue.linkExpiry} onChange={handleFieldChange} />
+          {/* Link Expiry Field */}
+          <div className="mb-4">
+            <label className="block text-gray-700">Link Expiry:</label>
+            <Input
+              type="date"
+              name="linkExpiry"
+              value={formValue.linkExpiry}
+              onChange={(value) => handleFieldChange(value, 'linkExpiry')}
+              className="mt-1 block w-full"
+            />
           </div>
 
+          {/* Add Extra Fields Button */}
           <Button appearance="ghost" onClick={addUdfField}>Add Extra Fields</Button>
           {formValue.udfFields.map((field, index) => (
-            <div key={index} className="form-group" style={{ display: 'flex', alignItems: 'center' }}>
-              <div style={{ flexGrow: 1 }}>
-                <label>{field.key}:</label>
-                <Input value={field.value} onChange={(e) => {
-                  const updatedFields = [...formValue.udfFields];
-                  updatedFields[index].value = e.target.value;
-                  setFormValue({ ...formValue, udfFields: updatedFields });
-                }} />
+            <div key={index} className="flex items-center mt-4">
+              <div className="flex-grow">
+                <label className="block text-gray-700">{field.key}:</label>
+                <Input
+                  value={field.value}
+                  onChange={(value) => {
+                    const updatedFields = [...formValue.udfFields];
+                    updatedFields[index].value = value;
+                    setFormValue({ ...formValue, udfFields: updatedFields });
+                  }}
+                  className="mt-1 block w-full"
+                />
               </div>
               <Button
                 appearance="subtle"
                 color="red"
                 onClick={() => removeUdfField(index)}
-                style={{ marginLeft: '10px', flexShrink: 0 }}
+                className="ml-4 mt-4"
               >
                 Remove
               </Button>
             </div>
           ))}
 
-          <div style={{ marginTop: '20px', textAlign: 'right' }}>
+          {/* Submit Button */}
+          <div className="mt-6 text-right">
             <Button appearance="primary" onClick={handleSubmit}>Submit</Button>
           </div>
         </Drawer.Body>
