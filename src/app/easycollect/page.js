@@ -127,12 +127,12 @@ function Page() {
             title: 'QrCode',
             data: null,
             render: (data, type, row) => {
-                if (row.status.toLowerCase() === 'paid') {
-                    return `<FontAwesomeIcon icon={faBan} />`;
-                }
-                return `<button class="btn btn-info btn-sm qr-code-generate" data-dp-link="${row.dp_short_link}">
-                            Qr Code
-                        </button>`;
+              if (row.status.toLowerCase() === 'paid') {
+                return '<i class="fas fa-ban"></i>';
+              }
+              return `<button class="btn btn-info btn-sm qr-code-generate" data-dp-link="${row.dp_short_link}">
+                        Qr Code
+                      </button>`;
             },
             className: 'whitespace-nowrap',
         },
@@ -142,9 +142,9 @@ function Page() {
             title: 'Link',
             data: 'dp_short_link',
             render: (data) => {
-                return `<span class="link-copy-icon" data-toggle="tooltip" data-placement="top" data-link="${data}">
-                            <FontAwesomeIcon icon={faCopy} />
-                        </span>`;
+              return `<span class="link-copy-icon" data-toggle="tooltip" data-placement="top" data-link="${data}">
+                        <i class="fas fa-copy"></i>
+                      </span>`;
             },
             className: 'whitespace-nowrap',
         },
@@ -154,12 +154,12 @@ function Page() {
             title: 'Edit',
             data: null,
             render: (data, type, row) => {
-                if (row.status.toLowerCase() === 'paid') {
-                    return `<FontAwesomeIcon icon={faBan} />`;
-                }
-                return `<span class="link-edit-icon" data-id="${row.id}">
-                            <FontAwesomeIcon icon={faEdit} />
-                        </span>`;
+              if (row.status.toLowerCase() === 'paid') {
+                return '<i class="fas fa-ban"></i>';
+              }
+              return `<span class="link-edit-icon" data-id="${row.id}">
+                        <i class="fas fa-edit"></i>
+                      </span>`;
             },
             className: 'whitespace-nowrap',
         },
