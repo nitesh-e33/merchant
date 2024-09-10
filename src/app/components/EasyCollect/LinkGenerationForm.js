@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { Drawer, Button, Input } from 'rsuite';
+import { apiRequest } from '@/app/lib/apiHelper';
 
 function LinkGenerationForm({ open, onClose }) {
   const [formValue, setFormValue] = useState({
@@ -14,7 +15,10 @@ function LinkGenerationForm({ open, onClose }) {
     udfFields: []
   });
   const [errors, setErrors] = useState({});
+  const [qrCode, setQrCode] = useState(null);
+  const [paymentShortUrl, setPaymentShortUrl] = useState(null);
 
+  // Set default link expiry date to +5 days
   useEffect(() => {
     const defaultExpiryDate = new Date();
     defaultExpiryDate.setDate(defaultExpiryDate.getDate() + 5);
@@ -48,8 +52,8 @@ function LinkGenerationForm({ open, onClose }) {
 
   const getNextAvailableUdf = () => {
     for (let i = 1; i <= 5; i++) {
-      if (!formValue.udfFields.some(field => field.key === `UDF${i}`)) {
-        return `UDF${i}`;
+      if (!formValue.udfFields.some(field => field.key === `udf${i}`)) {
+        return `udf${i}`;
       }
     }
     return null;
@@ -75,13 +79,65 @@ function LinkGenerationForm({ open, onClose }) {
     return Object.keys(errors).length ? errors : null;
   };
 
-  const generateLink = () => {
-    // Add the logic to generate the payment link
+  const generateLink = async () => {
+    try {
+      // Transform UDF fields into a flat structure
+      const udfFields = formValue.udfFields.reduce((acc, field) => {
+        acc[field.key] = field.value;
+        return acc;
+      }, {});
+
+      const formData = {
+        name: formValue.name,
+        email: formValue.email,
+        phone: formValue.phone,
+        productTitle: formValue.productTitle,
+        amount: formValue.amount,
+        reference_id: formValue.reference_id,
+        linkExpiry: formValue.linkExpiry,
+        ...udfFields // Spread UDF fields here
+      };
+
+      // First API call to generate the payment link
+      const response = await apiRequest('POST', '/v1/merchant/generate-easy-collect-payment-link', { post: formData });
+
+      if (response.StatusCode === "1") {
+        toast.success(response.Message);
+
+        const paymentShortUrl = response.Result.payment_short_url;
+        setPaymentShortUrl(paymentShortUrl);
+
+        // Second API call to generate QR code
+        const qrResponse = await fetch(`/api/generate-qr-code?url=${encodeURIComponent(paymentShortUrl)}`);
+        const result = await qrResponse.json();
+
+        if (result.qrCodeDataUrl) {
+          setQrCode(result.qrCodeDataUrl);
+        } else {
+          toast.error('QR not generated. Please try again later.');
+        }
+      } else {
+        toast.error(response.Message || 'Failed to generate payment link.');
+      }
+    } catch (error) {
+      toast.error('An error occurred. Please try again.');
+    }
+  };
+
+  // Function to handle copying link to clipboard
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text)
+      .then(() => {
+        toast.success('Link copied to clipboard!');
+      })
+      .catch(() => {
+        toast.error('Failed to copy link.');
+      });
   };
 
   return (
     <>
-      <Drawer placement="right" open={open} onClose={onClose} size="sm">
+      <Drawer backdrop={false} placement="right" open={open} onClose={onClose} size="sm">
         <Drawer.Header>
           <Drawer.Title>Payment Generation Link</Drawer.Title>
         </Drawer.Header>
@@ -200,6 +256,20 @@ function LinkGenerationForm({ open, onClose }) {
           <div className="mt-6 text-right">
             <Button appearance="primary" onClick={handleSubmit}>Submit</Button>
           </div>
+
+          {/* Display Payment Link, QR Code, and Copy Icon */}
+          {paymentShortUrl && (
+            <div className="mt-6">
+              <div className="text-center">
+                <Button appearance="subtle" onClick={() => copyToClipboard(paymentShortUrl)}>Copy Link</Button>
+              </div>
+              {qrCode && (
+                <div className="text-center mt-4">
+                  <img src={qrCode} alt="QR Code" />
+                </div>
+              )}
+            </div>
+          )}
         </Drawer.Body>
       </Drawer>
     </>
