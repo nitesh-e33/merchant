@@ -142,9 +142,10 @@ function Page() {
             title: 'Link',
             data: 'dp_short_link',
             render: (data) => {
-              return `<span class="link-copy-icon" data-toggle="tooltip" data-placement="top" data-link="${data}">
-                        <i class="fas fa-copy"></i>
-                      </span>`;
+              return `
+                <span class="link-copy-icon cursor-pointer" data-toggle="tooltip" data-placement="top" data-link="${data}">
+                  <i class="fas fa-copy hover:text-blue-500 transition-colors duration-300"></i>
+                </span>`;
             },
             className: 'whitespace-nowrap',
         },
@@ -157,9 +158,10 @@ function Page() {
               if (row.status.toLowerCase() === 'paid') {
                 return '<i class="fas fa-ban"></i>';
               }
-              return `<span class="link-edit-icon" data-id="${row.id}">
-                        <i class="fas fa-edit"></i>
-                      </span>`;
+              return `
+                <span class="link-edit-icon cursor-pointer" data-id="${row.id}">
+                  <i class="fas fa-edit hover:text-blue-500 transition-colors duration-300"></i>
+                </span>`;
             },
             className: 'whitespace-nowrap',
         },
