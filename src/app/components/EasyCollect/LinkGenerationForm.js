@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { Drawer, Button, Input } from 'rsuite';
 import { apiRequest } from '@/app/lib/apiHelper';
+import { copyToClipboard } from '@/app/lib/helper'
 
-function LinkGenerationForm({ open, onClose }) {
+function LinkGenerationForm({ open, onClose, initialData = null }) {
   const [formValue, setFormValue] = useState({
     name: '',
     email: '',
@@ -12,8 +13,35 @@ function LinkGenerationForm({ open, onClose }) {
     amount: '',
     reference_id: '',
     linkExpiry: '',
-    udfFields: []
+    udfFields: [],
+    order_id: ''
   });
+
+  useEffect(() => {
+    if (initialData) {
+      // Prefill the form with the initial data (edit mode)
+      const prefilledUdfs = [];
+      for (let i = 1; i <= 5; i++) {
+        const udfKey = `udf${i}`;
+        if (initialData[udfKey]) {
+          prefilledUdfs.push({ key: udfKey, value: initialData[udfKey], isRemovable: false });
+        }
+      }
+
+      setFormValue({
+        name: initialData.customer_name || '',
+        email: initialData.customer_email || '',
+        phone: initialData.customer_phone || '',
+        productTitle: initialData.orders.item_name || '',
+        amount: initialData.amount || '',
+        reference_id: initialData.reference_id || '',
+        linkExpiry: initialData.expiry_date || '',
+        udfFields: prefilledUdfs || [],
+        order_id: initialData.order_id || '',
+      });
+    }
+  }, [initialData]);
+
   const [errors, setErrors] = useState({});
   const [qrCode, setQrCode] = useState(null);
   const [paymentShortUrl, setPaymentShortUrl] = useState(null);
@@ -95,6 +123,7 @@ function LinkGenerationForm({ open, onClose }) {
         amount: formValue.amount,
         reference_id: formValue.reference_id,
         linkExpiry: formValue.linkExpiry,
+        order_id: formValue.order_id,
         ...udfFields // Spread UDF fields here
       };
 
@@ -124,17 +153,6 @@ function LinkGenerationForm({ open, onClose }) {
     }
   };
 
-  // Function to handle copying link to clipboard
-  const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text)
-      .then(() => {
-        toast.success('Link copied to clipboard!');
-      })
-      .catch(() => {
-        toast.error('Failed to copy link.');
-      });
-  };
-
   return (
     <>
       <Drawer backdrop={false} placement="right" open={open} onClose={onClose} size="sm">
@@ -142,6 +160,13 @@ function LinkGenerationForm({ open, onClose }) {
           <Drawer.Title>Payment Generation Link</Drawer.Title>
         </Drawer.Header>
         <Drawer.Body>
+          { initialData && (
+            <>
+              <div className="mb-4">
+                <Input type="hidden" name="order_id" value={formValue.order_id} onChange={(value) => handleFieldChange(value, 'order_id')} className="mt-1 block w-full" />
+              </div>
+            </>
+          )}
           {/* Name Field */}
           <div className="mb-4">
             <label className="block text-gray-700">Name:</label>
@@ -202,28 +227,33 @@ function LinkGenerationForm({ open, onClose }) {
             {errors.amount && <span className="text-red-500 text-sm">{errors.amount}</span>}
           </div>
 
-          {/* Reference ID Field */}
-          <div className="mb-4">
-            <label className="block text-gray-700">Reference ID (Optional):</label>
-            <Input
-              name="reference_id"
-              value={formValue.reference_id}
-              onChange={(value) => handleFieldChange(value, 'reference_id')}
-              className="mt-1 block w-full"
-            />
-          </div>
+          {/* Conditionally render Reference ID and Expiry Date only in non-edit mode */}
+          {!initialData && (
+            <>
+              {/* Reference ID Field */}
+              <div className="mb-4">
+                <label className="block text-gray-700">Reference ID (Optional):</label>
+                <Input
+                  name="reference_id"
+                  value={formValue.reference_id}
+                  onChange={(value) => handleFieldChange(value, 'reference_id')}
+                  className="mt-1 block w-full"
+                />
+              </div>
 
-          {/* Link Expiry Field */}
-          <div className="mb-4">
-            <label className="block text-gray-700">Link Expiry:</label>
-            <Input
-              type="date"
-              name="linkExpiry"
-              value={formValue.linkExpiry}
-              onChange={(value) => handleFieldChange(value, 'linkExpiry')}
-              className="mt-1 block w-full"
-            />
-          </div>
+              {/* Link Expiry Field */}
+              <div className="mb-4">
+                <label className="block text-gray-700">Link Expiry:</label>
+                <Input
+                  type="date"
+                  name="linkExpiry"
+                  value={formValue.linkExpiry}
+                  onChange={(value) => handleFieldChange(value, 'linkExpiry')}
+                  className="mt-1 block w-full"
+                />
+              </div>
+            </>
+          )}
 
           {/* Add Extra Fields Button */}
           <Button appearance="ghost" onClick={addUdfField}>Add Extra Fields</Button>

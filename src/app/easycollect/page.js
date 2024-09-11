@@ -1,16 +1,15 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
 import $ from 'jquery';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCopy, faEdit, faBan, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { apiRequest } from '../lib/apiHelper';
 import { toast } from 'react-toastify';
 import Breadcrumb from '../components/Transactions/Breadcrumb';
 import SearchForm from '../components/EasyCollect/SearchForm';
 import PaymentTable from '../components/Transactions/PaymentTable';
-import { formatDateTime } from '../lib/helper';
+import { formatDateTime, copyToClipboard } from '../lib/helper';
 import Loader from '../components/Loader';
 import QrCodeModal from '../components/EasyCollect/QrCodeModal'
+import LinkGenerationForm from '../components/EasyCollect/LinkGenerationForm';
 
 async function fetchEasyCollectData(searchParams = {}) {
   try {
@@ -40,6 +39,8 @@ function Page() {
   const tableRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
   const [qrCodeContent, setQrCodeContent] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editData, setEditData] = useState(null);
 
   useEffect(() => {
     const initSelect2 = () => {
@@ -144,7 +145,7 @@ function Page() {
             render: (data) => {
               return `
                 <span class="link-copy-icon cursor-pointer" data-toggle="tooltip" data-placement="top" data-link="${data}">
-                  <i class="fas fa-copy hover:text-blue-500 transition-colors duration-300"></i>
+                  <i class="far fa-copy hover:text-blue-500 transition-colors duration-300"></i>
                 </span>`;
             },
             className: 'whitespace-nowrap',
@@ -188,12 +189,38 @@ function Page() {
       }
     });
 
+    // Event listener for Edit action
+    table.off('click', '.link-edit-icon');
+    table.on('click', '.link-edit-icon', async function () {
+      setIsLoading(true);
+      const id = $(this).data('id');
+      if (!id) { return; }
+      try {
+        const response = await apiRequest('POST', `/v1/merchant/get-easy-collect-link/${id}`);
+        if (response.StatusCode === "1") {
+          const record = response.Result;
+          setIsLoading(false);
+          openLinkGenerationForm(record);
+        } else {
+          toast.error('Failed to fetch the record for editing');
+        }
+      } catch (error) {
+        console.error('Error fetching record for editing:', error);
+        toast.error('An error occurred while fetching the record');
+      }
+    });
+
     return () => {
       if ($.fn.DataTable.isDataTable(table)) {
         table.DataTable().destroy();
       }
     };
   }, [easyCollects]);
+
+  const openLinkGenerationForm = (data) => {
+    setEditData(data);
+    setIsEditModalOpen(true);
+  };
 
   const handleSearch = async () => {
     if (!searchName || !searchValue) {
@@ -257,6 +284,12 @@ function Page() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         qrCodeContent={qrCodeContent}
+      />
+
+      <LinkGenerationForm
+        open={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        initialData={editData}
       />
     </>
   );
