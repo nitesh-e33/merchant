@@ -290,9 +290,7 @@ function LinkGenerationForm({ open, onClose, initialData = null }) {
           {/* Display Payment Link, QR Code, and Copy Icon */}
           {paymentShortUrl && (
             <div className="mt-6">
-              <div className="text-center">
-                <Button appearance="subtle" onClick={() => copyToClipboard(paymentShortUrl)}>Copy Link</Button>
-              </div>
+              <Button appearance="subtle" onClick={() => copyToClipboard(paymentShortUrl)}>Copy Link</Button>
               {qrCode && (
                 <div className="text-center mt-4">
                   <img src={qrCode} alt="QR Code" />

@@ -142,7 +142,7 @@ function Page() {
         {
             title: 'Link',
             data: 'dp_short_link',
-            render: (data) => {
+            render: function (data, type, row) {
               return `
                 <span class="link-copy-icon cursor-pointer" data-toggle="tooltip" data-placement="top" data-link="${data}">
                   <i class="far fa-copy hover:text-blue-500 transition-colors duration-300"></i>
@@ -167,10 +167,18 @@ function Page() {
             className: 'whitespace-nowrap',
         },
         ],
+        drawCallback: function() {
+          // Bind the click event to the copy icons
+          $('.link-copy-icon').off('click').on('click', function() {
+            const link = $(this).data('link');
+            copyToClipboard(link);
+          });
+        }
     });
 
     table.off('click', '.qr-code-generate');
     table.on('click', '.qr-code-generate', async function () {
+      setIsLoading(true);
       const dpLink = $(this).data('dp-link');
       if (!dpLink) { return; }
       try {
@@ -178,6 +186,7 @@ function Page() {
         const result = await response.json();
 
         if (result.qrCodeDataUrl) {
+          setIsLoading(false);
           setQrCodeContent(`<img src="${result.qrCodeDataUrl}" alt="QR Code" />`);
           setIsModalOpen(true);
         } else {
@@ -186,6 +195,8 @@ function Page() {
       } catch (error) {
         console.error('Error fetching QR code:', error);
         toast.error('Error generating QR code');
+      } finally {
+        setIsLoading(false);
       }
     });
 
@@ -207,6 +218,8 @@ function Page() {
       } catch (error) {
         console.error('Error fetching record for editing:', error);
         toast.error('An error occurred while fetching the record');
+      } finally {
+        setIsLoading(false);
       }
     });
 
