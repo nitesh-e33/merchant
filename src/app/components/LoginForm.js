@@ -50,7 +50,7 @@ export default function LoginForm() {
           if (user.token) {
             localStorage.setItem('user', JSON.stringify(user));
             // Set user data in a cookie
-            Cookies.set('user', JSON.stringify(user), { expires: 7 }); // Set cookie to expire in 7 days
+            Cookies.set('user', JSON.stringify(user), { expires: 1 }); // Set cookie to expire in 1 days
             if (user.isKYCVerified) {
               router.push('/dashboard');
             } else {

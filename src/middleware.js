@@ -10,6 +10,7 @@ export async function middleware(req) {
 
   if (!user) {
     url.pathname = '/';
+    url.searchParams.set('invaliduser', 'true');
     return NextResponse.redirect(url);
   }
 

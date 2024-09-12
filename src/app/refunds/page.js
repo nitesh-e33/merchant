@@ -76,7 +76,7 @@ function Page() {
       order: [[0, 'desc']],
       data: refunds,
       columns: [
-        { title: 'DP Transaction ID', data: 'order_id' },
+        { title: 'DP Transaction ID', data: 'order_id', className: 'whitespace-nowrap' },
         { title: 'Refund ID', data: 'refund_id' },
         { title: 'Name', data: 'customer_name' },
         { title: 'Email', data: 'customer_email' },
