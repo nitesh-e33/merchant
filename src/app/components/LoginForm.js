@@ -12,6 +12,7 @@ export default function LoginForm() {
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
   
   const submitLoginForm = async () => {
@@ -36,6 +37,7 @@ export default function LoginForm() {
     }
 
     if (isValid) {
+      setLoading(true);
       try {
         const loginData = {
           email: email,
@@ -62,12 +64,14 @@ export default function LoginForm() {
         }
       } catch (error) {
         console.error('Error logging in:', error);
+      } finally {
+        setLoading(false);
       }
     }
   };
 
   return (
-      <div className="bg-white shadow-md rounded-lg p-8 max-w-sm w-full heigh">
+      <div className="bg-white shadow-md rounded-lg p-8 max-w-sm w-full">
         <div className="flex justify-center">
           <Image
             src="/themes/backend/img/DroomPay.png"
@@ -105,10 +109,11 @@ export default function LoginForm() {
           <div className="flex justify-center">
             <button
               type="button"
-              className="bg-blue-500 text-white p-2 rounded-lg w-full"
+              className={`bg-blue-500 text-white p-2 rounded-lg w-full ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
               onClick={submitLoginForm}
+              disabled={loading}
             >
-              Sign In
+              {loading ? 'Signing In...' : 'Sign In'}
             </button>
           </div>
         </form>

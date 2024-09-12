@@ -17,5 +17,13 @@ export async function middleware(req) {
 }
 
 export const config = {
-  matcher: ['/my-account', '/settings'],
+  matcher: [
+    '/my-account',
+    '/settings',
+    '/transactions',
+    '/refunds',
+    '/easycollect',
+    '/directdebit/debitrequests',
+    '/directdebit/authorization'
+  ],
 };

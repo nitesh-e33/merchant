@@ -26,8 +26,8 @@ const Header = () => {
         localStorage.removeItem('user');
         // Remove user cookie
         Cookies.remove('user');
-        toast.success(response.Message);
         router.push('/');
+        toast.success(response.Message);
       } else {
         toast.error(response.Message);
       }
