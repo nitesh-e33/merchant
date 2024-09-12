@@ -101,7 +101,23 @@ function FormComponent({ initialData, onSubmit }) {
       setErrors(formErrors);
       setIsSubmitting(false);
     } else {
-      onSubmit(formValue);
+      const udfFields = formValue.udfFields.reduce((acc, field) => {
+        acc[field.key] = field.value;
+        return acc;
+      }, {});
+
+      const formData = {
+        name: formValue.name,
+        email: formValue.email,
+        phone: formValue.phone,
+        productTitle: formValue.productTitle,
+        amount: formValue.amount,
+        reference_id: formValue.reference_id,
+        linkExpiry: formValue.linkExpiry,
+        order_id: formValue.order_id,
+        ...udfFields // Spread UDF fields here
+      };
+      onSubmit(formData);
     }
   };
 
