@@ -266,6 +266,13 @@ function Page() {
     setDto(dtoValue);
     setDateRange(dateRangeValue);
   };
+
+  const handleModalClose = async () => {
+    setIsEditModalOpen(false);
+    const data = await fetchEasyCollectData();
+    setEasyCollects(data);
+  };
+
   return (
     <>
       {isLoading && <Loader />}
@@ -287,6 +294,7 @@ function Page() {
           handleSearch={handleSearch}
           resetSearch={resetSearch}
           onDateRangeChange={handleDateRangeChange}
+          handleModalClose={handleModalClose}
         />
       </div>
 
@@ -301,7 +309,7 @@ function Page() {
 
       <LinkGenerationForm
         open={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
+        onClose={handleModalClose}
         initialData={editData}
       />
     </>

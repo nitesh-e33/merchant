@@ -3,15 +3,16 @@ import { Drawer, Button } from 'rsuite';
 import DateRangePickerComponent from '../DateRangePickerComponent';
 import LinkGenerationForm from './LinkGenerationForm';
 
-function SearchForm({ searchName, searchValue, setSearchName, setSearchValue, handleSearch, resetSearch, onDateRangeChange }) {
+function SearchForm({ searchName, searchValue, setSearchName, setSearchValue, handleSearch, resetSearch, onDateRangeChange, handleModalClose }) {
   const [open, setOpen] = useState(false);
 
   const handleOpenModal = () => {
     setOpen(true);
   };
 
-  const handleCloseModal = () => {
+  const onClose = async () => {
     setOpen(false);
+    await handleModalClose();
   };
 
   return (
@@ -69,7 +70,7 @@ function SearchForm({ searchName, searchValue, setSearchName, setSearchValue, ha
         </button>
       </form>
 
-      <LinkGenerationForm open={open} onClose={handleCloseModal} />
+      <LinkGenerationForm open={open} onClose={onClose} />
     </>
   );
 }

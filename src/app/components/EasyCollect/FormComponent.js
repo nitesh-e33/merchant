@@ -7,7 +7,7 @@ function FormComponent({ initialData, onSubmit }) {
     name: '',
     email: '',
     phone: '',
-    productTitle: '',
+    item_name: '',
     amount: '',
     reference_id: '',
     linkExpiry: '',
@@ -16,6 +16,7 @@ function FormComponent({ initialData, onSubmit }) {
   });
 
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Prefill form if initialData is provided
   useEffect(() => {
@@ -32,7 +33,7 @@ function FormComponent({ initialData, onSubmit }) {
         name: initialData.customer_name || '',
         email: initialData.customer_email || '',
         phone: initialData.customer_phone || '',
-        productTitle: initialData.orders.item_name || '',
+        item_name: initialData.orders.item_name || '',
         amount: initialData.amount || '',
         reference_id: initialData.reference_id || '',
         linkExpiry: initialData.expiry_date || '',
@@ -88,15 +89,17 @@ function FormComponent({ initialData, onSubmit }) {
     if (!formValue.name) errors.name = 'Name is required';
     if (!/^\S+@\S+\.\S+$/.test(formValue.email)) errors.email = 'Invalid email address';
     if (!/^[6-9]\d{9}$/.test(formValue.phone)) errors.phone = 'Invalid phone number';
-    if (!formValue.productTitle) errors.productTitle = 'Product Title is required';
+    if (!formValue.item_name) errors.item_name = 'Product Title is required';
     if (!formValue.amount || !/^\d+\.\d{2}$/.test(formValue.amount)) errors.amount = 'Amount must be a valid number with two decimal places';
     return Object.keys(errors).length ? errors : null;
   };
 
   const handleSubmit = () => {
+    setIsSubmitting(true);
     const formErrors = validateFormData();
     if (formErrors) {
       setErrors(formErrors);
+      setIsSubmitting(false);
     } else {
       onSubmit(formValue);
     }
@@ -144,12 +147,12 @@ function FormComponent({ initialData, onSubmit }) {
         <div className="mb-4">
           <label className="block text-gray-700">Product Title:</label>
           <Input
-            name="productTitle"
-            value={formValue.productTitle}
-            onChange={(value) => handleFieldChange(value, 'productTitle')}
+            name="item_name"
+            value={formValue.item_name}
+            onChange={(value) => handleFieldChange(value, 'item_name')}
             className="mt-1 block w-full"
           />
-          {errors.productTitle && <span className="text-red-500 text-sm">{errors.productTitle}</span>}
+          {errors.item_name && <span className="text-red-500 text-sm">{errors.item_name}</span>}
         </div>
 
         {/* Amount Field */}
@@ -218,7 +221,9 @@ function FormComponent({ initialData, onSubmit }) {
           ))}
 
           <div className="mt-6 text-right">
-            <Button appearance="primary" onClick={handleSubmit}>Submit</Button>
+            <Button appearance="primary" onClick={handleSubmit} disabled={isSubmitting}>
+              {isSubmitting ? 'Submitted' : 'Submit'}
+            </Button>
           </div>
       </div>
     </>

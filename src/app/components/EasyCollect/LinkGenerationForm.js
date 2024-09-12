@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Drawer, Button } from 'rsuite';
 import { toast } from 'react-toastify';
 import FormComponent from './FormComponent';
@@ -8,6 +8,13 @@ import { copyToClipboard } from '@/app/lib/helper';
 function LinkGenerationForm({ open, onClose, initialData }) {
   const [qrCode, setQrCode] = useState(null);
   const [paymentShortUrl, setPaymentShortUrl] = useState(null);
+
+  useEffect(() => {
+    if (open) {
+      setPaymentShortUrl(null);
+      setQrCode(null);
+    }
+  }, [open]);
 
   const handleFormSubmit = async (formData) => {
     try {
