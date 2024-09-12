@@ -7,6 +7,7 @@ import DocumentTypeForm from "../components/MyAccount/DocumentType";
 import ServiceTab from "../components/MyAccount/ServiceTab";
 import { apiRequest } from "../lib/apiHelper";
 import { toast } from "react-toastify";
+import { useSearchParams } from "next/navigation";
 
 const Page = () => {
   const [loading, setLoading] = useState(true);
@@ -21,6 +22,13 @@ const Page = () => {
   const [services, setServices] = useState([]);
   const [userData, setUserData] = useState({});
   const [error, setError] = useState(null);
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get('error')) {
+      toast.error('Your Profile is Under Verification.');
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const fetchMerchantProfile = async () => {

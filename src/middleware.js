@@ -14,6 +14,30 @@ export async function middleware(req) {
     return NextResponse.redirect(url);
   }
 
+  const userData = JSON.parse(user);
+  const isKYCVerified = userData?.isKYCVerified;
+
+  // If the user is not kyc verified, redirect to my-account
+  const kycVerificationRequiredRoutes = [
+    '/settings',
+    '/transactions',
+    '/refunds',
+    '/easycollect',
+    '/directdebit/debitrequests',
+    '/directdebit/authorization',
+  ];
+
+  if (kycVerificationRequiredRoutes.includes(url.pathname) && !isKYCVerified) {
+    url.pathname = '/my-account';
+    url.searchParams.set('error', 'kyc_verification');
+    return NextResponse.redirect(url, {
+      status: 302,
+      headers: {
+        'Cache-Control': 'no-cache',
+      },
+    });
+  }
+
   return NextResponse.next();
 }
 
