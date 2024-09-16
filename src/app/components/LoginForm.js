@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { apiRequest } from '../lib/apiHelper';
 import { toast } from "react-toastify";
 import Cookies from 'js-cookie';
+import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
 export default function LoginForm() {
   const [email, setEmail] = useState('');
@@ -39,18 +40,25 @@ export default function LoginForm() {
     if (isValid) {
       setLoading(true);
       try {
+        // Generate device fingerprint
+        const fp = await FingerprintJS.load();
+        const result = await fp.get();
+        const deviceId = result.visitorId;
+
         const loginData = {
           email: email,
           password: password,
           isLoginProcess: 'email'
         };
-        const response = await apiRequest("POST", "/merchant/login", {post: loginData});
+        const response = await apiRequest("POST", "/merchant/login", { post: loginData });
         if (response.StatusCode === '1') {
           const user = response.Result;
           if (user.token) {
             localStorage.setItem('user', JSON.stringify(user));
-            // Set user data in a cookie
-            Cookies.set('user', JSON.stringify(user), { expires: 1 }); // Set cookie to expire in 1 days
+            // Set user data and device ID in cookies
+            Cookies.set('user', JSON.stringify(user), { expires: 1 });
+            Cookies.set('device_id', deviceId, { expires: 1 });
+            // Redirect based on KYC verification
             if (user.isKYCVerified) {
               router.push('/dashboard');
             } else {

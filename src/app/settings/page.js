@@ -1,13 +1,20 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import TokenSetting from '../components/Settings/TokenSetting';
 import WebhookSetting from '../components/Settings/WebhookSetting'
 import ChangePassword from '../components/Settings/ChangePassword'
 import useFetchSettings from '../lib/useFetchSettings';
+import { useRouter } from 'next/navigation';
+import { generateAndCompareDeviceId } from '../lib/helper';
 
 function Page() {
   const [activeTab, setActiveTab] = useState('token');
   const { credentials, webhookList, loading } = useFetchSettings();
+  const router = useRouter();
+
+  useEffect(() => {
+    generateAndCompareDeviceId(router);
+  }, [router]);
 
   const handleTabClick = (tab) => {
     setActiveTab(tab);

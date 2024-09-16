@@ -6,10 +6,11 @@ import { toast } from 'react-toastify';
 import Breadcrumb from '../components/Transactions/Breadcrumb';
 import SearchForm from '../components/EasyCollect/SearchForm';
 import PaymentTable from '../components/Transactions/PaymentTable';
-import { formatDateTime, copyToClipboard } from '../lib/helper';
+import { formatDateTime, copyToClipboard, generateAndCompareDeviceId } from '../lib/helper';
 import Loader from '../components/Loader';
 import QrCodeModal from '../components/EasyCollect/QrCodeModal'
 import LinkGenerationForm from '../components/EasyCollect/LinkGenerationForm';
+import { useRouter } from 'next/navigation';
 
 async function fetchEasyCollectData(searchParams = {}) {
   try {
@@ -41,8 +42,10 @@ function Page() {
   const [qrCodeContent, setQrCodeContent] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editData, setEditData] = useState(null);
+  const router = useRouter();
 
   useEffect(() => {
+    generateAndCompareDeviceId(router);
     const initSelect2 = () => {
       $('.select2').select2();
 
@@ -78,7 +81,7 @@ function Page() {
     return () => {
       $('.select2').off('change');
     };
-  }, [dto]);
+  }, [router, dto]);
 
   useEffect(() => {
     const table = $(tableRef.current);

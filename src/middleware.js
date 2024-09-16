@@ -7,8 +7,9 @@ export async function middleware(req) {
   // Parse cookies from the request headers
   const cookies = parse(req.headers.get('cookie') || '');
   const user = cookies['user'];
+  const storedDeviceId = cookies['device_id'];
 
-  if (!user) {
+  if (!user || !storedDeviceId) {
     url.pathname = '/';
     url.searchParams.set('invaliduser', 'true');
     return NextResponse.redirect(url);
@@ -17,9 +18,10 @@ export async function middleware(req) {
   const userData = JSON.parse(user);
   const isKYCVerified = userData?.isKYCVerified;
 
-  // If the user is not kyc verified, redirect to my-account
+  // Check if user needs KYC verification for specific routes
   const kycVerificationRequiredRoutes = [
     '/settings',
+    '/dashboard',
     '/transactions',
     '/refunds',
     '/easycollect',
@@ -45,6 +47,7 @@ export const config = {
   matcher: [
     '/my-account',
     '/settings',
+    '/dashboard',
     '/transactions',
     '/refunds',
     '/easycollect',

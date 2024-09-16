@@ -8,6 +8,8 @@ import SearchForm from '../../components/Autodebit/Authorization/SearchForm';
 import AuthorizationDetailsModal from '../../components/Autodebit/Authorization/AuthorizationDetailsModal'
 import PaymentTable from '../../components/Transactions/PaymentTable';
 import Loader from '../../components/Loader';
+import { useRouter } from 'next/navigation';
+import { generateAndCompareDeviceId } from '../../lib/helper';
 
 async function fetchMerchantAuthorizationsData(searchParams = {}) {
   try {
@@ -37,8 +39,10 @@ function Page() {
   const [dateRange, setDateRange] = useState([null, null]);
   const tableRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
+    generateAndCompareDeviceId(router);
     const initSelect2 = () => {
       $('.select2').select2();
 
@@ -74,7 +78,7 @@ function Page() {
     return () => {
       $('.select2').off('change');
     };
-  }, [dto]);
+  }, [router, dto]);
 
   useEffect(() => {
     const table = $(tableRef.current);

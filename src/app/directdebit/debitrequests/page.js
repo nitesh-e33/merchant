@@ -7,8 +7,9 @@ import Breadcrumb from '../../components/Transactions/Breadcrumb';
 import SearchForm from '../../components/Autodebit/DebitRequest/SearchForm';
 import DebitRequestModal from '../../components/Autodebit/DebitRequest/DebitRequestModal'
 import PaymentTable from '../../components/Transactions/PaymentTable';
-import { formatDateTime } from '../../lib/helper';
+import { formatDateTime, generateAndCompareDeviceId } from '../../lib/helper';
 import Loader from '../../components/Loader';
+import { useRouter } from 'next/navigation';
 
 async function fetchMerchantDebitRequestData(searchParams = {}) {
   try {
@@ -38,8 +39,10 @@ function Page() {
   const [dateRange, setDateRange] = useState([null, null]);
   const tableRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
+    generateAndCompareDeviceId(router);
     const initSelect2 = () => {
       $('.select2').select2();
 
@@ -75,7 +78,7 @@ function Page() {
     return () => {
       $('.select2').off('change');
     };
-  }, [dto]);
+  }, [router, dto]);
 
   useEffect(() => {
     const table = $(tableRef.current);

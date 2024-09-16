@@ -9,7 +9,8 @@ import FilterForm from '../components/Transactions/FilterForm';
 import TransactionDetailsModal from '../components/Transactions/TransactionDetailsModal';
 import Loader from '../components/Loader';
 import PaymentTable from '../components/Transactions/PaymentTable';
-import { formatDateTime } from '../lib/helper';
+import { formatDateTime, generateAndCompareDeviceId } from '../lib/helper';
+import { useRouter } from 'next/navigation';
 
 async function fetchMerchantTransactions(searchParams = {}) {
   try {
@@ -41,6 +42,11 @@ function Page() {
   const [transactionDetails, setTransactionDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const tableRef = useRef(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    generateAndCompareDeviceId(router);
+  }, [router]);
 
   useEffect(() => {
     const initSelect2 = () => {

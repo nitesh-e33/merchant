@@ -8,7 +8,8 @@ import SearchForm from '../components/Refunds/SearchForm';
 import RefundDetailModal from '../components/Refunds/RefundDetailsModal'
 import PaymentTable from '../components/Transactions/PaymentTable';
 import Loader from '../components/Loader';
-import { formatDate } from '../lib/helper';
+import { formatDate, generateAndCompareDeviceId } from '../lib/helper';
+import { useRouter } from 'next/navigation';
 
 async function fetchMerchantRefunds(searchParams = {}) {
   try {
@@ -36,8 +37,11 @@ function Page() {
   const [refundDetails, setRefundDetails] = useState(null);
   const tableRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
+    generateAndCompareDeviceId(router);
+
     const initSelect2 = () => {
       $('.select2').select2();
 

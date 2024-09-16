@@ -1,5 +1,6 @@
 import { toast } from "react-toastify";
-
+import Cookies from 'js-cookie';
+import FingerprintJS from '@fingerprintjs/fingerprintjs';
 export const formatDateTime = (date) => {
     if (!date) return 'N/A';
     return new Date(date).toLocaleString('en-IN', {
@@ -31,4 +32,17 @@ export const copyToClipboard = (text) => {
       .catch(() => {
         toast.error('Failed to copy.');
     });
+};
+export const generateAndCompareDeviceId = async (router) => {
+  const deviceId = Cookies.get('device_id');
+
+  const fp = await FingerprintJS.load();
+  const result = await fp.get();
+  const currentId = result.visitorId;
+
+  if (deviceId !== currentId) {
+    Cookies.remove('device_id');
+    Cookies.remove('user');
+    router.push('/');
+  }
 };

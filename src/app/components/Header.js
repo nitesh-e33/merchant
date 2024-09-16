@@ -26,6 +26,7 @@ const Header = () => {
         localStorage.removeItem('user');
         // Remove user cookie
         Cookies.remove('user');
+        Cookies.remove('device_id');
         router.push('/');
         toast.success(response.Message);
       } else {
