@@ -1,4 +1,4 @@
-import ResetPasswordForm from "../components/ResetPasswordForm"
+import ForgotPasswordForm from "../components/ForgotPasswordForm"
 
 const Page = () => {
     return (
@@ -6,7 +6,7 @@ const Page = () => {
         className="flex items-center justify-center min-h-screen bg-gray-100"
         style={{ backgroundImage: `url('/themes/backend/img/DroomPay_Background.jpg')`, backgroundSize: 'cover' }}
         >
-        <ResetPasswordForm />
+        <ForgotPasswordForm />
         </div>
     );
 };

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { apiRequest } from '../lib/apiHelper';
 import { toast } from "react-toastify";
 
-export default function ResetPasswordForm() {
+export default function ForgotPasswordForm() {
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
   const [loading, setLoading] = useState(false);
