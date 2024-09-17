@@ -44,64 +44,62 @@ function DashboardPage() {
     $('#start_date').on('apply.daterangepicker', function (ev, picker) {
       const selectedStartDate = picker.startDate.format('YYYY-MM-DD');
       setInputs((prev) => ({ ...prev, start_date: selectedStartDate }));
-      $('#end_date').click();
     });
 
     // Handle end_date selection
     $('#end_date').on('apply.daterangepicker', function (ev, picker) {
       const selectedEndDate = picker.startDate.format('YYYY-MM-DD');
       setInputs((prev) => ({ ...prev, end_date: selectedEndDate }));
-
-      // Reload the data after date range selection
-      fetchData();
     });
-
-    // Initial data fetch
-    fetchData();
   }, []);
 
-  const fetchData = async () => {
-    try {
-      const response = await apiRequest('POST', '/v1/merchant/dashboard', { post: inputs });
-      const dashboardData = response.Result;
-      setDashboardData(dashboardData);
-      setTxnStatusData(dashboardData.txn_status_data || []);
-      setPaymentData(dashboardData.txn_mode_data || []);
-      setServiceTypeData(dashboardData.txt_service_type || []);
+  // Fetch data whenever the date range changes
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await apiRequest('POST', '/v1/merchant/dashboard', { post: inputs });
+        const dashboardData = response.Result;
+        setDashboardData(dashboardData);
+        setTxnStatusData(dashboardData.txn_status_data || []);
+        setPaymentData(dashboardData.txn_mode_data || []);
+        setServiceTypeData(dashboardData.txt_service_type || []);
 
-      const txtHourlyData = dashboardData.txt_hourly_data || [];
-      const successData = {}, failedData = {}, otherData = {};
+        const txtHourlyData = dashboardData.txt_hourly_data || [];
+        const successData = {}, failedData = {}, otherData = {};
 
-      txtHourlyData.forEach((item) => {
-        const { txn_status, hourly, total } = item;
-        switch (txn_status) {
-          case 'success':
-            successData[hourly] = (successData[hourly] || 0) + total;
-            break;
-          case 'failed':
-            failedData[hourly] = (failedData[hourly] || 0) + total;
-            break;
-          default:
-            otherData[hourly] = (otherData[hourly] || 0) + total;
-            break;
-        }
-      });
+        txtHourlyData.forEach((item) => {
+          const { txn_status, hourly, total } = item;
+          switch (txn_status) {
+            case 'success':
+              successData[hourly] = (successData[hourly] || 0) + total;
+              break;
+            case 'failed':
+              failedData[hourly] = (failedData[hourly] || 0) + total;
+              break;
+            default:
+              otherData[hourly] = (otherData[hourly] || 0) + total;
+              break;
+          }
+        });
 
-      const formatHourlyData = (data) =>
-        Object.keys(data).map((hourly) => ({
-          hourly,
-          total: data[hourly],
-        }));
+        const formatHourlyData = (data) =>
+          Object.keys(data).map((hourly) => ({
+            hourly,
+            total: data[hourly],
+          }));
 
-      setHourlyData({
-        success: formatHourlyData(successData),
-        failed: formatHourlyData(failedData),
-        other: formatHourlyData(otherData),
-      });
-    } catch (error) {
-      console.error('Error fetching dashboard data', error);
-    }
-  };
+        setHourlyData({
+          success: formatHourlyData(successData),
+          failed: formatHourlyData(failedData),
+          other: formatHourlyData(otherData),
+        });
+      } catch (error) {
+        console.error('Error fetching dashboard data', error);
+      }
+    };
+
+    fetchData();
+  }, [inputs]);
 
   const calculateRates = () => {
     const totalTransactions = txnStatusData
