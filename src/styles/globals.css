@@ -3,7 +3,6 @@
 @tailwind utilities;
 
 /* Import AdminLTE CSS */
-@import 'adminlte/adminlte.min.css';
 @import 'adminlte/admin.min.css';
 @import 'select2/select2.min.css';
 
@@ -11,6 +10,10 @@
 @import 'rsuite/dist/rsuite.min.css';
 /* @import 'bootstrap/dist/css/bootstrap.min.css'; */
 
+.layout-fixed .brand-link {
+    width: 250px;
+    height: 55px;
+}
 .input-icon-wrapper {
     position: relative;
 }

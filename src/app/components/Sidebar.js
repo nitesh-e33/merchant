@@ -16,7 +16,6 @@ const Sidebar = () => {
     <aside className="main-sidebar sidebar-dark-primary elevation-4">
       <a href="/dashboard" className="brand-link">
         <img src="/DroomPay.png" alt="DroomPay Logo" className="brand-image" />
-        <span>.</span>
       </a>
 
       <div className="sidebar">
