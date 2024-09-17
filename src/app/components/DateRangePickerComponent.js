@@ -1,5 +1,4 @@
 import { DateRangePicker, Stack } from 'rsuite';
-import 'rsuite/dist/rsuite.min.css';
 import startOfWeek from 'date-fns/startOfWeek';
 import endOfWeek from 'date-fns/endOfWeek';
 import addDays from 'date-fns/addDays';

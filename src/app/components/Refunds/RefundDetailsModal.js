@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Drawer, Button } from 'rsuite';
-import 'rsuite/dist/rsuite.min.css';
 import { apiRequest } from '@/app/lib/apiHelper';
 import OrderStatusFlow from '../Transactions/TransactionDetailsView/OrderStatusFlow';
 import { formatDate } from '../../lib/helper';

@@ -64,6 +64,7 @@
 }
 .primary-title, .text-center, .inner p:not(.txn_amount) {
     transition: color 0.3s ease, opacity 0.3s ease;
+    font-size: 18px;
 }
 .txn_amount {
     position: absolute;
