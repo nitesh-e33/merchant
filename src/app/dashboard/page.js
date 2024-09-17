@@ -6,6 +6,8 @@ import DashboardHeader from '../components/Dashboard/DashboardHeader';
 import TransactionBoxes from '../components/Dashboard/TransactionBoxes';
 import Charts from '../components/Dashboard/Charts';
 import moment from 'moment';
+import { useRouter } from 'next/navigation';
+import { generateAndCompareDeviceId } from '../lib/helper';
 
 function DashboardPage() {
   const [inputs, setInputs] = useState({
@@ -20,6 +22,11 @@ function DashboardPage() {
     failed: [],
     other: []
   });
+  const router = useRouter();
+
+  useEffect(() => {
+    generateAndCompareDeviceId(router);
+  }, [router]);
 
   useEffect(() => {
     const fetchData = async () => {
