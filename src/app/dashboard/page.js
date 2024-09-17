@@ -6,8 +6,9 @@ import DashboardHeader from '../components/Dashboard/DashboardHeader';
 import TransactionBoxes from '../components/Dashboard/TransactionBoxes';
 import Charts from '../components/Dashboard/Charts';
 import moment from 'moment';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { generateAndCompareDeviceId } from '../lib/helper';
+import { toast } from 'react-toastify';
 
 function DashboardPage() {
   const [inputs, setInputs] = useState({
@@ -23,10 +24,14 @@ function DashboardPage() {
     other: []
   });
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
+    if (searchParams.get('exception')) {
+      toast.error('Unauthorized Access');
+    }
     generateAndCompareDeviceId(router);
-  }, [router]);
+  }, [searchParams, router]);
 
   useEffect(() => {
     const fetchData = async () => {
