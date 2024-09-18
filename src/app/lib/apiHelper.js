@@ -1,4 +1,4 @@
-import axios from 'axios';
+// import axios from 'axios';
 
 export async function apiRequest(type, api, data = {}) {
 
@@ -31,51 +31,68 @@ export async function apiRequest(type, api, data = {}) {
     switch (type) {
       case 'get':
         const getParams = data.get || {};
-        const getConfig = {
-          params: getParams,
-          headers: { ...headers, ...(data.headers || {}) },
-        };
-        response = await axios.get(api, getConfig);
-        break;
+        const queryParams = new URLSearchParams(getParams).toString();
+          // const getConfig = {
+          //   params: getParams,
+          //   headers: { ...headers, ...(data.headers || {}) },
+          // };
+          // response = await axios.get(api, getConfig);
+          response = await fetch(`/api/proxy?apiUrl=${encodeURIComponent(api)}&queryParams=${encodeURIComponent(queryParams)}`, {
+            method: 'GET',
+            headers: {
+              ...headers,
+            },
+          });
+          break;
 
       case 'post':
       case 'delete':
         let postData = data.post || {};
 
-        if (postData instanceof FormData) {
-          headers['Content-Type'] = 'multipart/form-data';
-        } else {
-          const multipart = [];
+        // if (postData instanceof FormData) {
+        //   headers['Content-Type'] = 'multipart/form-data';
+        // } else {
+        //   const multipart = [];
 
-          Object.entries(postData).forEach(([key, value]) => {
-            if (Array.isArray(value)) {
-              value.forEach((item) => {
-                multipart.push({ name: `${key}[]`, contents: item });
-              });
-            } else {
-              multipart.push({ name: key, contents: value });
-            }
+        //   Object.entries(postData).forEach(([key, value]) => {
+        //     if (Array.isArray(value)) {
+        //       value.forEach((item) => {
+        //         multipart.push({ name: `${key}[]`, contents: item });
+        //       });
+        //     } else {
+        //       multipart.push({ name: key, contents: value });
+        //     }
+        //   });
+
+        //   if (data.files) {
+        //     Object.entries(data.files).forEach(([key, file]) => {
+        //       multipart.push({ name: key, contents: file });
+        //     });
+        //   }
+
+        //   postData = new FormData();
+        //   multipart.forEach(({ name, contents }) => {
+        //     postData.append(name, contents);
+        //   });
+
+        //   headers['Content-Type'] = 'multipart/form-data';
+        // }
+
+        // const postConfig = {
+        //   headers: { ...headers, ...(data.headers || {}) },
+        // };
+        // response = await axios[type](api, postData, postConfig);
+
+        if (type === 'post') {
+          response = await fetch('/api/proxy', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...headers,
+            },
+            body: JSON.stringify({ apiUrl: api, requestData: postData, headers: headers }),
           });
-
-          if (data.files) {
-            Object.entries(data.files).forEach(([key, file]) => {
-              multipart.push({ name: key, contents: file });
-            });
-          }
-
-          postData = new FormData();
-          multipart.forEach(({ name, contents }) => {
-            postData.append(name, contents);
-          });
-
-          headers['Content-Type'] = 'multipart/form-data';
         }
-
-        const postConfig = {
-          headers: { ...headers, ...(data.headers || {}) },
-        };
-
-        response = await axios[type](api, postData, postConfig);
         break;
 
       case 'put':
@@ -86,7 +103,8 @@ export async function apiRequest(type, api, data = {}) {
         throw new Error(`Unsupported request type: ${type}`);
     }
 
-    const responseContainer = response.data;
+    // const responseContainer = response.data;
+    const responseContainer = await response.json();
 
     // Clean up temporary files if necessary
     if (response.status === 200 && data.files) {
