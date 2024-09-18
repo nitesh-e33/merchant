@@ -66,7 +66,7 @@ const Header = () => {
             <Link className="nav-link" data-bs-toggle="dropdown" href="#" role="button">
               <FontAwesomeIcon icon={faUser} /> {user.name}
             </Link>
-            <div className="dropdown-menu dropdown-menu-end">
+            <div className="dropdown-menu dropdown-menu-lg dropdown-menu-right">
               <span className="dropdown-item dropdown-header">User Profile</span>
               <div className="dropdown-divider"></div>
               <Link href="/my-account" passHref className="dropdown-item">

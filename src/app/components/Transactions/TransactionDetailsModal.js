@@ -29,7 +29,7 @@ function TransactionDetailsModal({ isOpen, onClose, order }) {
       setLoadingStatus(true);
       try {
         const response = await apiRequest('GET', '/v1/merchant/order-status-history', {
-          get: { order_id: order?.order_id }
+          get: { order_id: order?.dp_trans_id }
         });
         if (response.StatusCode === '1') {
           setOrderStatusHistory(response.Result);
