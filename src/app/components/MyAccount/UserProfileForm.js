@@ -1,43 +1,9 @@
-import React, { useState, useEffect, ChangeEvent } from 'react';
+import React, { useState, useEffect } from 'react';
 import { apiRequest } from '@/app/lib/apiHelper';
 import { toast } from 'react-toastify';
 
-interface FormData {
-  userid: number;
-  fname: string;
-  lname: string;
-  email: string;
-  alt_email_address: string;
-  phone: string;
-  alt_user_phone: string;
-  user_pan_no: string;
-  user_aadhaar_no: string;
-  user_address1: string;
-  user_address2: string;
-  pincode: number;
-  city: string;
-  state: string;
-}
-
-interface Errors {
-  fnameError: string;
-  emailError: string;
-  phoneError: string;
-  altEmailError: string;
-  altPhoneError: string;
-  panError: string;
-  aadharError: string;
-  address1Error: string;
-  pincodeError: string;
-  cityError: string;
-  stateError: string;
-}
-interface UserProfileFormProps {
-  userData: FormData;
-}
-
-const UserProfileForm: React.FC<UserProfileFormProps> = ({ userData }) => {
-  const [formData, setFormData] = useState<FormData>({
+const UserProfileForm = ({ userData }) => {
+  const [formData, setFormData] = useState({
     userid: 0,
     fname: '',
     lname: '',
@@ -54,7 +20,7 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ userData }) => {
     state: '',
   });
 
-  const [errors, setErrors] = useState<Errors>({
+  const [errors, setErrors] = useState({
     fnameError: '',
     emailError: '',
     phoneError: '',
@@ -89,7 +55,7 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ userData }) => {
     }
   }, [userData]);
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
@@ -101,7 +67,7 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ userData }) => {
     }
   };
 
-  const handlePincodeInput = async (pincode: string) => {
+  const handlePincodeInput = async (pincode) => {
     if (/^\d{6}$/.test(pincode)) {
       setErrors((prevErrors) => ({
         ...prevErrors,
@@ -109,7 +75,7 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ userData }) => {
       }));
 
       try {
-        const data = await apiRequest('GET', '/city-state-pincode', {get: {pincode} });
+        const data = await apiRequest('GET', '/city-state-pincode', { get: { pincode } });
         if (data.StatusCode === '1') {
           setFormData((prevData) => ({
             ...prevData,
@@ -251,10 +217,10 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ userData }) => {
   const submitUserForm = async () => {
     if (validateForm()) {
       try {
-        const response = await apiRequest('POST', '/v1/merchant/update/user', {post: formData});
+        const response = await apiRequest('POST', '/v1/merchant/update/user', { post: formData });
         if (response.StatusCode === '1') {
           toast.success('User profile updated successfully');
-          setTimeout(function () {
+          setTimeout(() => {
             window.location.reload();
           }, 2000);
         } else {
@@ -311,8 +277,8 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ userData }) => {
             <input
               type="email"
               name="email"
-              placeholder="Email"
               id="email"
+              placeholder="Email"
               className="form-control"
               value={formData.email}
               onChange={handleChange}
@@ -326,8 +292,8 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ userData }) => {
             <input
               type="email"
               name="alt_email_address"
-              placeholder="Alternative Email"
               id="alt_email_address"
+              placeholder="Alternative Email"
               className="form-control"
               value={formData.alt_email_address}
               onChange={handleChange}
@@ -337,12 +303,12 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ userData }) => {
         </div>
         <div className="col-sm-6">
           <div className="form-group">
-            <label>Mobile *</label>
+            <label>Phone *</label>
             <input
               type="text"
               name="phone"
               id="phone"
-              placeholder="Mobile No."
+              placeholder="Phone"
               className="form-control"
               value={formData.phone}
               onChange={handleChange}
@@ -352,12 +318,12 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ userData }) => {
         </div>
         <div className="col-sm-6">
           <div className="form-group">
-            <label>Alternative Mobile</label>
+            <label>Alternative Phone</label>
             <input
               type="text"
               name="alt_user_phone"
               id="alt_user_phone"
-              placeholder="Alternative Mobile No."
+              placeholder="Alternative Phone"
               className="form-control"
               value={formData.alt_user_phone}
               onChange={handleChange}
@@ -367,12 +333,12 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ userData }) => {
         </div>
         <div className="col-sm-6">
           <div className="form-group">
-            <label>Pan Number </label>
+            <label>PAN Number</label>
             <input
               type="text"
               name="user_pan_no"
               id="user_pan_no"
-              placeholder="Pan Number"
+              placeholder="PAN Number"
               className="form-control"
               value={formData.user_pan_no}
               onChange={handleChange}
@@ -382,12 +348,12 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ userData }) => {
         </div>
         <div className="col-sm-6">
           <div className="form-group">
-            <label>Aadhar Number</label>
+            <label>Aadhaar Number</label>
             <input
               type="text"
               name="user_aadhaar_no"
               id="user_aadhaar_no"
-              placeholder="Aadhar Number"
+              placeholder="Aadhaar Number"
               className="form-control"
               value={formData.user_aadhaar_no}
               onChange={handleChange}
@@ -449,7 +415,8 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ userData }) => {
               placeholder="City"
               className="form-control"
               value={formData.city}
-              readOnly
+              onChange={handleChange}
+              disabled
             />
             <p id="cityError" className="text-danger">{errors.cityError}</p>
           </div>
@@ -464,7 +431,8 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ userData }) => {
               placeholder="State"
               className="form-control"
               value={formData.state}
-              readOnly
+              onChange={handleChange}
+              disabled
             />
             <p id="stateError" className="text-danger">{errors.stateError}</p>
           </div>

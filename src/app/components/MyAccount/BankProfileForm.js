@@ -3,33 +3,13 @@ import { API_ASSET_URL } from '@/app/lib/constant';
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 
-interface BankProfileFormProps {
-  userId: string;
-  companyId: string;
-  bankId: string;
-  bankData: {
-    ac_holder_name?: string;
-    account_number?: string;
-    bank_ifsc_code?: string;
-    bank_name?: string;
-    bank_branch_name?: string;
-    bank_proof?: string;
-    is_verified?: string;
-  };
-}
-
-const BankProfileForm: React.FC<BankProfileFormProps> = ({
-  userId,
-  companyId,
-  bankId,
-  bankData,
-}) => {
+const BankProfileForm = ({ userId, companyId, bankId, bankData }) => {
   const [accountHolderName, setAccountHolderName] = useState(bankData.ac_holder_name || '');
   const [accountNumber, setAccountNumber] = useState(bankData.account_number || '');
   const [ifscCode, setIfscCode] = useState(bankData.bank_ifsc_code || '');
   const [bankName, setBankName] = useState(bankData.bank_name || '');
   const [branchName, setBranchName] = useState(bankData.bank_branch_name || '');
-  const [bankProof, setBankProof] = useState<File | null>(null);
+  const [bankProof, setBankProof] = useState(null);
   const [errors, setErrors] = useState({
     accountHolderName: '',
     accountNumber: '',
@@ -40,7 +20,7 @@ const BankProfileForm: React.FC<BankProfileFormProps> = ({
   });
 
   const validateForm = () => {
-    const newErrors: any = {};
+    const newErrors = {};
     let isValid = true;
 
     if (!accountHolderName) {
@@ -126,7 +106,7 @@ const BankProfileForm: React.FC<BankProfileFormProps> = ({
     }
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (event) => {
     if (event.target.files?.[0]) {
       setBankProof(event.target.files[0]);
     }
