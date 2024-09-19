@@ -1,4 +1,24 @@
 import { NextResponse } from 'next/server';
+const sendExternalRequest = async (apiUrl, method, headers, body = null) => {
+  try {
+    const externalResponse = await fetch(apiUrl, {
+      method,
+      headers,
+      body,
+    });
+
+    if (!externalResponse.ok) {
+      throw new Error(`External API error: ${externalResponse.status}`);
+    }
+
+    const result = await externalResponse.json();
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error('Error calling external API:', error);
+    return NextResponse.json({ error: 'Failed to fetch data' }, { status: 500 });
+  }
+};
+
 export async function handler(request) {
   const method = request.method;
   let apiUrl, requestData, headers = {};
@@ -11,49 +31,28 @@ export async function handler(request) {
         const formData = await request.formData();
         apiUrl = formData.get('apiUrl');
 
-        // Create a new FormData object for the external request
         const externalFormData = new FormData();
         formData.forEach((value, key) => {
-          if (value instanceof File) {
-            externalFormData.append(key, value);
-          } else {
-            externalFormData.append(key, value);
-          }
+          externalFormData.append(key, value);
         });
 
         headers = {
           Authorization: request.headers.get('authorization'),
         };
 
-        // Send the request with the FormData directly
-        const externalResponse = await fetch(apiUrl, {
-          method,
-          headers,
-          body: externalFormData,
-        });
-
-        const result = await externalResponse.json();
-        return NextResponse.json(result);
+        return await sendExternalRequest(apiUrl, method, headers, externalFormData);
 
       } else {
-        // Handle JSON
+        // Handle JSON request
         const body = await request.json();
         apiUrl = body.apiUrl;
-        requestData = body.requestData || {};
+        requestData = JSON.stringify(body.requestData || {});
         headers = {
           'Content-Type': 'application/json',
           ...body.headers,
         };
 
-        // Send the request with JSON body
-        const externalResponse = await fetch(apiUrl, {
-          method,
-          headers,
-          body: JSON.stringify(requestData),
-        });
-
-        const result = await externalResponse.json();
-        return NextResponse.json(result);
+        return await sendExternalRequest(apiUrl, method, headers, requestData);
       }
     } else if (method === 'GET') {
       const { searchParams } = new URL(request.url);
@@ -65,18 +64,11 @@ export async function handler(request) {
         Authorization: request.headers.get('authorization'),
       };
 
-      // Send the request with GET method
-      const externalResponse = await fetch(apiUrl, {
-        method,
-        headers,
-      });
-
-      const result = await externalResponse.json();
-      return NextResponse.json(result);
+      return await sendExternalRequest(apiUrl, method, headers);
     }
   } catch (error) {
-    console.error('Error calling external API:', error);
-    return NextResponse.json({ error: 'Failed to fetch data' }, { status: 500 });
+    console.error('Error handling request:', error);
+    return NextResponse.json({ error: 'Failed to process request' }, { status: 500 });
   }
 }
 
