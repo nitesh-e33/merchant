@@ -519,12 +519,12 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
           </div>
         </div>
         <div className="row">
-          <div className="col-sm-2 col-sm-offset-8">
+          <div className="col-sm-8 col-sm-offset-8">
             <a className="btn btn-info btn-block btnCancel" href="/my-account">
               Cancel
             </a>
           </div>
-          <div className="col-sm-2">
+          <div className="col-sm-4">
             <input
               className="btn btn-success btn-block updateUserProfile"
               type="button"
