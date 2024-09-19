@@ -1,5 +1,8 @@
+import { useRef } from 'react';
 import DateRangePickerComponent from '../../DateRangePickerComponent';
 function SearchForm({ searchName, searchValue, setSearchName, setSearchValue, handleSearch, resetSearch, onDateRangeChange }) {
+  const dateRangePickerRef = useRef();
+
   return (
     <form id="searchForm" onSubmit={(e) => e.preventDefault()} className="col-md-12">
       <div className="row align-items-center">
@@ -38,11 +41,23 @@ function SearchForm({ searchName, searchValue, setSearchName, setSearchValue, ha
           </div>
         </div>
         <div className="col-1 mt-4">
-          <button className="btn btn-danger btn-sm" onClick={resetSearch}>Reset</button>
+          <button
+            className="btn btn-danger btn-sm"
+            onClick={() => {
+              resetSearch();
+              // Trigger reset in DateRangePickerComponent
+              if (dateRangePickerRef.current) {
+                dateRangePickerRef.current.reset();
+              }
+            }}
+          >
+            Reset
+          </button>
         </div>
 
         <div className="col-1 mt-3">
           <DateRangePickerComponent
+            ref={dateRangePickerRef}
             onShortcutClick={onDateRangeChange}
             onChange={onDateRangeChange}
           />

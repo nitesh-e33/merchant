@@ -1,3 +1,4 @@
+import { forwardRef, useImperativeHandle, useState, useEffect } from 'react';
 import { DateRangePicker, Stack } from 'rsuite';
 import startOfWeek from 'date-fns/startOfWeek';
 import endOfWeek from 'date-fns/endOfWeek';
@@ -6,7 +7,6 @@ import startOfMonth from 'date-fns/startOfMonth';
 import endOfMonth from 'date-fns/endOfMonth';
 import addMonths from 'date-fns/addMonths';
 import subWeeks from 'date-fns/subWeeks';
-import { useState, useEffect } from 'react';
 
 const predefinedRanges = [
   {
@@ -59,7 +59,7 @@ const predefinedRanges = [
   }
 ];
 
-function DateRangePickerComponent({ onShortcutClick, onChange }) {
+const DateRangePickerComponent = forwardRef(({ onShortcutClick, onChange }, ref) => {
   const [customRange, setCustomRange] = useState([startOfMonth(new Date()), new Date()]); // Default to 'This month'
   const [selectedLabel, setSelectedLabel] = useState('This month');
 
@@ -83,6 +83,17 @@ function DateRangePickerComponent({ onShortcutClick, onChange }) {
     setSelectedLabel('Custom Range');
   };
 
+  const handleReset = () => {
+    const thisMonthRange = [startOfMonth(new Date()), new Date()];
+    setCustomRange(thisMonthRange);
+    setSelectedLabel('This month');
+    onShortcutClick('this_month', thisMonthRange);
+  };
+
+  useImperativeHandle(ref, () => ({
+    reset: handleReset
+  }));
+
   const renderSelectedValue = () => {
     return selectedLabel;
   };
@@ -101,6 +112,6 @@ function DateRangePickerComponent({ onShortcutClick, onChange }) {
       />
     </Stack>
   );
-}
+});
 
 export default DateRangePickerComponent;

@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import { Drawer, Button } from 'rsuite';
+import { useRef, useState } from 'react';
 import DateRangePickerComponent from '../DateRangePickerComponent';
 import LinkGenerationForm from './LinkGenerationForm';
 
 function SearchForm({ searchName, searchValue, setSearchName, setSearchValue, handleSearch, resetSearch, onDateRangeChange, handleModalClose }) {
   const [open, setOpen] = useState(false);
+  const dateRangePickerRef = useRef();
 
   const handleOpenModal = () => {
     setOpen(true);
@@ -54,11 +54,23 @@ function SearchForm({ searchName, searchValue, setSearchName, setSearchValue, ha
             </div>
           </div>
           <div className="col-1 mt-4">
-            <button className="btn btn-danger btn-sm" onClick={resetSearch}>Reset</button>
+            <button
+              className="btn btn-danger btn-sm"
+              onClick={() => {
+                resetSearch();
+                // Trigger reset in DateRangePickerComponent
+                if (dateRangePickerRef.current) {
+                  dateRangePickerRef.current.reset();
+                }
+              }}
+            >
+              Reset
+            </button>
           </div>
 
           <div className="col-1 mt-3">
             <DateRangePickerComponent
+              ref={dateRangePickerRef}
               onShortcutClick={onDateRangeChange}
               onChange={onDateRangeChange}
             />
