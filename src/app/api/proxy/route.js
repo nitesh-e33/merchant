@@ -10,15 +10,31 @@ export async function handler(request) {
       if (contentType.includes('multipart/form-data')) {
         const formData = await request.formData();
         apiUrl = formData.get('apiUrl');
-        requestData = {};
+
+        // Create a new FormData object for the external request
+        const externalFormData = new FormData();
         formData.forEach((value, key) => {
-          requestData[key] = value;
+          if (value instanceof File) {
+            externalFormData.append(key, value);
+          } else {
+            externalFormData.append(key, value);
+          }
         });
 
         headers = {
-          'Content-Type': 'application/json',
           Authorization: request.headers.get('authorization'),
         };
+
+        // Send the request with the FormData directly
+        const externalResponse = await fetch(apiUrl, {
+          method,
+          headers,
+          body: externalFormData,
+        });
+
+        const result = await externalResponse.json();
+        return NextResponse.json(result);
+
       } else {
         // Handle JSON
         const body = await request.json();
@@ -28,6 +44,16 @@ export async function handler(request) {
           'Content-Type': 'application/json',
           ...body.headers,
         };
+
+        // Send the request with JSON body
+        const externalResponse = await fetch(apiUrl, {
+          method,
+          headers,
+          body: JSON.stringify(requestData),
+        });
+
+        const result = await externalResponse.json();
+        return NextResponse.json(result);
       }
     } else if (method === 'GET') {
       const { searchParams } = new URL(request.url);
@@ -38,19 +64,16 @@ export async function handler(request) {
         'Content-Type': 'application/json',
         Authorization: request.headers.get('authorization'),
       };
+
+      // Send the request with GET method
+      const externalResponse = await fetch(apiUrl, {
+        method,
+        headers,
+      });
+
+      const result = await externalResponse.json();
+      return NextResponse.json(result);
     }
-
-    // Send the request to the external API
-    const externalResponse = await fetch(apiUrl, {
-      method,
-      headers,
-      ...(method === 'POST' && {
-        body: headers['Content-Type'] === 'application/json' ? JSON.stringify(requestData) : requestData,
-      }),
-    });
-
-    const result = await externalResponse.json();
-    return NextResponse.json(result);
   } catch (error) {
     console.error('Error calling external API:', error);
     return NextResponse.json({ error: 'Failed to fetch data' }, { status: 500 });
