@@ -22,18 +22,34 @@ export async function apiRequest(type, api, data = {}) {
       });
     } else {
       const postData = data.post || {};
-      response = await fetch('/api/proxy', {
-        method: type.toUpperCase(),
-        headers: {
-          'Content-Type': 'application/json',
-          ...headers,
-        },
-        body: JSON.stringify({
-          apiUrl: apiEndpoint,
-          requestData: postData,
-          headers,
-        }),
-      });
+      const isFormData = postData instanceof FormData;
+      const headersWithContentType = {
+        ...headers,
+        ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+      };
+      if (isFormData) {
+        const formData = new FormData();
+        formData.append('apiUrl', apiEndpoint);
+        postData.forEach((value, key) => {
+          formData.append(key, value);
+        });
+
+        response = await fetch('/api/proxy', {
+          method: type.toUpperCase(),
+          headers: headersWithContentType,
+          body: formData,
+        });
+      } else {
+        response = await fetch('/api/proxy', {
+          method: type.toUpperCase(),
+          headers: headersWithContentType,
+          body: JSON.stringify({
+            apiUrl: apiEndpoint,
+            requestData: postData,
+            headers,
+          }),
+        });
+      }
     }
 
     // const responseContainer = response.data;

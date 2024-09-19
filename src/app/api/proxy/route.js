@@ -5,13 +5,30 @@ export async function handler(request) {
 
   try {
     if (method === 'POST') {
-      const body = await request.json();
-      apiUrl = body.apiUrl;
-      requestData = body.requestData || {};
-      headers = {
-        'Content-Type': 'application/json',
-        ...body.headers,
-      };
+      const contentType = request.headers.get('content-type') || '';
+
+      if (contentType.includes('multipart/form-data')) {
+        const formData = await request.formData();
+        apiUrl = formData.get('apiUrl');
+        requestData = {};
+        formData.forEach((value, key) => {
+          requestData[key] = value;
+        });
+
+        headers = {
+          'Content-Type': 'application/json',
+          Authorization: request.headers.get('authorization'),
+        };
+      } else {
+        // Handle JSON
+        const body = await request.json();
+        apiUrl = body.apiUrl;
+        requestData = body.requestData || {};
+        headers = {
+          'Content-Type': 'application/json',
+          ...body.headers,
+        };
+      }
     } else if (method === 'GET') {
       const { searchParams } = new URL(request.url);
       apiUrl = searchParams.get('apiUrl');
@@ -23,10 +40,13 @@ export async function handler(request) {
       };
     }
 
+    // Send the request to the external API
     const externalResponse = await fetch(apiUrl, {
       method,
       headers,
-      ...(method === 'POST' && { body: JSON.stringify(requestData) }),
+      ...(method === 'POST' && {
+        body: headers['Content-Type'] === 'application/json' ? JSON.stringify(requestData) : requestData,
+      }),
     });
 
     const result = await externalResponse.json();
