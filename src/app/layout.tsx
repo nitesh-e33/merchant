@@ -15,7 +15,10 @@ import "react-toastify/dist/ReactToastify.css";
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
-  const isLoginPage = pathname === '/' || pathname === '/forgotpassword';
+  const isLoginPage =
+      pathname === '/' ||
+      pathname === '/forgotpassword' ||
+      pathname.startsWith('/reset-password/')
 
   return (
     <html lang="en">
