@@ -129,7 +129,7 @@ const BankProfileForm = ({ userId, companyId, bankId, bankData }) => {
               className="form-control"
               value={accountHolderName}
               onChange={(e) => setAccountHolderName(e.target.value)}
-              // readOnly={bankData.is_verified === 'yes'}
+              readOnly={bankData.is_verified === 'yes'}
             />
             <p id="acc_holder_nameError" className="text-danger">{errors.accountHolderName}</p>
           </div>

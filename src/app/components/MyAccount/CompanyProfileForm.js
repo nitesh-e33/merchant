@@ -322,6 +322,7 @@ const CompanyProfileForm = ({
               placeholder="Company Email"
               className="form-control"
               value={formData.company_email || ''}
+              readOnly={companyData.is_email_verified}
               onChange={handleInputChange}
             />
             <p id="c_emailError" className="text-danger">{errors.c_emailError}</p>
@@ -337,6 +338,7 @@ const CompanyProfileForm = ({
               placeholder="Company Phone"
               className="form-control"
               value={formData.company_phone || ''}
+              readOnly={companyData.is_phone_verified}
               onChange={handleInputChange}
             />
             <p id="c_phoneError" className="text-danger">{errors.c_phoneError}</p>
@@ -352,6 +354,7 @@ const CompanyProfileForm = ({
               placeholder="Company Address 1"
               className="form-control"
               value={formData.company_address1 || ''}
+              readOnly={companyData.is_company__address_verified}
               onChange={handleInputChange}
             />
             <p id="c_address1Error" className="text-danger">{errors.c_address1Error}</p>

@@ -281,6 +281,7 @@ const UserProfileForm = ({ userData }) => {
               placeholder="Email"
               className="form-control"
               value={formData.email}
+              readOnly={userData.is_email_verified}
               onChange={handleChange}
             />
             <p id="emailError" className="text-danger">{errors.emailError}</p>
@@ -311,6 +312,7 @@ const UserProfileForm = ({ userData }) => {
               placeholder="Phone"
               className="form-control"
               value={formData.phone}
+              readOnly={userData.is_phone_verified}
               onChange={handleChange}
             />
             <p id="phoneError" className="text-danger">{errors.phoneError}</p>
@@ -341,6 +343,7 @@ const UserProfileForm = ({ userData }) => {
               placeholder="PAN Number"
               className="form-control"
               value={formData.user_pan_no}
+              readOnly={userData.is_pan_verified}
               onChange={handleChange}
             />
             <p id="panError" className="text-danger">{errors.panError}</p>
@@ -356,6 +359,7 @@ const UserProfileForm = ({ userData }) => {
               placeholder="Aadhaar Number"
               className="form-control"
               value={formData.user_aadhaar_no}
+              readOnly={userData.is_aadhaar_verified}
               onChange={handleChange}
             />
             <p id="aadharError" className="text-danger">{errors.aadharError}</p>

@@ -78,14 +78,15 @@ const Page = () => {
           setKycRequiredDocsList(kycRequiredDocsList.Result || []);
           setServices(services);
 
+          const isEmptyObject = (obj) => obj && Object.keys(obj).length === 0;
           // Set initial active tab based on the data availability
           if (!user) {
             setActiveTab('user');
-          } else if (user && !companyData) {
+          } else if (user && isEmptyObject(companyData)) {
             setActiveTab('company');
-          } else if (user && companyData && !bankData) {
+          } else if (user && !isEmptyObject(companyData) && isEmptyObject(bankData)) {
             setActiveTab('bank');
-          } else if (user && companyData && bankData && !services.length) {
+          } else if (user && !isEmptyObject(companyData) && !isEmptyObject(bankData) && services.length === 0) {
             setActiveTab('document');
           } else {
             setActiveTab('service');
