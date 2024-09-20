@@ -1,47 +1,9 @@
 import { apiRequest } from '@/app/lib/apiHelper';
-import { API_ASSET_URL } from '@/app/lib/constant';
-import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
+import React, { useState, useEffect } from 'react';
+import { API_ASSET_URL } from '@/app/lib/constant';
 
-interface CompanyProfileFormProps {
-  userId: string;
-  companyId: string;
-  bankId: string;
-  companyData: {
-    company_name?: string;
-    company_alias_name?: string;
-    host_name?: string;
-    company_email?: string;
-    company_phone?: string;
-    company_address1?: string;
-    company_address2?: string;
-    company_logo?: string | File;
-    entity_type?: string;
-    pincode?: string;
-    city?: string;
-    state?: string;
-  };
-  entityList: {
-    id: string;
-    entity_name: string;
-  }[];
-}
-
-interface Errors {
-  c_nameError: string;
-  hostNameError: string;
-  aliasNameError: string;
-  c_emailError: string;
-  c_phoneError: string;
-  c_address1Error: string;
-  c_logoError: string;
-  entityTypeError: string;
-  c_pincodeError: string;
-  c_cityError: string;
-  c_stateError: string;
-}
-
-const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
+const CompanyProfileForm = ({
   userId,
   companyId,
   bankId,
@@ -50,7 +12,7 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
 }) => {
   const [formData, setFormData] = useState(companyData);
 
-  const [errors, setErrors] = useState<Errors>({
+  const [errors, setErrors] = useState({
     c_nameError: '',
     hostNameError: '',
     aliasNameError: '',
@@ -68,7 +30,7 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
     setFormData(companyData);
   }, [companyData]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (e) => {
     const { name, value, files } = e.target;
 
     if (name === 'company_logo') {
@@ -79,50 +41,49 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
 
         // Validate file type and size
         if (!['jpg', 'png', 'jpeg', 'webp'].includes(ext)) {
-          setErrors(prevErrors => ({
+          setErrors((prevErrors) => ({
             ...prevErrors,
             c_logoError: 'File type must be png, jpg, jpeg, or webp',
           }));
         } else if (fileSize > 300 * 1024) {
-          setErrors(prevErrors => ({
+          setErrors((prevErrors) => ({
             ...prevErrors,
             c_logoError: 'File size must be less than 300KB',
           }));
         } else {
           // File is valid
-          setErrors(prevErrors => ({
+          setErrors((prevErrors) => ({
             ...prevErrors,
             c_logoError: '',
           }));
-          setFormData(prevData => ({
+          setFormData((prevData) => ({
             ...prevData,
             company_logo: file,
           }));
         }
       } else {
-        // Handle no file selected
-        setErrors(prevErrors => ({
+        setErrors((prevErrors) => ({
           ...prevErrors,
           c_logoError: '',
         }));
-        setFormData(prevData => ({
+        setFormData((prevData) => ({
           ...prevData,
           company_logo: '',
         }));
       }
     } else {
-      setFormData(prevData => ({
+      setFormData((prevData) => ({
         ...prevData,
         [name]: value,
       }));
     }
-  
+
     if (name === 'pincode') {
       handlePincodeInput(value);
     }
   };
 
-  const handlePincodeInput = async (pincode: string) => {
+  const handlePincodeInput = async (pincode) => {
     if (/^\d{6}$/.test(pincode)) {
       setErrors((prevErrors) => ({
         ...prevErrors,
@@ -130,7 +91,7 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
       }));
 
       try {
-        const data = await apiRequest('GET', '/city-state-pincode', {get: {pincode} });
+        const data = await apiRequest('GET', '/city-state-pincode', { get: { pincode } });
         if (data.StatusCode === '1') {
           setFormData((prevData) => ({
             ...prevData,
@@ -251,66 +212,52 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
     return valid;
   };
 
-  const generateFilename = (file?: File) => {
-    if (file) {
-      const timestamp = Date.now();
-      const randomNum = Math.floor(Math.random() * 1000) + 1;
-      const originalName = file.name.replace(/\s+/g, '');
-      const newFilename = `${timestamp}-${randomNum}-${originalName}`;
-      const path = `/var/www/html/droompay/merchant/droom-pay/merchant/public/uploads/temp//${newFilename}`;
-      return path;
-    }
-    return null;
-  };
-
   const submitCompanyForm = async () => {
     if (!validateForm()) {
-        toast.error('Please fix the errors in the form');
-        return;
+      toast.error('Please fix the errors in the form');
+      return;
     }
+
     try {
-        const formDataToSend = new FormData();
-        // Append form fields
-        Object.entries({
-            company_name: formData.company_name,
-            company_alias_name: formData.company_alias_name,
-            host_name: formData.host_name,
-            company_email: formData.company_email,
-            company_phone: formData.company_phone,
-            company_address1: formData.company_address1,
-            company_address2: formData.company_address2,
-            entity_type: formData.entity_type,
-            pincode: formData.pincode,
-            city: formData.city,
-            state: formData.state,
-            merchant_user_id: userId,
-            company_id: companyId,
-            user_account_id: bankId
-        }).forEach(([key, value]) => {
-            if (value) formDataToSend.append(key, value);
-        });
-        // Append company_logo only if it's a file
-        if (formData.company_logo instanceof File) {
-            formDataToSend.append('company_logo', formData.company_logo);
-        }
+      const formDataToSend = new FormData();
+      Object.entries({
+        company_name: formData.company_name,
+        company_alias_name: formData.company_alias_name,
+        host_name: formData.host_name,
+        company_email: formData.company_email,
+        company_phone: formData.company_phone,
+        company_address1: formData.company_address1,
+        company_address2: formData.company_address2,
+        entity_type: formData.entity_type,
+        pincode: formData.pincode,
+        city: formData.city,
+        state: formData.state,
+        merchant_user_id: userId,
+        company_id: companyId,
+        user_account_id: bankId
+      }).forEach(([key, value]) => {
+        if (value) formDataToSend.append(key, value);
+      });
 
-        const endpoint = companyId ? '/v1/merchant/update-company-profile' : '/v1/merchant/create-company-profile';
-        const files = formData.company_logo instanceof File ? { company_logo: generateFilename(formData.company_logo) } : undefined;
+      if (formData.company_logo instanceof File) {
+        formDataToSend.append('company_logo', formData.company_logo);
+      }
 
-        const response = await apiRequest('POST', endpoint, {
-            post: formDataToSend,
-            files
-        });
+      const endpoint = companyId ? '/v1/merchant/update-company-profile' : '/v1/merchant/create-company-profile';
 
-        if (response.StatusCode === '1') {
-            toast.success('Company profile updated successfully');
-            setTimeout(() => window.location.reload(), 2000);
-        } else {
-            toast.error(response.Result || 'Something went wrong. Please try again later.');
-        }
+      const response = await apiRequest('POST', endpoint, {
+        post: formDataToSend,
+      });
+
+      if (response.StatusCode === '1') {
+        toast.success(response.Message);
+        setTimeout(() => window.location.reload(), 2000);
+      } else {
+        toast.error(response.Result || 'Something went wrong. Please try again later.');
+      }
     } catch (error) {
-        console.error('Error saving company profile:', error);
-        toast.error('An error occurred while saving the company profile.');
+      console.error('Error saving company profile:', error);
+      toast.error('An error occurred while saving the company profile.');
     }
   };
 
@@ -519,12 +466,12 @@ const CompanyProfileForm: React.FC<CompanyProfileFormProps> = ({
           </div>
         </div>
         <div className="row">
-          <div className="col-sm-8 col-sm-offset-8">
+          <div className="col-sm-7 col-sm-offset-8">
             <a className="btn btn-info btn-block btnCancel" href="/my-account">
               Cancel
             </a>
           </div>
-          <div className="col-sm-4">
+          <div className="col-sm-5">
             <input
               className="btn btn-success btn-block updateUserProfile"
               type="button"

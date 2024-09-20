@@ -18,7 +18,8 @@ const ResetPassword = ({ params }) => {
       if (response.StatusCode === "1") {
         setIsTokenValid(true);
       } else {
-        toast.error(response.Result || 'Reset token is invalid or expired.');
+        const errorMessage = response.Result?.reset_token?.[0] || 'Reset token is invalid or expired.';
+        toast.error(errorMessage);
         setIsTokenValid(false);
       }
     } catch (error) {
