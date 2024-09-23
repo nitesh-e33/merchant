@@ -33,6 +33,7 @@ const UserProfileForm = ({ userData }) => {
     cityError: '',
     stateError: '',
   });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (userData) {
@@ -216,6 +217,7 @@ const UserProfileForm = ({ userData }) => {
 
   const submitUserForm = async () => {
     if (validateForm()) {
+      setLoading(true);
       try {
         const response = await apiRequest('POST', '/v1/merchant/update/user', { post: formData });
         if (response.StatusCode === '1') {
@@ -449,12 +451,14 @@ const UserProfileForm = ({ userData }) => {
           </a>
         </div>
         <div className="col-sm-2">
-          <input
-            className="btn btn-success btn-block updateUserProfile"
+          <button
             type="button"
-            value="Next"
+            className="btn btn-success btn-block"
             onClick={submitUserForm}
-          />
+            disabled={loading}
+          >
+            {loading ? 'Submitting...' : 'Next'}
+          </button>
         </div>
       </div>
     </form>

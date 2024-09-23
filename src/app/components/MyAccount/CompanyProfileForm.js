@@ -11,6 +11,7 @@ const CompanyProfileForm = ({
   entityList,
 }) => {
   const [formData, setFormData] = useState(companyData);
+  const [loading, setLoading] = useState(false);
 
   const [errors, setErrors] = useState({
     c_nameError: '',
@@ -217,7 +218,7 @@ const CompanyProfileForm = ({
       toast.error('Please fix the errors in the form');
       return;
     }
-
+    setLoading(true);
     try {
       const formDataToSend = new FormData();
       Object.entries({
@@ -262,7 +263,7 @@ const CompanyProfileForm = ({
   };
 
   return (
-    <form action="/my-account" encType='multipart/form-data' method="post" id="frmCreateCompanyProfile">
+    <form action="/" method="post" id="frmCreateCompanyProfile">
       <input type="hidden" name="merchant_user_id" value={userId} />
       <input type="hidden" name="company_id" value={companyId} />
       <input type="hidden" name="user_account_id" value={bankId} />
@@ -470,20 +471,20 @@ const CompanyProfileForm = ({
             <p id="c_stateError" className="text-danger">{errors.c_stateError}</p>
           </div>
         </div>
-        <div className="row">
-          <div className="col-sm-7 col-sm-offset-8">
-            <a className="btn btn-info btn-block btnCancel" href="/my-account">
-              Cancel
-            </a>
-          </div>
-          <div className="col-sm-5">
-            <input
-              className="btn btn-success btn-block updateUserProfile"
-              type="button"
-              value="Next"
-              onClick={submitCompanyForm}
-            />
-          </div>
+        <div className="col-sm-2">
+          <a className="btn btn-info btn-block btnCancel" href="/my-account">
+            Cancel
+          </a>
+        </div>
+        <div className="col-sm-2">
+          <button
+            type="button"
+            className="btn btn-success btn-block"
+            onClick={submitCompanyForm}
+            disabled={loading}
+          >
+            {loading ? 'Submitting...' : 'Next'}
+          </button>
         </div>
       </div>
     </form>

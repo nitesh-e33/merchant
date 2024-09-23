@@ -10,6 +10,7 @@ const BankProfileForm = ({ userId, companyId, bankId, bankData }) => {
   const [bankName, setBankName] = useState(bankData.bank_name || '');
   const [branchName, setBranchName] = useState(bankData.bank_branch_name || '');
   const [bankProof, setBankProof] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({
     accountHolderName: '',
     accountNumber: '',
@@ -76,7 +77,7 @@ const BankProfileForm = ({ userId, companyId, bankId, bankData }) => {
 
   const submitBankForm = async () => {
     if (!validateForm()) return;
-
+    setLoading(true);
     const formData = new FormData();
     formData.append('merchant_user_id', userId);
     formData.append('company_id', companyId);
@@ -230,12 +231,14 @@ const BankProfileForm = ({ userId, companyId, bankId, bankData }) => {
         </div>
         {bankData.is_verified === 'no' && (
           <div className="col-sm-2">
-            <input
-              className="btn btn-success btn-block bankFormBtn"
+            <button
               type="button"
-              value="Next"
+              className="btn btn-success btn-block"
               onClick={submitBankForm}
-            />
+              disabled={loading}
+            >
+              {loading ? 'Submitting...' : 'Next'}
+            </button>
           </div>
         )}
       </div>

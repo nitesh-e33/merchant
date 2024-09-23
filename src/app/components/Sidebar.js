@@ -2,7 +2,7 @@ import { usePathname } from 'next/navigation';
 import { faAngleLeft, faCircle, faSearch, faTachometerAlt } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Link from 'next/link';
-import React from 'react';
+import React, { useState } from 'react';
 
 const Sidebar = () => {
   const pathname = usePathname() || '';
@@ -11,6 +11,14 @@ const Sidebar = () => {
   // Retrieve user services from local storage
   const user = JSON.parse(localStorage.getItem('user'));
   const userServices = user?.services ? Object.values(user.services) : [];
+
+  // State to track the currently open menu
+  const [openMenu, setOpenMenu] = useState('');
+
+  // Toggle the menu on click
+  const handleMenuClick = (menu) => {
+    setOpenMenu(openMenu === menu ? '' : menu);
+  };
 
   return (
     <aside className="main-sidebar sidebar-dark-primary elevation-4">
@@ -34,13 +42,19 @@ const Sidebar = () => {
         {/* Sidebar Menu */}
         <nav className="mt-2">
           <ul className="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+            {/* Dashboard Menu */}
             <li className={`nav-item ${isActive('/dashboard') ? 'menu-open' : ''}`}>
-              <a href="#" className={`nav-link ${isActive('/dashboard') ? 'active' : ''}`} title="Dashboard">
+              <a
+                href="#"
+                className={`nav-link ${isActive('/dashboard') ? 'active' : ''}`}
+                title="Dashboard"
+                onClick={() => handleMenuClick('dashboard')}
+              >
                 <FontAwesomeIcon icon={faTachometerAlt} className="nav-icon" />
                 <span>Dashboard</span>
                 <FontAwesomeIcon icon={faAngleLeft} className="right" />
               </a>
-              <ul style={{ display: isActive('/dashboard') ? 'block' : 'none' }} className="nav nav-treeview">
+              <ul style={{ display: openMenu === 'dashboard' || isActive('/dashboard') ? 'block' : 'none' }} className="nav nav-treeview">
                 <li className="nav-item">
                   <Link href="/dashboard" className={`nav-link sub-nav-link ${isActive('/dashboard') ? 'active' : ''}`}>
                     <FontAwesomeIcon icon={faCircle} className="nav-icon" />
@@ -50,13 +64,19 @@ const Sidebar = () => {
               </ul>
             </li>
 
+            {/* Transactions Menu */}
             <li className={`nav-item ${isActive('/transactions') ? 'menu-open' : ''}`}>
-              <a href="#" className={`nav-link ${isActive('/transactions') ? 'active' : ''}`} title="Transaction">
+              <a
+                href="#"
+                className={`nav-link ${isActive('/transactions') ? 'active' : ''}`}
+                title="Transaction"
+                onClick={() => handleMenuClick('transactions')}
+              >
                 <FontAwesomeIcon icon={faTachometerAlt} className="nav-icon" />
                 <span>Transaction</span>
                 <FontAwesomeIcon icon={faAngleLeft} className="right" />
               </a>
-              <ul style={{ display: isActive('/transactions') ? 'block' : 'none' }} className="nav nav-treeview">
+              <ul style={{ display: openMenu === 'transactions' || isActive('/transactions') ? 'block' : 'none' }} className="nav nav-treeview">
                 <li className="nav-item">
                   <Link href="/transactions" className={`nav-link sub-nav-link ${isActive('/transactions') ? 'active' : ''}`}>
                     <FontAwesomeIcon icon={faCircle} className="nav-icon" />
@@ -66,13 +86,19 @@ const Sidebar = () => {
               </ul>
             </li>
 
+            {/* Refunds Menu */}
             <li className={`nav-item ${isActive('/refunds') ? 'menu-open' : ''}`}>
-              <a href="#" className={`nav-link ${isActive('/refunds') ? 'active' : ''}`} title="Refund">
+              <a
+                href="#"
+                className={`nav-link ${isActive('/refunds') ? 'active' : ''}`}
+                title="Refund"
+                onClick={() => handleMenuClick('refunds')}
+              >
                 <FontAwesomeIcon icon={faTachometerAlt} className="nav-icon" />
                 <span>Refund</span>
                 <FontAwesomeIcon icon={faAngleLeft} className="right" />
               </a>
-              <ul style={{ display: isActive('/refunds') ? 'block' : 'none' }} className="nav nav-treeview">
+              <ul style={{ display: openMenu === 'refunds' || isActive('/refunds') ? 'block' : 'none' }} className="nav nav-treeview">
                 <li className="nav-item">
                   <Link href="/refunds" className={`nav-link sub-nav-link ${isActive('/refunds') ? 'active' : ''}`}>
                     <FontAwesomeIcon icon={faCircle} className="nav-icon" />
@@ -85,12 +111,17 @@ const Sidebar = () => {
             {/* Conditionally render Auto Debit panel */}
             {userServices.includes('AD') && (
               <li className={`nav-item ${isActive('/directdebit') ? 'menu-open' : ''}`}>
-                <a href="#" className={`nav-link ${isActive('/directdebit') ? 'active' : ''}`} title="Auto Debit">
+                <a
+                  href="#"
+                  className={`nav-link ${isActive('/directdebit') ? 'active' : ''}`}
+                  title="Auto Debit"
+                  onClick={() => handleMenuClick('directdebit')}
+                >
                   <FontAwesomeIcon icon={faTachometerAlt} className="nav-icon" />
                   <span>Auto Debit</span>
                   <FontAwesomeIcon icon={faAngleLeft} className="right" />
                 </a>
-                <ul style={{ display: isActive('/directdebit') ? 'block' : 'none' }} className="nav nav-treeview">
+                <ul style={{ display: openMenu === 'directdebit' || isActive('/directdebit') ? 'block' : 'none' }} className="nav nav-treeview">
                   <li className="nav-item">
                     <Link href="/directdebit/authorization" className={`nav-link sub-nav-link ${isActive('/directdebit/authorization') ? 'active' : ''}`}>
                       <FontAwesomeIcon icon={faCircle} className="nav-icon" />
@@ -110,12 +141,17 @@ const Sidebar = () => {
             {/* Conditionally render Easy Collect panel */}
             {userServices.includes('EC') && (
               <li className={`nav-item ${isActive('/easycollect') ? 'menu-open' : ''}`}>
-                <a href="#" className={`nav-link ${isActive('/easycollect') ? 'active' : ''}`} title="Easy Collect">
+                <a
+                  href="#"
+                  className={`nav-link ${isActive('/easycollect') ? 'active' : ''}`}
+                  title="Easy Collect"
+                  onClick={() => handleMenuClick('easycollect')}
+                >
                   <FontAwesomeIcon icon={faTachometerAlt} className="nav-icon" />
                   <span>Easy Collect</span>
                   <FontAwesomeIcon icon={faAngleLeft} className="right" />
                 </a>
-                <ul style={{ display: isActive('/easycollect') ? 'block' : 'none' }} className="nav nav-treeview">
+                <ul style={{ display: openMenu === 'easycollect' || isActive('/easycollect') ? 'block' : 'none' }} className="nav nav-treeview">
                   <li className="nav-item">
                     <Link href="/easycollect" className={`nav-link sub-nav-link ${isActive('/easycollect') ? 'active' : ''}`}>
                       <FontAwesomeIcon icon={faCircle} className="nav-icon" />
