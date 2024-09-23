@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatDateTime } from '@/app/lib/helper';
 
 const OrderStatusFlow = ({ orderStatusHistory, loadingStatus }) => (
   <div className="mt-6">
@@ -10,8 +11,8 @@ const OrderStatusFlow = ({ orderStatusHistory, loadingStatus }) => (
         <ul className="list-none p-0">
           {orderStatusHistory.map((status, index) => (
             <li key={index} className="relative pl-8 mb-4">
-            <div className="absolute left-0.5 top-1 w-0.5 bg-gray-300 h-24"></div>
-            <div className="absolute left-0 top-0 bg-green-500 h-2 w-2 rounded-full"></div>
+            <div className='border-l-2 border-gray-200 h-[calc(100%-(-20px))] left-25 position absolute top-[10px] ml-1'></div>
+            <div className="absolute bg-white border-2 border-[#52c41a] rounded-full h-2.5 w-2.5 mt-1"></div>
             <div className="ml-4">
               <p><strong>Order Status: </strong> {status.status}</p>
               <p><strong>Payment Status: </strong> {status.payment_status}</p>
@@ -19,15 +20,7 @@ const OrderStatusFlow = ({ orderStatusHistory, loadingStatus }) => (
                 <p><strong>Refund Status: </strong> {status.refund_status}</p>
               )}
               <p><strong>Date: </strong>
-                {new Date(status.created_at).toLocaleDateString('en-IN', {
-                  day: '2-digit',
-                  month: 'short',
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  second: '2-digit',
-                  hour12: true,
-                })}
+                { formatDateTime(status.created_at) }
               </p>
             </div>
           </li>

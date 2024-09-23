@@ -15,7 +15,7 @@ const WebhookStatusChangeModal = ({ isOpen, onClose, onConfirm }) => {
           </button>
         </div>
         <div className="p-4">
-          <label>Do you want to change status of this webhook?</label>
+          <label>Do you want to change status of this webhook ?</label>
           <br />
         </div>
         <div className="flex justify-end p-4 border-t">

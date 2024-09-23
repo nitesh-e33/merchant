@@ -376,21 +376,23 @@ const CompanyProfileForm = ({
         </div>
         <div className="col-sm-6">
           <div className="form-group">
-            <label>Company Logo</label>
-            {formData.company_logo && (
-              <a
-                href={`${API_ASSET_URL}${formData.company_logo}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <img
-                  src={`${API_ASSET_URL}${formData.company_logo}`}
-                  alt="company_logo"
-                  width="30px"
-                  height="30px"
-                />
-              </a>
-            )}
+            <div className='flex'>
+              <label className='mx-2'>Company Logo</label>
+              {formData.company_logo && (
+                <a
+                  href={`${API_ASSET_URL}${formData.company_logo}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <img
+                    src={`${API_ASSET_URL}${formData.company_logo}`}
+                    alt="company_logo"
+                    width="40px"
+                    height="40px"
+                  />
+                </a>
+              )}
+            </div>
             <input
               type="file"
               name="company_logo"

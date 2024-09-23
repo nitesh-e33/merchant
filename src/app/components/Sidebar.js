@@ -40,7 +40,7 @@ const Sidebar = () => {
                 <span>Dashboard</span>
                 <FontAwesomeIcon icon={faAngleLeft} className="right" />
               </a>
-              <ul className="nav nav-treeview">
+              <ul style={{ display: isActive('/dashboard') ? 'block' : 'none' }} className="nav nav-treeview">
                 <li className="nav-item">
                   <Link href="/dashboard" className={`nav-link sub-nav-link ${isActive('/dashboard') ? 'active' : ''}`}>
                     <FontAwesomeIcon icon={faCircle} className="nav-icon" />
@@ -56,7 +56,7 @@ const Sidebar = () => {
                 <span>Transaction</span>
                 <FontAwesomeIcon icon={faAngleLeft} className="right" />
               </a>
-              <ul className="nav nav-treeview">
+              <ul style={{ display: isActive('/transactions') ? 'block' : 'none' }} className="nav nav-treeview">
                 <li className="nav-item">
                   <Link href="/transactions" className={`nav-link sub-nav-link ${isActive('/transactions') ? 'active' : ''}`}>
                     <FontAwesomeIcon icon={faCircle} className="nav-icon" />
@@ -72,7 +72,7 @@ const Sidebar = () => {
                 <span>Refund</span>
                 <FontAwesomeIcon icon={faAngleLeft} className="right" />
               </a>
-              <ul className="nav nav-treeview">
+              <ul style={{ display: isActive('/refunds') ? 'block' : 'none' }} className="nav nav-treeview">
                 <li className="nav-item">
                   <Link href="/refunds" className={`nav-link sub-nav-link ${isActive('/refunds') ? 'active' : ''}`}>
                     <FontAwesomeIcon icon={faCircle} className="nav-icon" />
@@ -86,11 +86,11 @@ const Sidebar = () => {
             {userServices.includes('AD') && (
               <li className={`nav-item ${isActive('/directdebit') ? 'menu-open' : ''}`}>
                 <a href="#" className={`nav-link ${isActive('/directdebit') ? 'active' : ''}`} title="Auto Debit">
-                <FontAwesomeIcon icon={faTachometerAlt} className="nav-icon" />
+                  <FontAwesomeIcon icon={faTachometerAlt} className="nav-icon" />
                   <span>Auto Debit</span>
                   <FontAwesomeIcon icon={faAngleLeft} className="right" />
                 </a>
-                <ul className="nav nav-treeview">
+                <ul style={{ display: isActive('/directdebit') ? 'block' : 'none' }} className="nav nav-treeview">
                   <li className="nav-item">
                     <Link href="/directdebit/authorization" className={`nav-link sub-nav-link ${isActive('/directdebit/authorization') ? 'active' : ''}`}>
                       <FontAwesomeIcon icon={faCircle} className="nav-icon" />
@@ -111,11 +111,11 @@ const Sidebar = () => {
             {userServices.includes('EC') && (
               <li className={`nav-item ${isActive('/easycollect') ? 'menu-open' : ''}`}>
                 <a href="#" className={`nav-link ${isActive('/easycollect') ? 'active' : ''}`} title="Easy Collect">
-                <FontAwesomeIcon icon={faTachometerAlt} className="nav-icon" />
+                  <FontAwesomeIcon icon={faTachometerAlt} className="nav-icon" />
                   <span>Easy Collect</span>
                   <FontAwesomeIcon icon={faAngleLeft} className="right" />
                 </a>
-                <ul className="nav nav-treeview">
+                <ul style={{ display: isActive('/easycollect') ? 'block' : 'none' }} className="nav nav-treeview">
                   <li className="nav-item">
                     <Link href="/easycollect" className={`nav-link sub-nav-link ${isActive('/easycollect') ? 'active' : ''}`}>
                       <FontAwesomeIcon icon={faCircle} className="nav-icon" />
