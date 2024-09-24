@@ -43,6 +43,8 @@ function Page() {
   const [isLoading, setIsLoading] = useState(false);
   const tableRef = useRef(null);
   const router = useRouter();
+  // Create a ref to the DateRangePickerComponent
+  const dateRangePickerRef = useRef();
 
   useEffect(() => {
     generateAndCompareDeviceId(router);
@@ -227,6 +229,7 @@ function Page() {
           setSearchValue={setSearchValue}
           handleSearch={handleSearch}
           resetSearch={resetSearch}
+          dateRangePickerRef={dateRangePickerRef}
         />
       </div>
 
@@ -237,6 +240,7 @@ function Page() {
           paymentMode={paymentMode}
           setPaymentMode={setPaymentMode}
           onDateRangeChange={handleDateRangeChange}
+          dateRangePickerRef={dateRangePickerRef}
         />
       </div>
 

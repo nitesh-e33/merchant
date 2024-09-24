@@ -1,6 +1,6 @@
 import DateRangePickerComponent from '../DateRangePickerComponent';
 
-function FilterForm({ paymentStatus, setPaymentStatus, paymentMode, setPaymentMode, onDateRangeChange }) {
+function FilterForm({ paymentStatus, setPaymentStatus, paymentMode, setPaymentMode, onDateRangeChange, dateRangePickerRef }) {
   return (
     <form id="data-range-form" onSubmit={(e) => e.preventDefault()} className="col-md-12">
       <div className="row align-items-center">
@@ -46,6 +46,7 @@ function FilterForm({ paymentStatus, setPaymentStatus, paymentMode, setPaymentMo
 
         <div className="col-3">
           <DateRangePickerComponent
+            ref={dateRangePickerRef}
             onShortcutClick={onDateRangeChange}
             onChange={onDateRangeChange}
           />

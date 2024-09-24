@@ -12,6 +12,7 @@ const CompanyProfileForm = ({
 }) => {
   const [formData, setFormData] = useState(companyData);
   const [loading, setLoading] = useState(false);
+  const [companyLogo, setCompanyLogo] = useState(null);
 
   const [errors, setErrors] = useState({
     c_nameError: '',
@@ -57,10 +58,7 @@ const CompanyProfileForm = ({
             ...prevErrors,
             c_logoError: '',
           }));
-          setFormData((prevData) => ({
-            ...prevData,
-            company_logo: file,
-          }));
+          setCompanyLogo(file);
         }
       } else {
         setErrors((prevErrors) => ({
@@ -239,10 +237,7 @@ const CompanyProfileForm = ({
       }).forEach(([key, value]) => {
         if (value) formDataToSend.append(key, value);
       });
-
-      if (formData.company_logo instanceof File) {
-        formDataToSend.append('company_logo', formData.company_logo);
-      }
+      if (companyLogo) formDataToSend.append('company_logo', companyLogo);
 
       const endpoint = companyId ? '/v1/merchant/update-company-profile' : '/v1/merchant/create-company-profile';
 
