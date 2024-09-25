@@ -2,15 +2,24 @@
 import { toast } from "react-toastify";
 import LoginForm from "./components/LoginForm"
 import { useEffect } from "react";
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 const HomePage = () => {
+  const router = useRouter();
   const searchParams = useSearchParams();
   useEffect(() => {
     if (searchParams.get('invaliduser')) {
       toast.error('Please login to access your account.');
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      const parsedUserData = JSON.parse(userData);
+      router.push(parsedUserData.isKYCVerified ? '/dashboard' : '/my-account');
+    }
+  }, [router]);
 
   return (
     <div

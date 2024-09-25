@@ -12,12 +12,29 @@ import { formatDate, generateAndCompareDeviceId } from '../lib/helper';
 import { useRouter } from 'next/navigation';
 
 async function fetchMerchantRefunds(searchParams = {}) {
+  const filteredParams = Object.fromEntries(
+    Object.entries(searchParams).filter(([key, value]) => key.trim() !== '' && value.trim() !== '')
+  );
+  const isRefundData = Object.keys(filteredParams).length === 0;
+  if (isRefundData) {
+    const cachedData = localStorage.getItem('refundData');
+    const cachedTime = localStorage.getItem('refundData_timestamp');
+    const oneHour = 60 * 60 * 1000;
+    if (cachedData && cachedTime && (Date.now() - cachedTime < oneHour)) {
+      return JSON.parse(cachedData);
+    }
+  }
   try {
     const response = await apiRequest('POST', '/v1/merchant/refunds', {
       post: searchParams
     });
     if (response.StatusCode === "1") {
-      return response.Result.refund_transaction_history;
+      const resultData = response.Result.refund_transaction_history;
+      if (isRefundData) {
+        localStorage.setItem('refundData', JSON.stringify(resultData));
+        localStorage.setItem('refundData_timestamp', Date.now());
+      }
+      return resultData;
     } else {
       toast.error(response.Result || 'Something went wrong. Please try again later.');
       return [];

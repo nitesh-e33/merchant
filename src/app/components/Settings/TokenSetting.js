@@ -68,6 +68,7 @@ function TokenSetting({ credentials }) {
         credential_id: credentials.credential_id
       };
 
+      localStorage.removeItem('credentials');
       // Make the API call to generate the new client secret
       const response = await apiRequest('POST', '/v1/merchant/generate-new-client-secret', {post: credentialInfo});
 

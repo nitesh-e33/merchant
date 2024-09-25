@@ -19,6 +19,8 @@ function LinkGenerationForm({ open, onClose, initialData }) {
   const handleFormSubmit = async (formData) => {
     try {
       // First API call to generate the payment link
+      localStorage.removeItem('easyCollectData');
+      localStorage.removeItem('easyCollectData_timestamp');
       const response = await apiRequest('POST', '/v1/merchant/generate-easy-collect-payment-link', { post: formData });
 
       if (response.StatusCode === "1") {

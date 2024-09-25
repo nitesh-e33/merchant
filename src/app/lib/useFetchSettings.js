@@ -22,18 +22,32 @@ const useFetchSettings = () => {
           return;
         }
 
-        const [credentialsResponse, webhookListResponse] = await Promise.all([
-          apiRequest('GET', '/v1/merchant/get-client-setting'),
-          apiRequest('POST', '/v1/merchant/webhook/list'),
-        ]);
+        const cachedCredentials = localStorage.getItem('credentials');
+        const cachedWebhookList = localStorage.getItem('webhookList');
 
-        const cacheKey = `ClientId_${credentialsResponse.Result.client_id}`;
-        if (localStorage.getItem(cacheKey)) {
-          credentialsResponse.Result.client_secret = 'xxxxxxxxxxxxxxxx';
+        let credentialsData, webhookListData;
+        if (cachedCredentials) {
+          credentialsData = JSON.parse(cachedCredentials);
+          const cacheKey = `ClientId_${credentialsData.client_id}`;
+          if (localStorage.getItem(cacheKey)) {
+            credentialsData.client_secret = 'xxxxxxxxxxxxxxxx';
+          }
+        } else {
+          const credentialsResponse = await apiRequest('GET', '/v1/merchant/get-client-setting');
+          credentialsData = credentialsResponse.Result || {};
+          localStorage.setItem('credentials', JSON.stringify(credentialsData));
         }
 
-        setCredentials(credentialsResponse.Result);
-        setWebhookList(webhookListResponse.Result || []);
+        if (cachedWebhookList) {
+          webhookListData = JSON.parse(cachedWebhookList);
+        } else {
+          const webhookListResponse = await apiRequest('POST', '/v1/merchant/webhook/list');
+          webhookListData = webhookListResponse.Result || [];
+          localStorage.setItem('webhookList', JSON.stringify(webhookListData));
+        }
+        // Set state with fetched or cached data
+        setCredentials(credentialsData);
+        setWebhookList(webhookListData);
       } catch (error) {
         console.error('Error fetching settings:', error);
         toast.error('Failed to fetch settings. Please try again later.');

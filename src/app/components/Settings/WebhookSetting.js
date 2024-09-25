@@ -49,6 +49,7 @@ function WebhookSetting({ webhookList }) {
     }
 
     try {
+      localStorage.removeItem('webhookList');
       const response = await apiRequest('POST', '/v1/merchant/webhook/setting', {
         post: { webhook_url: urlToSave, webhook_type: webhookType, flag },
       });
@@ -93,6 +94,7 @@ function WebhookSetting({ webhookList }) {
       return;
     }
     try {
+      localStorage.removeItem('webhookList');
       const response = await apiRequest('POST', '/v1/merchant/webhook/status', {
         post: { webhook_id: selectedWebhook.id, status: newStatus },
       });
