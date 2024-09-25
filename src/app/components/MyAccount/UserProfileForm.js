@@ -219,6 +219,8 @@ const UserProfileForm = ({ userData }) => {
     if (validateForm()) {
       setLoading(true);
       try {
+        const profileKey = `merchantProfile_${formData.userid}`;
+        localStorage.removeItem(profileKey);
         const response = await apiRequest('POST', '/v1/merchant/update/user', { post: formData });
         if (response.StatusCode === '1') {
           toast.success('User profile updated successfully');

@@ -51,6 +51,54 @@ const Page = () => {
         }
       }
 
+      // Check if data is already in localStorage
+      const profileKey = `merchantProfile_${storedUserId}`;
+      const entityListKey = `entityList_${storedUserId}`;
+      const kycDocsKey = `kycRequiredDocs_${storedUserId}`;
+
+      const cachedProfile = localStorage.getItem(profileKey);
+      const cachedEntityList = localStorage.getItem(entityListKey);
+      const cachedKycDocs = localStorage.getItem(kycDocsKey);
+
+      if (cachedProfile && cachedEntityList && cachedKycDocs) {
+        // Use data from localStorage
+        const user = JSON.parse(cachedProfile);
+        const entityList = JSON.parse(cachedEntityList);
+        const kycRequiredDocsList = JSON.parse(cachedKycDocs);
+
+        const companyData = user.company || {};
+        const companyId = companyData.company_id || '';
+        const bankData = user.bank_account?.[0] || {};
+        const bankId = bankData.id || '';
+        const services = companyData.credentials?.mapped_services || [];
+
+        setUserData(user);
+        setCompanyData(companyData);
+        setCompanyId(companyId);
+        setBankData(bankData);
+        setBankId(bankId);
+        setEntityList(entityList);
+        setKycRequiredDocsList(kycRequiredDocsList);
+        setServices(services);
+
+        const isEmptyObject = (obj) => obj && Object.keys(obj).length === 0;
+        // Set active tab based on data
+        if (!user) {
+          setActiveTab('user');
+        } else if (user && isEmptyObject(companyData)) {
+          setActiveTab('company');
+        } else if (user && !isEmptyObject(companyData) && isEmptyObject(bankData)) {
+          setActiveTab('bank');
+        } else if (user && !isEmptyObject(companyData) && !isEmptyObject(bankData) && services.length === 0) {
+          setActiveTab('document');
+        } else {
+          setActiveTab('service');
+        }
+
+        setLoading(false);
+        return;
+      }
+
       try {
         const response = await apiRequest('GET', '/v1/merchant/profile', { get: { merchant_id: storedUserId } });
 
@@ -78,8 +126,13 @@ const Page = () => {
           setKycRequiredDocsList(kycRequiredDocsList.Result || []);
           setServices(services);
 
+          // Save data to localStorage
+          localStorage.setItem(profileKey, JSON.stringify(user));
+          localStorage.setItem(entityListKey, JSON.stringify(entityList.Result || []));
+          localStorage.setItem(kycDocsKey, JSON.stringify(kycRequiredDocsList.Result || []));
+
           const isEmptyObject = (obj) => obj && Object.keys(obj).length === 0;
-          // Set initial active tab based on the data availability
+          // Set active tab based on data
           if (!user) {
             setActiveTab('user');
           } else if (user && isEmptyObject(companyData)) {
