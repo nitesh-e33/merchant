@@ -22,8 +22,8 @@ const Header = () => {
     try {
       const response = await apiRequest('GET', '/v1/merchant/logout');
       if (response.StatusCode === '1') {
-        // Remove user data from localStorage
-        localStorage.removeItem('user');
+        // Remove data from localStorage
+        localStorage.clear();
         // Remove user cookie
         Cookies.remove('user');
         Cookies.remove('device_id');

@@ -51,112 +51,95 @@ const Page = () => {
         }
       }
 
-      // Check if data is already in localStorage
+      // Define localStorage keys
       const profileKey = `merchantProfile_${storedUserId}`;
       const entityListKey = `entityList_${storedUserId}`;
       const kycDocsKey = `kycRequiredDocs_${storedUserId}`;
 
+      // Check for cached data
       const cachedProfile = localStorage.getItem(profileKey);
       const cachedEntityList = localStorage.getItem(entityListKey);
       const cachedKycDocs = localStorage.getItem(kycDocsKey);
 
-      if (cachedProfile && cachedEntityList && cachedKycDocs) {
-        // Use data from localStorage
-        const user = JSON.parse(cachedProfile);
-        const entityList = JSON.parse(cachedEntityList);
-        const kycRequiredDocsList = JSON.parse(cachedKycDocs);
+      let profileData, entityListData, kycDocsData;
 
-        const companyData = user.company || {};
-        const companyId = companyData.company_id || '';
-        const bankData = user.bank_account?.[0] || {};
-        const bankId = bankData.id || '';
-        const services = companyData.credentials?.mapped_services || [];
-
-        setUserData(user);
-        setCompanyData(companyData);
-        setCompanyId(companyId);
-        setBankData(bankData);
-        setBankId(bankId);
-        setEntityList(entityList);
-        setKycRequiredDocsList(kycRequiredDocsList);
-        setServices(services);
-
-        const isEmptyObject = (obj) => obj && Object.keys(obj).length === 0;
-        // Set active tab based on data
-        if (!user) {
-          setActiveTab('user');
-        } else if (user && isEmptyObject(companyData)) {
-          setActiveTab('company');
-        } else if (user && !isEmptyObject(companyData) && isEmptyObject(bankData)) {
-          setActiveTab('bank');
-        } else if (user && !isEmptyObject(companyData) && !isEmptyObject(bankData) && services.length === 0) {
-          setActiveTab('document');
+      // Fetch profile if not cached
+      if (cachedProfile) {
+        profileData = JSON.parse(cachedProfile);
+      } else {
+        const profileResponse = await apiRequest('GET', '/v1/merchant/profile', { get: { merchant_id: storedUserId } });
+        if (profileResponse.StatusCode === '1') {
+          profileData = profileResponse.Result || {};
+          localStorage.setItem(profileKey, JSON.stringify(profileData)); // Cache the profile data
         } else {
-          setActiveTab('service');
+          console.error('Error fetching profile:', profileResponse.Message);
+          return;
         }
-
-        setLoading(false);
-        return;
       }
 
-      try {
-        const response = await apiRequest('GET', '/v1/merchant/profile', { get: { merchant_id: storedUserId } });
-
-        if (response.StatusCode === '1') {
-          const user = response.Result || {};
-          setUserData(user);
-          const companyData = user.company || {};
-          const companyId = companyData.company_id || '';
-          const bankData = user.bank_account?.[0] || {};
-          const bankId = bankData.id || '';
-          const entityList = await apiRequest('GET', '/v1/merchant/entity/list');
-          const kycRequiredDocsList = companyId ? await apiRequest('GET', '/v1/merchant/get-all-kyc-required-document', {
-            get: {
-              company_id: companyId,
-              entity_id: companyData.entity_type,
-            },
-          }) : [];
-          const services = companyData.credentials?.mapped_services || [];
-
-          setCompanyData(companyData);
-          setCompanyId(companyId);
-          setBankData(bankData);
-          setBankId(bankId);
-          setEntityList(entityList.Result || []);
-          setKycRequiredDocsList(kycRequiredDocsList.Result || []);
-          setServices(services);
-
-          // Save data to localStorage
-          localStorage.setItem(profileKey, JSON.stringify(user));
-          localStorage.setItem(entityListKey, JSON.stringify(entityList.Result || []));
-          localStorage.setItem(kycDocsKey, JSON.stringify(kycRequiredDocsList.Result || []));
-
-          const isEmptyObject = (obj) => obj && Object.keys(obj).length === 0;
-          // Set active tab based on data
-          if (!user) {
-            setActiveTab('user');
-          } else if (user && isEmptyObject(companyData)) {
-            setActiveTab('company');
-          } else if (user && !isEmptyObject(companyData) && isEmptyObject(bankData)) {
-            setActiveTab('bank');
-          } else if (user && !isEmptyObject(companyData) && !isEmptyObject(bankData) && services.length === 0) {
-            setActiveTab('document');
-          } else {
-            setActiveTab('service');
-          }
-        } else if (response.StatusCode === '0') {
-          setError(response.Message || 'An error occurred');
-          toast.error(response.Message || 'An error occurred');
+      // Fetch entity list if not cached
+      if (cachedEntityList) {
+        entityListData = JSON.parse(cachedEntityList);
+      } else {
+        const entityListResponse = await apiRequest('GET', '/v1/merchant/entity/list');
+        if (entityListResponse.StatusCode === '1') {
+          entityListData = entityListResponse.Result || [];
+          localStorage.setItem(entityListKey, JSON.stringify(entityListData)); // Cache the entity list
         } else {
-          toast.error(response.Result || 'An unknown error occurred');
-          setError(response.Result || 'An unknown error occurred');
+          console.error('Error fetching entity list:', entityListResponse.Message);
+          return;
         }
-      } catch (error) {
-        setError('An error occurred while fetching the profile');
-        console.error('Error fetching merchant profile:', error);
-      } finally {
-        setLoading(false); // Ensure loading is set to false when fetching is complete
       }
+
+      // Fetch KYC documents if not cached and if companyId is available
+      const companyId = profileData.company?.company_id;
+      if (companyId && cachedKycDocs) {
+        kycDocsData = JSON.parse(cachedKycDocs);
+      } else if (companyId) {
+        const kycDocsResponse = await apiRequest('GET', '/v1/merchant/get-all-kyc-required-document', {
+          get: {
+            company_id: companyId,
+            entity_id: profileData.company.entity_type,
+          },
+        });
+        if (kycDocsResponse.StatusCode === '1') {
+          kycDocsData = kycDocsResponse.Result || [];
+          localStorage.setItem(kycDocsKey, JSON.stringify(kycDocsData)); // Cache the KYC docs
+        } else {
+          console.error('Error fetching KYC documents:', kycDocsResponse.Message);
+          return;
+        }
+      }
+
+      // Set all the data into state once
+      const companyData = profileData.company || {};
+      const bankData = profileData.bank_account?.[0] || {};
+      const services = companyData.credentials?.mapped_services || [];
+
+      setUserData(profileData);
+      setCompanyData(companyData);
+      setCompanyId(companyData.company_id || '');
+      setBankData(bankData);
+      setBankId(bankData.id || '');
+      setEntityList(entityListData);
+      setKycRequiredDocsList(kycDocsData);
+      setServices(services);
+
+      // Set the active tab based on the fetched data
+      const isEmptyObject = (obj) => obj && Object.keys(obj).length === 0;
+      if (!profileData) {
+        setActiveTab('user');
+      } else if (isEmptyObject(companyData)) {
+        setActiveTab('company');
+      } else if (isEmptyObject(bankData)) {
+        setActiveTab('bank');
+      } else if (services.length === 0) {
+        setActiveTab('document');
+      } else {
+        setActiveTab('service');
+      }
+
+      setLoading(false);
     };
 
     fetchMerchantProfile();

@@ -241,7 +241,9 @@ const CompanyProfileForm = ({
 
       const endpoint = companyId ? '/v1/merchant/update-company-profile' : '/v1/merchant/create-company-profile';
       const profileKey = `merchantProfile_${userId}`;
+      const kycDocsKey = `kycRequiredDocs_${userId}`;
       localStorage.removeItem(profileKey);
+      localStorage.removeItem(kycDocsKey);
       const response = await apiRequest('POST', endpoint, {
         post: formDataToSend,
       });

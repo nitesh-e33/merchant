@@ -39,8 +39,8 @@ const BothSidesDocUpload = ({ doc, entity_type_id, company_id, kyc_doc_id, onCha
     try {
       const user = JSON.parse(localStorage.getItem('user'));
       const userId = user.user_id;
-      const profileKey = `merchantProfile_${userId}`;
-      localStorage.removeItem(profileKey);
+      const kycDocsKey = `kycRequiredDocs_${userId}`;
+      localStorage.removeItem(kycDocsKey);
       const response = await apiRequest('POST', '/v1/merchant/kyc-document-upload', { post: formData });
       if (response.StatusCode === '1') {
         toast.success(response.Message);
