@@ -128,14 +128,14 @@ function WebhookSetting({ webhookList }) {
           <div className="relative">
             <input
               type="text"
-              className={`block w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm ${!isEditMode ? 'cursor-not-allowed bg-gray-100' : ''}`}
+              className={`block w-full pr-10 px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm ${!isEditMode ? 'cursor-not-allowed bg-gray-100' : ''}`}
               value={isEditMode ? editValues[id] : webhook.webhook_url}
               disabled={!isEditMode}
               onChange={(e) => handleInputChange(id, e.target.value)}
             />
             {isEditMode && (
               <span
-                className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer text-light-blue hover:text-blue-500"
+                className="absolute inset-y-0 right-0 flex items-center cursor-pointer text-light-blue hover:text-blue-500 -mr-5"
                 onClick={() => handleSaveClick(id, webhook.webhook_type, isMissing ? 0 : 1)}
               >
                 <FontAwesomeIcon icon={faCheck} />
