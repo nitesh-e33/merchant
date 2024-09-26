@@ -7,45 +7,16 @@ import Breadcrumb from '../../components/Transactions/Breadcrumb';
 import SearchForm from '../../components/Autodebit/DebitRequest/SearchForm';
 import DebitRequestModal from '../../components/Autodebit/DebitRequest/DebitRequestModal'
 import PaymentTable from '../../components/Transactions/PaymentTable';
-import { formatDateTime, generateAndCompareDeviceId } from '../../lib/helper';
+import { formatDateTime, generateAndCompareDeviceId, handleApiRequest } from '../../lib/helper';
 import Loader from '../../components/Loader';
 import { useRouter } from 'next/navigation';
 
 async function fetchMerchantDebitRequestData(searchParams = {}) {
-  const dtoKey = 'requestData';
-  const filteredParams = Object.fromEntries(
-    Object.entries(searchParams).filter(([key, value]) => key.trim() !== '' && value.trim() !== '')
-  );
-  // Check if the filtered object only contains "dto: 'this_month'"
-  const isThisMonthOnly = Object.keys(filteredParams).length === 1 && filteredParams.dto === 'this_month';
-  if (isThisMonthOnly) {
-    const cachedData = localStorage.getItem(dtoKey);
-    const cachedTime = localStorage.getItem(`${dtoKey}_timestamp`);
-    const oneHour = 60 * 60 * 1000;
-    if (cachedData && cachedTime && (Date.now() - cachedTime < oneHour)) {
-      return JSON.parse(cachedData);
-    }
-  }
-  try {
-    const response = await apiRequest('POST', '/v1/merchant/get-auto-debit-requests', {
-      post: searchParams
-    });
-    if (response.StatusCode === "1") {
-      const resultData = response.Result.data;
-      if (isThisMonthOnly) {
-        localStorage.setItem(dtoKey, JSON.stringify(resultData));
-        localStorage.setItem(`${dtoKey}_timestamp`, Date.now());
-      }
-      return resultData;
-    } else {
-      toast.error(response.Result || 'Something went wrong. Please try again later.');
-      return [];
-    }
-  } catch (error) {
-    toast.error('An error occurred while fetching the debit requests');
-    console.error('Error fetching debit requests:', error);
-    return [];
-  }
+  const cacheKey = 'requestData';
+  const cacheExpiryTime = 60 * 60 * 1000; // 1 hour in ms
+  return handleApiRequest('/v1/merchant/get-auto-debit-requests', searchParams, cacheKey, cacheExpiryTime).then(response => {
+    return response.data;
+  });
 }
 
 function Page() {

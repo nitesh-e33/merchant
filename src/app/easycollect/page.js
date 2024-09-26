@@ -6,47 +6,18 @@ import { toast } from 'react-toastify';
 import Breadcrumb from '../components/Transactions/Breadcrumb';
 import SearchForm from '../components/EasyCollect/SearchForm';
 import PaymentTable from '../components/Transactions/PaymentTable';
-import { formatDateTime, copyToClipboard, generateAndCompareDeviceId } from '../lib/helper';
+import { formatDateTime, copyToClipboard, generateAndCompareDeviceId, handleApiRequest } from '../lib/helper';
 import Loader from '../components/Loader';
 import QrCodeModal from '../components/EasyCollect/QrCodeModal'
 import LinkGenerationForm from '../components/EasyCollect/LinkGenerationForm';
 import { useRouter } from 'next/navigation';
 
 async function fetchEasyCollectData(searchParams = {}) {
-  const dtoKey = 'easyCollectData';
-  const filteredParams = Object.fromEntries(
-    Object.entries(searchParams).filter(([key, value]) => key.trim() !== '' && value.trim() !== '')
-  );
-  // Check if the filtered object only contains "dto: 'this_month'"
-  const isThisMonthOnly = Object.keys(filteredParams).length === 1 && filteredParams.dto === 'this_month';
-  if (isThisMonthOnly) {
-    const cachedData = localStorage.getItem(dtoKey);
-    const cachedTime = localStorage.getItem(`${dtoKey}_timestamp`);
-    const oneHour = 60 * 60 * 1000;
-    if (cachedData && cachedTime && (Date.now() - cachedTime < oneHour)) {
-      return JSON.parse(cachedData);
-    }
-  }
-  try {
-    const response = await apiRequest('POST', '/v1/merchant/easy-collect-list', {
-      post: searchParams
-    });
-    if (response.StatusCode === "1") {
-      const resultData = response.Result.data;
-      if (isThisMonthOnly) {
-        localStorage.setItem(dtoKey, JSON.stringify(resultData));
-        localStorage.setItem(`${dtoKey}_timestamp`, Date.now());
-      }
-      return resultData;
-    } else {
-      toast.error(response.Result || 'Something went wrong. Please try again later.');
-      return [];
-    }
-  } catch (error) {
-    toast.error('An error occurred while fetching the easy collect data');
-    console.error('Error fetching easy collect data:', error);
-    return [];
-  }
+  const cacheKey = 'easyCollectData';
+  const cacheExpiryTime = 60 * 60 * 1000;
+  return handleApiRequest('/v1/merchant/easy-collect-list', searchParams, cacheKey, cacheExpiryTime).then(response => {
+    return response.data;
+  });
 }
 
 function Page() {

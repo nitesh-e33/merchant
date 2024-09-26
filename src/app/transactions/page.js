@@ -9,25 +9,15 @@ import FilterForm from '../components/Transactions/FilterForm';
 import TransactionDetailsModal from '../components/Transactions/TransactionDetailsModal';
 import Loader from '../components/Loader';
 import PaymentTable from '../components/Transactions/PaymentTable';
-import { formatDateTime, generateAndCompareDeviceId } from '../lib/helper';
+import { formatDateTime, generateAndCompareDeviceId, handleApiRequest } from '../lib/helper';
 import { useRouter } from 'next/navigation';
 
 async function fetchMerchantTransactions(searchParams = {}) {
-  try {
-    const response = await apiRequest('POST', '/v1/merchant/transactions', {
-      post: searchParams
-    });
-    if (response.StatusCode === "1") {
-      return response.Result.transaction_history;
-    } else {
-      toast.error(response.Result || 'Something went wrong. Please try again later.');
-      return [];
-    }
-  } catch (error) {
-    toast.error('An error occurred while fetching the transactions');
-    console.error('Error fetching transactions:', error);
-    return [];
-  }
+  const cacheKey = 'transactionData';
+  const cacheExpiryTime = 30 * 60 * 1000;
+  return handleApiRequest('/v1/merchant/transactions', searchParams, cacheKey, cacheExpiryTime).then(response => {
+    return response.transaction_history;
+  });
 }
 
 function Page() {
