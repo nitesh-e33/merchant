@@ -2,6 +2,7 @@ import { toast } from "react-toastify";
 import Cookies from 'js-cookie';
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 import { apiRequest } from "./apiHelper";
+import $ from 'jquery';
 export const formatDateTime = (date) => {
     if (!date) return 'N/A';
     return new Date(date).toLocaleString('en-IN', {
@@ -94,3 +95,33 @@ export async function handleApiRequest(url, searchParams, cacheKey, cacheExpiryT
     return [];
   }
 }
+export const initSelect2 = (setSearchName, setPaymentStatus, setPaymentMode) => {
+  $('.select2').select2();
+  $('.select2').on('change', function () {
+    const name = $(this).attr('name');
+    const value = $(this).val();
+    if (name === 'searchName') {
+      setSearchName(value);
+    } else if (name === 'paymentStatus') {
+      setPaymentStatus && setPaymentStatus(value);
+    } else if (name === 'paymentMode') {
+      setPaymentMode && setPaymentMode(value);
+    }
+  });
+};
+export const fetchDataHelper = async (dto, dateRange, searchName, searchValue, fetchDataFn, additionalParams = {}) => {
+  if (dto === 'custom_range' && (!dateRange || !dateRange[0] || !dateRange[1])) {
+    return;
+  }
+  const searchParams = {
+    dto,
+    ...(dto === 'custom_range' && dateRange && dateRange[0] && dateRange[1] && {
+      start_date: dateRange[0].toISOString().split('T')[0],
+      end_date: dateRange[1].toISOString().split('T')[0],
+    }),
+    [searchName]: searchValue,
+    ...additionalParams
+  };
+  const data = await fetchDataFn(searchParams);
+  return data;
+};

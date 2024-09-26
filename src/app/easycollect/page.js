@@ -6,7 +6,7 @@ import { toast } from 'react-toastify';
 import Breadcrumb from '../components/Transactions/Breadcrumb';
 import SearchForm from '../components/EasyCollect/SearchForm';
 import PaymentTable from '../components/Transactions/PaymentTable';
-import { formatDateTime, copyToClipboard, generateAndCompareDeviceId, handleApiRequest } from '../lib/helper';
+import { formatDateTime, copyToClipboard, generateAndCompareDeviceId, handleApiRequest, initSelect2, fetchDataHelper } from '../lib/helper';
 import Loader from '../components/Loader';
 import QrCodeModal from '../components/EasyCollect/QrCodeModal'
 import LinkGenerationForm from '../components/EasyCollect/LinkGenerationForm';
@@ -36,36 +36,13 @@ function Page() {
 
   useEffect(() => {
     generateAndCompareDeviceId(router);
-    const initSelect2 = () => {
-      $('.select2').select2();
-
-      $('.select2').on('change', function () {
-        const name = $(this).attr('name');
-        const value = $(this).val();
-        if (name === 'searchName') {
-          setSearchName(value);
-        }
-      });
-    };
+    initSelect2(setSearchName);
 
     const fetchData = async () => {
-      if (dto === 'custom_range' && (!dateRange || !dateRange[0] || !dateRange[1])) {
-        return;
-      }
-      const searchParams = {
-        dto,
-        ...(dto === 'custom_range' && dateRange && dateRange[0] && dateRange[1] && {
-          start_date: dateRange[0].toISOString().split('T')[0],
-          end_date: dateRange[1].toISOString().split('T')[0],
-        }),
-        [searchName]: searchValue,
-      };
-
-      const data = await fetchEasyCollectData(searchParams);
+      const data = await fetchDataHelper(dto, dateRange, searchName, searchValue, fetchEasyCollectData);
       setEasyCollects(data);
     };
 
-    initSelect2();
     fetchData();
 
     return () => {

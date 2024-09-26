@@ -7,7 +7,7 @@ import Breadcrumb from '../../components/Transactions/Breadcrumb';
 import SearchForm from '../../components/Autodebit/DebitRequest/SearchForm';
 import DebitRequestModal from '../../components/Autodebit/DebitRequest/DebitRequestModal'
 import PaymentTable from '../../components/Transactions/PaymentTable';
-import { formatDateTime, generateAndCompareDeviceId, handleApiRequest } from '../../lib/helper';
+import { formatDateTime, generateAndCompareDeviceId, handleApiRequest, initSelect2, fetchDataHelper } from '../../lib/helper';
 import Loader from '../../components/Loader';
 import { useRouter } from 'next/navigation';
 
@@ -33,36 +33,13 @@ function Page() {
 
   useEffect(() => {
     generateAndCompareDeviceId(router);
-    const initSelect2 = () => {
-      $('.select2').select2();
-
-      $('.select2').on('change', function () {
-        const name = $(this).attr('name');
-        const value = $(this).val();
-        if (name === 'searchName') {
-          setSearchName(value);
-        }
-      });
-    };
+    initSelect2(setSearchName);
 
     const fetchData = async () => {
-      if (dto === 'custom_range' && (!dateRange || !dateRange[0] || !dateRange[1])) {
-        return;
-      }
-      const searchParams = {
-        dto,
-        ...(dto === 'custom_range' && dateRange && dateRange[0] && dateRange[1] && {
-          start_date: dateRange[0].toISOString().split('T')[0],
-          end_date: dateRange[1].toISOString().split('T')[0],
-        }),
-        [searchName]: searchValue,
-      };
-
-      const data = await fetchMerchantDebitRequestData(searchParams);
+      const data = await fetchDataHelper(dto, dateRange, searchName, searchValue, fetchMerchantDebitRequestData);
       setDebitRequests(data);
     };
 
-    initSelect2();
     fetchData();
 
     return () => {

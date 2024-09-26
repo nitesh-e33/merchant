@@ -9,7 +9,7 @@ import FilterForm from '../components/Transactions/FilterForm';
 import TransactionDetailsModal from '../components/Transactions/TransactionDetailsModal';
 import Loader from '../components/Loader';
 import PaymentTable from '../components/Transactions/PaymentTable';
-import { formatDateTime, generateAndCompareDeviceId, handleApiRequest } from '../lib/helper';
+import { formatDateTime, generateAndCompareDeviceId, handleApiRequest, initSelect2, fetchDataHelper } from '../lib/helper';
 import { useRouter } from 'next/navigation';
 
 async function fetchMerchantTransactions(searchParams = {}) {
@@ -41,41 +41,17 @@ function Page() {
   }, [router]);
 
   useEffect(() => {
-    const initSelect2 = () => {
-      $('.select2').select2();
-
-      $('.select2').on('change', function () {
-        const name = $(this).attr('name');
-        const value = $(this).val();
-        if (name === 'searchName') {
-          setSearchName(value);
-        } else if (name === 'paymentStatus') {
-          setPaymentStatus(value);
-        } else if (name === 'paymentMode') {
-          setPaymentMode(value);
-        }
-      });
-    };
-
+    initSelect2(setSearchName, setPaymentStatus, setPaymentMode);
     const fetchData = async () => {
-      if (dto === 'custom_range' && (!dateRange || !dateRange[0] || !dateRange[1])) {
-        return;
-      }
-      const searchParams = {
+      const additionalParams = {
         payment_status: paymentStatus,
         payment_method: paymentMode,
-        dto,
-        ...(dto === 'custom_range' && dateRange && dateRange[0] && dateRange[1] && {
-          start_date: dateRange[0].toISOString().split('T')[0],
-          end_date: dateRange[1].toISOString().split('T')[0],
-        }),
-        [searchName]: searchValue,
       };
-      const data = await fetchMerchantTransactions(searchParams);
+
+      const data = await fetchDataHelper(dto, dateRange, searchName, searchValue, fetchMerchantTransactions, additionalParams);
       setTransactions(data);
     };
 
-    initSelect2();
     fetchData();
 
     return () => {

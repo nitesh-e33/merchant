@@ -8,7 +8,7 @@ import SearchForm from '../components/Refunds/SearchForm';
 import RefundDetailModal from '../components/Refunds/RefundDetailsModal'
 import PaymentTable from '../components/Transactions/PaymentTable';
 import Loader from '../components/Loader';
-import { formatDate, generateAndCompareDeviceId } from '../lib/helper';
+import { formatDate, generateAndCompareDeviceId, initSelect2 } from '../lib/helper';
 import { useRouter } from 'next/navigation';
 
 async function fetchMerchantRefunds(searchParams = {}) {
@@ -58,18 +58,7 @@ function Page() {
 
   useEffect(() => {
     generateAndCompareDeviceId(router);
-
-    const initSelect2 = () => {
-      $('.select2').select2();
-
-      $('.select2').on('change', function () {
-        const name = $(this).attr('name');
-        const value = $(this).val();
-        if (name === 'searchName') {
-          setSearchName(value);
-        }
-      });
-    };
+    initSelect2(setSearchName);
 
     const fetchData = async () => {
         const searchParams = {
@@ -79,7 +68,6 @@ function Page() {
         setRefunds(data);
     };
 
-    initSelect2();
     fetchData();
 
     return () => {

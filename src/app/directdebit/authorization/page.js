@@ -9,7 +9,7 @@ import AuthorizationDetailsModal from '../../components/Autodebit/Authorization/
 import PaymentTable from '../../components/Transactions/PaymentTable';
 import Loader from '../../components/Loader';
 import { useRouter } from 'next/navigation';
-import { generateAndCompareDeviceId, handleApiRequest } from '../../lib/helper';
+import { generateAndCompareDeviceId, handleApiRequest, initSelect2, fetchDataHelper } from '../../lib/helper';
 
 async function fetchMerchantAuthorizationsData(searchParams = {}) {
   const cacheKey = 'authorizationData';
@@ -33,36 +33,12 @@ function Page() {
 
   useEffect(() => {
     generateAndCompareDeviceId(router);
-    const initSelect2 = () => {
-      $('.select2').select2();
-
-      $('.select2').on('change', function () {
-        const name = $(this).attr('name');
-        const value = $(this).val();
-        if (name === 'searchName') {
-          setSearchName(value);
-        }
-      });
-    };
-
+    initSelect2(setSearchName);
     const fetchData = async () => {
-      if (dto === 'custom_range' && (!dateRange || !dateRange[0] || !dateRange[1])) {
-        return;
-      }
-      const searchParams = {
-        dto,
-        ...(dto === 'custom_range' && dateRange && dateRange[0] && dateRange[1] && {
-          start_date: dateRange[0].toISOString().split('T')[0],
-          end_date: dateRange[1].toISOString().split('T')[0],
-        }),
-        [searchName]: searchValue,
-      };
-
-      const data = await fetchMerchantAuthorizationsData(searchParams);
+      const data = await fetchDataHelper(dto, dateRange, searchName, searchValue, fetchMerchantAuthorizationsData);
       setAuthorizations(data);
     };
 
-    initSelect2();
     fetchData();
 
     return () => {
