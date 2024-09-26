@@ -19,8 +19,8 @@ async function fetchMerchantRefunds(searchParams = {}) {
   if (isRefundData) {
     const cachedData = localStorage.getItem('refundData');
     const cachedTime = localStorage.getItem('refundData_timestamp');
-    const oneHour = 60 * 60 * 1000;
-    if (cachedData && cachedTime && (Date.now() - cachedTime < oneHour)) {
+    const halfHour = 30 * 60 * 1000; // 30 minutes in milliseconds
+    if (cachedData && cachedTime && (Date.now() - cachedTime < halfHour)) {
       return JSON.parse(cachedData);
     }
   }

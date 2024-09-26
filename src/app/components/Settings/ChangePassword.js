@@ -112,7 +112,7 @@ function ChangePassword() {
   return (
     <div className="card">
       <div className="card-header">
-        <h3 className="card-title">Change Password</h3>
+        <h3 className="card-title text-lg font-semibold">Change Password</h3>
       </div>
       <div className="card-body">
         <form id="frmChangePassword">

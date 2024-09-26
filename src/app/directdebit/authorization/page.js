@@ -12,12 +12,31 @@ import { useRouter } from 'next/navigation';
 import { generateAndCompareDeviceId } from '../../lib/helper';
 
 async function fetchMerchantAuthorizationsData(searchParams = {}) {
+  const dtoKey = 'authorizationData';
+  const filteredParams = Object.fromEntries(
+    Object.entries(searchParams).filter(([key, value]) => key.trim() !== '' && value.trim() !== '')
+  );
+  // Check if the filtered object only contains "dto: 'this_month'"
+  const isThisMonthOnly = Object.keys(filteredParams).length === 1 && filteredParams.dto === 'this_month';
+  if (isThisMonthOnly) {
+    const cachedData = localStorage.getItem(dtoKey);
+    const cachedTime = localStorage.getItem(`${dtoKey}_timestamp`);
+    const oneHour = 60 * 60 * 1000;
+    if (cachedData && cachedTime && (Date.now() - cachedTime < oneHour)) {
+      return JSON.parse(cachedData);
+    }
+  }
   try {
     const response = await apiRequest('POST', '/v1/merchant/auto-debit-authorizations-list', {
       post: searchParams
     });
     if (response.StatusCode === "1") {
-      return response.Result.data;
+      const resultData = response.Result.data;
+      if (isThisMonthOnly) {
+        localStorage.setItem(dtoKey, JSON.stringify(resultData));
+        localStorage.setItem(`${dtoKey}_timestamp`, Date.now());
+      }
+      return resultData;
     } else {
       toast.error(response.Result || 'Something went wrong. Please try again later.');
       return [];

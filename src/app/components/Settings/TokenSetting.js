@@ -93,8 +93,8 @@ function TokenSetting({ credentials }) {
     <div className="row">
       <div className="col-12">
         <div className="card">
-          <div className="card-header flex justify-between items-center">
-            <b>Merchant Details</b>
+          <div className="card-header items-center">
+            <b className='text-lg font-semibold'>Merchant Details</b>
             <button
               className="btn btn-success float-right"
               data-company-id={credentials?.company_id}
