@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { parse } from 'cookie';
+import CryptoJS from 'crypto-js';
+import { SECRET_KEY } from '../src/app/lib/constant'
 
 export async function middleware(req) {
   const url = req.nextUrl.clone();
@@ -7,10 +9,11 @@ export async function middleware(req) {
 
   // Parse cookies from the request headers
   const cookies = parse(req.headers.get('cookie') || '');
-  const user = cookies['user'];
+  const encryptedUser = cookies['user'];
   const storedDeviceId = cookies['device_id'];
 
-  if (!user || !storedDeviceId) {
+  // Check if user or device ID is missing
+  if (!encryptedUser || !storedDeviceId) {
     url.pathname = '/';
     url.searchParams.set('invaliduser', 'true');
     return NextResponse.redirect(url);
@@ -18,10 +21,15 @@ export async function middleware(req) {
 
   let userData;
   try {
-    userData = JSON.parse(user);
+    // Decrypt the user cookie data
+    const bytes = CryptoJS.AES.decrypt(encryptedUser, SECRET_KEY);
+    const decryptedUser = bytes.toString(CryptoJS.enc.Utf8);
+    // Parse the decrypted data
+    userData = JSON.parse(decryptedUser);
   } catch (error) {
+    // Handle decryption error or invalid JSON
     url.pathname = '/';
-    url.searchParams.set('error', 'invalid_user_data');
+    url.searchParams.set('invaliduser', 'true');
     return NextResponse.redirect(url);
   }
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { apiRequest } from './apiHelper';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
+import { decryptedData } from './helper';
 
 const useFetchSettings = () => {
   const [credentials, setCredentials] = useState(null);
@@ -12,8 +13,11 @@ const useFetchSettings = () => {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const storedUser = localStorage.getItem('user');
-        const userData = storedUser ? JSON.parse(storedUser) : null;
+        const encryptedUser = localStorage.getItem('user');
+        var userData = {}
+        if (encryptedUser) {
+          userData = decryptedData(encryptedUser);
+        }
 
         if (!userData?.isKYCVerified) {
           toast.error('Your Profile is Under Verification');

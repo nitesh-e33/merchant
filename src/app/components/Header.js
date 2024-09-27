@@ -6,15 +6,19 @@ import { apiRequest } from '../lib/apiHelper';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import Cookies from 'js-cookie';
+import { decryptedData } from '../lib/helper';
 
 const Header = () => {
   const [user, setUser] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      setUser(JSON.parse(userData));
+    const encryptedUser = localStorage.getItem('user');
+    if (encryptedUser) {
+      const userData = decryptedData(encryptedUser);
+      if (userData) {
+        setUser(userData);
+      }
     }
   }, []);
 

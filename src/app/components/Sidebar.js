@@ -3,13 +3,18 @@ import { faAngleLeft, faCircle, faSearch, faTachometerAlt } from '@fortawesome/f
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Link from 'next/link';
 import React, { useState } from 'react';
+import { decryptedData } from '../lib/helper';
 
 const Sidebar = () => {
   const pathname = usePathname() || '';
   const isActive = (path) => pathname.startsWith(path);
 
   // Retrieve user services from local storage
-  const user = JSON.parse(localStorage.getItem('user'));
+  const encryptedUser = localStorage.getItem('user');
+  var user = {}
+  if (encryptedUser) {
+    user = decryptedData(encryptedUser);
+  }
   const userServices = user?.services ? Object.values(user.services) : [];
 
   // State to track the currently open menu

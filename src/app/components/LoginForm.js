@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { apiRequest } from '../lib/apiHelper';
 import { toast } from "react-toastify";
 import Cookies from 'js-cookie';
+import CryptoJS from 'crypto-js';
+import { SECRET_KEY } from '../lib/constant';
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
 export default function LoginForm() {
@@ -53,9 +55,9 @@ export default function LoginForm() {
         if (response.StatusCode === '1') {
           const user = response.Result;
           if (user.token) {
-            localStorage.setItem('user', JSON.stringify(user));
-            // Set user data and device ID in cookies
-            Cookies.set('user', JSON.stringify(user), { expires: 1 });
+            const encryptedUser = CryptoJS.AES.encrypt(JSON.stringify(user), SECRET_KEY).toString();
+            localStorage.setItem('user', encryptedUser);
+            Cookies.set('user', encryptedUser, { expires: 1 });
             Cookies.set('device_id', deviceId, { expires: 1 });
             // Redirect based on KYC verification
             if (user.isKYCVerified) {

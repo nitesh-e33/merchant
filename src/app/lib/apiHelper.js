@@ -108,6 +108,7 @@
 //   }
 // }
 
+import { decryptedData } from './helper';
 export async function apiRequest(type, api, data = {}) {
 
   const api_url = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -194,17 +195,16 @@ const shouldBypassToken = (api) => {
 };
 
 function getToken() {
-  if (typeof window !== 'undefined') {
-    const user = localStorage.getItem('user');
-    if (user) {
-      try {
-        const userObject = JSON.parse(user);
-        return userObject.token || null;
-      } catch (error) {
-        console.error('Error parsing user from localStorage:', error);
-        return null;
-      }
-    }
+  if (typeof window === 'undefined') return null;
+
+  const encryptedUser = localStorage.getItem('user');
+  if (!encryptedUser) return null;
+
+  try {
+    const user = decryptedData(encryptedUser);
+    return user?.token || null;
+  } catch (error) {
+    console.error('Error parsing user from localStorage:', error);
+    return null;
   }
-  return null;
 }

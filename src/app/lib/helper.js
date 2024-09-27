@@ -3,6 +3,9 @@ import Cookies from 'js-cookie';
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 import { apiRequest } from "./apiHelper";
 import $ from 'jquery';
+import CryptoJS from 'crypto-js';
+import { SECRET_KEY } from "./constant";
+
 export const formatDateTime = (date) => {
     if (!date) return 'N/A';
     return new Date(date).toLocaleString('en-IN', {
@@ -35,6 +38,7 @@ export const copyToClipboard = (text) => {
         toast.error('Failed to copy.');
     });
 };
+
 export const generateAndCompareDeviceId = async (router) => {
   const deviceId = Cookies.get('device_id');
 
@@ -48,6 +52,7 @@ export const generateAndCompareDeviceId = async (router) => {
     router.push('/');
   }
 };
+
 // Helper function to filter searchParams
 function filterSearchParams(searchParams) {
   return Object.fromEntries(
@@ -95,6 +100,7 @@ export async function handleApiRequest(url, searchParams, cacheKey, cacheExpiryT
     return [];
   }
 }
+
 export const initSelect2 = (setSearchName, setPaymentStatus, setPaymentMode) => {
   $('.select2').select2();
   $('.select2').on('change', function () {
@@ -109,6 +115,7 @@ export const initSelect2 = (setSearchName, setPaymentStatus, setPaymentMode) => 
     }
   });
 };
+
 export const fetchDataHelper = async (dto, dateRange, searchName, searchValue, fetchDataFn, additionalParams = {}) => {
   if (dto === 'custom_range' && (!dateRange || !dateRange[0] || !dateRange[1])) {
     return;
@@ -124,4 +131,18 @@ export const fetchDataHelper = async (dto, dateRange, searchName, searchValue, f
   };
   const data = await fetchDataFn(searchParams);
   return data;
+};
+
+export const decryptedData = (encryptedData) => {
+  try {
+    const bytes = CryptoJS.AES.decrypt(encryptedData, SECRET_KEY);
+    const decryptedData = bytes.toString(CryptoJS.enc.Utf8);
+    if (decryptedData) {
+      return JSON.parse(decryptedData);
+    }
+    return {};
+  } catch (error) {
+    console.error('Decryption failed:', error.message);
+    return {};
+  }
 };

@@ -26,10 +26,7 @@ const SingleDocUpload = ({ doc, entity_type_id, company_id, kyc_doc_id, onChange
     formData.append('company_doc_id', uploadedDocs.id);
 
     try {
-      const user = JSON.parse(localStorage.getItem('user'));
-      const userId = user.user_id;
-      const kycDocsKey = `kycRequiredDocs_${userId}`;
-      localStorage.removeItem(kycDocsKey);
+      localStorage.removeItem('docs');
       const response = await apiRequest('POST', '/v1/merchant/kyc-document-upload', { post: formData });
       if (response.StatusCode === '1') {
         toast.success(response.Message)

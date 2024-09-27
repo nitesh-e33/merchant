@@ -8,7 +8,7 @@ import ServiceTab from "../components/MyAccount/ServiceTab";
 import { apiRequest } from "../lib/apiHelper";
 import { toast } from "react-toastify";
 import { useRouter, useSearchParams } from "next/navigation";
-import { generateAndCompareDeviceId } from "../lib/helper";
+import { decryptedData, generateAndCompareDeviceId } from "../lib/helper";
 
 const Page = () => {
   const [loading, setLoading] = useState(true);
@@ -22,7 +22,6 @@ const Page = () => {
   const [bankData, setBankData] = useState({});
   const [services, setServices] = useState([]);
   const [userData, setUserData] = useState({});
-  const [error, setError] = useState(null);
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -35,31 +34,27 @@ const Page = () => {
 
   useEffect(() => {
     const fetchMerchantProfile = async () => {
-      const storedUser = localStorage.getItem('user');
       let storedUserId = '';
-
-      if (storedUser) {
-        try {
-          const userData = JSON.parse(storedUser);
+      const encryptedUser = localStorage.getItem('user');
+      if (encryptedUser) {
+        const userData = decryptedData(encryptedUser);
+        if (userData) {
           storedUserId = userData.user_id || '';
           setUserId(storedUserId);
-        } catch (e) {
-          console.error('Error parsing user data from localStorage:', e);
-          setError('Error retrieving user data');
-          setLoading(false); // Set loading to false
+        } else {
+          console.error('Error parsing user data from localStorage');
           return;
         }
+      } else {
+        toast.error('Please login to your account')
+        router.push('/');
+        return;
       }
 
-      // Define localStorage keys
-      const profileKey = `merchantProfile_${storedUserId}`;
-      const entityListKey = `entityList_${storedUserId}`;
-      const kycDocsKey = `kycRequiredDocs_${storedUserId}`;
-
       // Check for cached data
-      const cachedProfile = localStorage.getItem(profileKey);
-      const cachedEntityList = localStorage.getItem(entityListKey);
-      const cachedKycDocs = localStorage.getItem(kycDocsKey);
+      const cachedProfile = localStorage.getItem('mprofile');
+      const cachedEntityList = localStorage.getItem('elist');
+      const cachedKycDocs = localStorage.getItem('docs');
 
       let profileData, entityListData, kycDocsData;
 
@@ -70,7 +65,7 @@ const Page = () => {
         const profileResponse = await apiRequest('GET', '/v1/merchant/profile', { get: { merchant_id: storedUserId } });
         if (profileResponse.StatusCode === '1') {
           profileData = profileResponse.Result || {};
-          localStorage.setItem(profileKey, JSON.stringify(profileData)); // Cache the profile data
+          localStorage.setItem('mprofile', JSON.stringify(profileData)); // Cache the profile data
         } else {
           console.error('Error fetching profile:', profileResponse.Message);
           return;
@@ -84,7 +79,7 @@ const Page = () => {
         const entityListResponse = await apiRequest('GET', '/v1/merchant/entity/list');
         if (entityListResponse.StatusCode === '1') {
           entityListData = entityListResponse.Result || [];
-          localStorage.setItem(entityListKey, JSON.stringify(entityListData)); // Cache the entity list
+          localStorage.setItem('elist', JSON.stringify(entityListData)); // Cache the entity list
         } else {
           console.error('Error fetching entity list:', entityListResponse.Message);
           return;
@@ -104,7 +99,7 @@ const Page = () => {
         });
         if (kycDocsResponse.StatusCode === '1') {
           kycDocsData = kycDocsResponse.Result || [];
-          localStorage.setItem(kycDocsKey, JSON.stringify(kycDocsData)); // Cache the KYC docs
+          localStorage.setItem('docs', JSON.stringify(kycDocsData)); // Cache the KYC docs
         } else {
           console.error('Error fetching KYC documents:', kycDocsResponse.Message);
           return;

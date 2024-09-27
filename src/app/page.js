@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 import LoginForm from "./components/LoginForm"
 import { useEffect } from "react";
 import { useRouter, useSearchParams } from 'next/navigation';
+import { decryptedData } from "./lib/helper";
 
 const HomePage = () => {
   const router = useRouter();
@@ -14,10 +15,12 @@ const HomePage = () => {
   }, [searchParams]);
 
   useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      const parsedUserData = JSON.parse(userData);
-      router.push(parsedUserData.isKYCVerified ? '/dashboard' : '/my-account');
+    const encryptedUser = localStorage.getItem('user');
+    if (encryptedUser) {
+      const userData = decryptedData(encryptedUser);
+      if (userData && Object.keys(userData).length) {
+        router.push(userData.isKYCVerified ? '/dashboard' : '/my-account');
+      }
     }
   }, [router]);
 

@@ -90,8 +90,7 @@ const BankProfileForm = ({ userId, companyId, bankId, bankData }) => {
     if (bankProof) formData.append('bank_proof', bankProof);
 
     const endpoint = bankId ? '/v1/merchant/update-bank-account' : '/v1/merchant/add-bank-account';
-    const profileKey = `merchantProfile_${userId}`;
-    localStorage.removeItem(profileKey);
+    localStorage.removeItem('mprofile');
     const response = await apiRequest('POST', endpoint, {
       post: formData,
     });
