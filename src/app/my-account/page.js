@@ -8,7 +8,7 @@ import ServiceTab from "../components/MyAccount/ServiceTab";
 import { apiRequest } from "../lib/apiHelper";
 import { toast } from "react-toastify";
 import { useRouter, useSearchParams } from "next/navigation";
-import { decryptedData, generateAndCompareDeviceId } from "../lib/helper";
+import { decryptedData, encryptData, generateAndCompareDeviceId } from "../lib/helper";
 
 const Page = () => {
   const [loading, setLoading] = useState(true);
@@ -51,60 +51,36 @@ const Page = () => {
         return;
       }
 
-      // Check for cached data
-      const cachedProfile = localStorage.getItem('mprofile');
-      const cachedEntityList = localStorage.getItem('elist');
-      const cachedKycDocs = localStorage.getItem('docs');
-
-      let profileData, entityListData, kycDocsData;
-
-      // Fetch profile if not cached
-      if (cachedProfile) {
-        profileData = JSON.parse(cachedProfile);
-      } else {
-        const profileResponse = await apiRequest('GET', '/v1/merchant/profile', { get: { merchant_id: storedUserId } });
-        if (profileResponse.StatusCode === '1') {
-          profileData = profileResponse.Result || {};
-          localStorage.setItem('mprofile', JSON.stringify(profileData)); // Cache the profile data
-        } else {
-          console.error('Error fetching profile:', profileResponse.Message);
-          return;
+      const fetchData = async (cacheKey, apiUrl, apiMethod = 'GET', requestParams = {}) => {
+        const cachedData = localStorage.getItem(cacheKey);
+        if (cachedData) {
+          return decryptedData(cachedData);
         }
-      }
 
-      // Fetch entity list if not cached
-      if (cachedEntityList) {
-        entityListData = JSON.parse(cachedEntityList);
-      } else {
-        const entityListResponse = await apiRequest('GET', '/v1/merchant/entity/list');
-        if (entityListResponse.StatusCode === '1') {
-          entityListData = entityListResponse.Result || [];
-          localStorage.setItem('elist', JSON.stringify(entityListData)); // Cache the entity list
+        const response = await apiRequest(apiMethod, apiUrl, requestParams);
+        if (response.StatusCode === '1') {
+          const data = response.Result || (apiMethod === 'POST' ? [] : {});
+          localStorage.setItem(cacheKey, encryptData(data));
+          return data;
         } else {
-          console.error('Error fetching entity list:', entityListResponse.Message);
-          return;
+          console.error(`Error fetching ${cacheKey}:`, response.Message);
+          return null;
         }
-      }
+      };
 
-      // Fetch KYC documents if not cached and if companyId is available
+      const profileData = await fetchData('mprofile', '/v1/merchant/profile', 'GET', { get: { merchant_id: storedUserId } });
+      if (!profileData) return;
+
+      const entityListData = await fetchData('elist', '/v1/merchant/entity/list');
+      if (!entityListData) return;
+
       const companyId = profileData.company?.company_id;
-      if (companyId && cachedKycDocs) {
-        kycDocsData = JSON.parse(cachedKycDocs);
-      } else if (companyId) {
-        const kycDocsResponse = await apiRequest('GET', '/v1/merchant/get-all-kyc-required-document', {
-          get: {
-            company_id: companyId,
-            entity_id: profileData.company.entity_type,
-          },
-        });
-        if (kycDocsResponse.StatusCode === '1') {
-          kycDocsData = kycDocsResponse.Result || [];
-          localStorage.setItem('docs', JSON.stringify(kycDocsData)); // Cache the KYC docs
-        } else {
-          console.error('Error fetching KYC documents:', kycDocsResponse.Message);
-          return;
+      const kycDocsData = companyId ? await fetchData('docs', '/v1/merchant/get-all-kyc-required-document', 'GET', {
+        get: {
+          company_id: companyId,
+          entity_id: profileData.company.entity_type,
         }
-      }
+      }) : [];
 
       // Set all the data into state once
       const companyData = profileData.company || {};

@@ -5,9 +5,8 @@ import { useRouter } from 'next/navigation';
 import { apiRequest } from '../lib/apiHelper';
 import { toast } from "react-toastify";
 import Cookies from 'js-cookie';
-import CryptoJS from 'crypto-js';
-import { SECRET_KEY } from '../lib/constant';
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
+import { encryptData } from '../lib/helper';
 
 export default function LoginForm() {
   const [email, setEmail] = useState('');
@@ -55,7 +54,7 @@ export default function LoginForm() {
         if (response.StatusCode === '1') {
           const user = response.Result;
           if (user.token) {
-            const encryptedUser = CryptoJS.AES.encrypt(JSON.stringify(user), SECRET_KEY).toString();
+            const encryptedUser = encryptData(user);
             localStorage.setItem('user', encryptedUser);
             Cookies.set('user', encryptedUser, { expires: 1 });
             Cookies.set('device_id', deviceId, { expires: 1 });

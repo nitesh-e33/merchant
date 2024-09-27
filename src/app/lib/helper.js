@@ -62,14 +62,16 @@ function filterSearchParams(searchParams) {
 // Helper function to manage localStorage with caching
 function getCachedData(key, maxAgeInMs) {
   const cachedData = localStorage.getItem(key);
+  const data = decryptedData(cachedData);
   const cachedTime = localStorage.getItem(`${key}_timestamp`);
   if (cachedData && cachedTime && (Date.now() - cachedTime < maxAgeInMs)) {
-    return JSON.parse(cachedData);
+    return data;
   }
   return null;
 }
 function setCachedData(key, data) {
-  localStorage.setItem(key, JSON.stringify(data));
+  const encryptedUser = encryptData(data);
+  localStorage.setItem(key, encryptedUser);
   localStorage.setItem(`${key}_timestamp`, Date.now());
 }
 
@@ -131,6 +133,16 @@ export const fetchDataHelper = async (dto, dateRange, searchName, searchValue, f
   };
   const data = await fetchDataFn(searchParams);
   return data;
+};
+
+export const encryptData = (data) => {
+  try {
+    const encryptedData = CryptoJS.AES.encrypt(JSON.stringify(data), SECRET_KEY).toString();
+    return encryptedData;
+  } catch (error) {
+    console.error('Encryption failed:', error.message);
+    return null;
+  }
 };
 
 export const decryptedData = (encryptedData) => {

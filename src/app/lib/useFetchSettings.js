@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { apiRequest } from './apiHelper';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
-import { decryptedData } from './helper';
+import { decryptedData, encryptData } from './helper';
 
 const useFetchSettings = () => {
   const [credentials, setCredentials] = useState(null);
@@ -14,7 +14,7 @@ const useFetchSettings = () => {
     const fetchSettings = async () => {
       try {
         const encryptedUser = localStorage.getItem('user');
-        var userData = {}
+        let userData = {};
         if (encryptedUser) {
           userData = decryptedData(encryptedUser);
         }
@@ -26,12 +26,13 @@ const useFetchSettings = () => {
           return;
         }
 
+        // Retrieve and decrypt cached credentials and webhook list
         const cachedCredentials = localStorage.getItem('credentials');
         const cachedWebhookList = localStorage.getItem('webhookList');
 
         let credentialsData, webhookListData;
         if (cachedCredentials) {
-          credentialsData = JSON.parse(cachedCredentials);
+          credentialsData = decryptedData(cachedCredentials);
           const cacheKey = `ClientId_${credentialsData.client_id}`;
           if (localStorage.getItem(cacheKey)) {
             credentialsData.client_secret = 'xxxxxxxxxxxxxxxx';
@@ -39,15 +40,17 @@ const useFetchSettings = () => {
         } else {
           const credentialsResponse = await apiRequest('GET', '/v1/merchant/get-client-setting');
           credentialsData = credentialsResponse.Result || {};
-          localStorage.setItem('credentials', JSON.stringify(credentialsData));
+          const encryptedCredentials = encryptData(credentialsData);
+          localStorage.setItem('credentials', encryptedCredentials);
         }
 
         if (cachedWebhookList) {
-          webhookListData = JSON.parse(cachedWebhookList);
+          webhookListData = decryptedData(cachedWebhookList);
         } else {
           const webhookListResponse = await apiRequest('POST', '/v1/merchant/webhook/list');
           webhookListData = webhookListResponse.Result || [];
-          localStorage.setItem('webhookList', JSON.stringify(webhookListData));
+          const encryptedWebhookList = encryptData(webhookListData);
+          localStorage.setItem('webhookList', encryptedWebhookList);
         }
         // Set state with fetched or cached data
         setCredentials(credentialsData);

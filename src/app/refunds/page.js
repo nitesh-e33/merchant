@@ -8,7 +8,7 @@ import SearchForm from '../components/Refunds/SearchForm';
 import RefundDetailModal from '../components/Refunds/RefundDetailsModal'
 import PaymentTable from '../components/Transactions/PaymentTable';
 import Loader from '../components/Loader';
-import { formatDate, generateAndCompareDeviceId, initSelect2 } from '../lib/helper';
+import { decryptedData, encryptData, formatDate, generateAndCompareDeviceId, initSelect2 } from '../lib/helper';
 import { useRouter } from 'next/navigation';
 
 async function fetchMerchantRefunds(searchParams = {}) {
@@ -17,11 +17,12 @@ async function fetchMerchantRefunds(searchParams = {}) {
   );
   const isRefundData = Object.keys(filteredParams).length === 0;
   if (isRefundData) {
-    const cachedData = localStorage.getItem('refundData');
+    const encryptedData = localStorage.getItem('refundData');
+    const cachedData = decryptedData(encryptedData);
     const cachedTime = localStorage.getItem('refundData_timestamp');
     const halfHour = 30 * 60 * 1000; // 30 minutes in milliseconds
     if (cachedData && cachedTime && (Date.now() - cachedTime < halfHour)) {
-      return JSON.parse(cachedData);
+      return cachedData;
     }
   }
   try {
@@ -31,7 +32,8 @@ async function fetchMerchantRefunds(searchParams = {}) {
     if (response.StatusCode === "1") {
       const resultData = response.Result.refund_transaction_history;
       if (isRefundData) {
-        localStorage.setItem('refundData', JSON.stringify(resultData));
+        const encryptedData = encryptData(resultData);
+        localStorage.setItem('refundData', encryptedData);
         localStorage.setItem('refundData_timestamp', Date.now());
       }
       return resultData;
