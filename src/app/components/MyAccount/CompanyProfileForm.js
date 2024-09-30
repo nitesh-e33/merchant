@@ -241,7 +241,7 @@ const CompanyProfileForm = ({
 
       const endpoint = companyId ? '/v1/merchant/update-company-profile' : '/v1/merchant/create-company-profile';
       localStorage.removeItem('mprofile');
-      localStorage.removeItem('docs');
+      localStorage.removeItem('mdprofile');
       const response = await apiRequest('POST', endpoint, {
         post: formDataToSend,
       });

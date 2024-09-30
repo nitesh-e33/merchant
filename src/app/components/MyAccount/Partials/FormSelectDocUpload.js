@@ -24,14 +24,21 @@ const FormSelectDocUpload = ({ docs, entity_type_id, company_id, kyc_doc_id, onC
       setUploadedDoc(existingDoc.uploadedDocs);
       onChange('document_id', existingDoc.id);
     }
-  }, [docsArray, selectedDoc]);
+  }, [docsArray]);
 
   const handleSelectChange = (e) => {
-    const selectedDocId = e.target.value;
-    setSelectedDoc(selectedDocId);
-    setErrorMessage(''); // Clear error message when a valid selection is made
-    onChange('document_id', selectedDocId);
+    setSelectedDoc(e.target.value);
   };
+
+  useEffect(() => {
+    // Handle select2 change event manually
+    $('.select2').on('change', function (e) {
+      const selectedDocId = e.target.value;
+      setSelectedDoc(selectedDocId);
+      setErrorMessage('');
+      onChange('document_id', selectedDocId);
+    });
+  }, []);
 
   const handleFileChange = async (e) => {
     const selectedFile = e.target.files[0];
@@ -48,10 +55,12 @@ const FormSelectDocUpload = ({ docs, entity_type_id, company_id, kyc_doc_id, onC
     formData.append('kyc_doc_id', kyc_doc_id);
     formData.append('entity_type_id', entity_type_id);
     formData.append('company_id', company_id);
-    formData.append('company_doc_id', uploadedDoc?.id);
+    if (typeof uploadedDoc === 'object' && !Array.isArray(uploadedDoc) && uploadedDoc !== null && uploadedDoc.id) {
+      formData.append('company_doc_id', uploadedDoc.id);
+    }
 
     try {
-      localStorage.removeItem('docs');
+      localStorage.removeItem('mdprofile');
       const response = await apiRequest('POST', '/v1/merchant/kyc-document-upload', { post: formData });
       if (response.StatusCode === '1') {
         toast.success(response.Message);

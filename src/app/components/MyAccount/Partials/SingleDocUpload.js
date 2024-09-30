@@ -23,10 +23,11 @@ const SingleDocUpload = ({ doc, entity_type_id, company_id, kyc_doc_id, onChange
     formData.append('kyc_doc_id', kyc_doc_id);
     formData.append('entity_type_id', entity_type_id);
     formData.append('company_id', company_id);
-    formData.append('company_doc_id', uploadedDocs.id);
-
+    if (typeof uploadedDocs === 'object' && !Array.isArray(uploadedDocs) && uploadedDocs !== null && uploadedDocs.id) {
+      formData.append('company_doc_id', uploadedDocs.id);
+    }
     try {
-      localStorage.removeItem('docs');
+      localStorage.removeItem('mdprofile');
       const response = await apiRequest('POST', '/v1/merchant/kyc-document-upload', { post: formData });
       if (response.StatusCode === '1') {
         toast.success(response.Message)
