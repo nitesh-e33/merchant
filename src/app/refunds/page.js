@@ -84,7 +84,7 @@ function Page() {
     }
     table.DataTable({
       scrollX: true,
-      order: [[0, 'desc']],
+      order: [[9, 'asc']],
       data: refunds,
       columns: [
         { title: 'DP Transaction ID', data: 'order_id', className: 'whitespace-nowrap' },

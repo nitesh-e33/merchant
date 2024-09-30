@@ -66,7 +66,7 @@ function Page() {
     }
     table.DataTable({
       scrollX: true,
-      order: [[0, 'desc']],
+      order: [[8, 'desc']],
       data: transactions,
       columns: [
         { title: 'DP Transaction ID', data: 'dp_trans_id', className: 'whitespace-nowrap' },

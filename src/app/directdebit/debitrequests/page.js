@@ -54,7 +54,7 @@ function Page() {
     }
     table.DataTable({
       scrollX: true,
-      order: [[0, 'desc']],
+      order: [[7, 'asc']],
       data: debitRequests,
       columns: [
         { title: 'DP Transaction ID', data: 'txnid', className: 'whitespace-nowrap' },
