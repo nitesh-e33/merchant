@@ -7,7 +7,7 @@ import Breadcrumb from '../../components/Transactions/Breadcrumb';
 import SearchForm from '../../components/Autodebit/DebitRequest/SearchForm';
 import DebitRequestModal from '../../components/Autodebit/DebitRequest/DebitRequestModal'
 import PaymentTable from '../../components/Transactions/PaymentTable';
-import { formatDateTime, generateAndCompareDeviceId, handleApiRequest, initSelect2, fetchDataHelper } from '../../lib/helper';
+import { formatDateTime, generateAndCompareDeviceId, handleApiRequest, initSelect2, fetchDataHelper, encryptData, decryptedData } from '../../lib/helper';
 import Loader from '../../components/Loader';
 import { useRouter } from 'next/navigation';
 
@@ -73,11 +73,13 @@ function Page() {
       setIsLoading(true);
       const requestId = $(this).data('request-id');
       const cacheKey = `debitRequestData_${requestId}`;
-      const cachedData = localStorage.getItem(cacheKey);
       const cacheExpiry = 60 * 60 * 1000; // 1 hour in milliseconds
 
-      if (cachedData) {
-        const { data, timestamp } = JSON.parse(cachedData);
+      // Retrieve and decrypt the cached data
+      const cachedEncryptedData = localStorage.getItem(cacheKey);
+      if (cachedEncryptedData) {
+        const decryptedCachedData = decryptedData(cachedEncryptedData);
+        const { data, timestamp } = decryptedCachedData;
         const currentTime = new Date().getTime();
 
         if (currentTime - timestamp < cacheExpiry) {
@@ -96,13 +98,12 @@ function Page() {
         if (response.StatusCode === "1") {
           setDebitRequestDetails(response.Result);
           setIsModalOpen(true);
-          localStorage.setItem(
-            cacheKey,
-            JSON.stringify({
-              data: response.Result,
-              timestamp: new Date().getTime()
-            })
-          );
+          // Encrypt and store the data in localStorage
+          const encryptedData = encryptData({
+            data: response.Result,
+            timestamp: new Date().getTime()
+          });
+          localStorage.setItem(cacheKey, encryptedData);
         } else {
           toast.error(response.Result || 'Failed to fetch debit request details.');
         }

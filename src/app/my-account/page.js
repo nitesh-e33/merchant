@@ -75,7 +75,7 @@ const Page = () => {
       if (!entityListData) return;
 
       const companyId = profileData.company?.company_id;
-      const kycDocsData = companyId ? await fetchData('docs', '/v1/merchant/get-all-kyc-required-document', 'GET', {
+      const kycDocsData = companyId ? await fetchData('mdprofile', '/v1/merchant/get-all-kyc-required-document', 'GET', {
         get: {
           company_id: companyId,
           entity_id: profileData.company.entity_type,

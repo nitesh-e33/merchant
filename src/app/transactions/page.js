@@ -9,7 +9,7 @@ import FilterForm from '../components/Transactions/FilterForm';
 import TransactionDetailsModal from '../components/Transactions/TransactionDetailsModal';
 import Loader from '../components/Loader';
 import PaymentTable from '../components/Transactions/PaymentTable';
-import { formatDateTime, generateAndCompareDeviceId, handleApiRequest, initSelect2, fetchDataHelper } from '../lib/helper';
+import { formatDateTime, generateAndCompareDeviceId, handleApiRequest, initSelect2, fetchDataHelper, decryptedData, encryptData } from '../lib/helper';
 import { useRouter } from 'next/navigation';
 
 async function fetchMerchantTransactions(searchParams = {}) {
@@ -87,11 +87,13 @@ function Page() {
       setIsLoading(true);
       const orderId = $(this).data('order-id');
       const cacheKey = `transactionData_${orderId}`;
-      const cachedData = localStorage.getItem(cacheKey);
       const cacheExpiry = 60 * 60 * 1000; // 1 hour in milliseconds
 
-      if (cachedData) {
-        const { data, timestamp } = JSON.parse(cachedData);
+      // Retrieve and decrypt the cached data
+      const cachedEncryptedData = localStorage.getItem(cacheKey);
+      if (cachedEncryptedData) {
+        const decryptedCachedData = decryptedData(cachedEncryptedData);
+        const { data, timestamp } = decryptedCachedData;
         const currentTime = new Date().getTime();
 
         if (currentTime - timestamp < cacheExpiry) {
@@ -110,13 +112,12 @@ function Page() {
         if (response.StatusCode === "1") {
           setTransactionDetails(response.Result);
           setIsModalOpen(true);
-          localStorage.setItem(
-            cacheKey,
-            JSON.stringify({
-              data: response.Result,
-              timestamp: new Date().getTime()
-            })
-          );
+          // Encrypt and store the data in localStorage
+          const encryptedData = encryptData({
+            data: response.Result,
+            timestamp: new Date().getTime()
+          });
+          localStorage.setItem(cacheKey, encryptedData);
         } else {
           toast.error(response.Result || 'Failed to fetch transaction details.');
         }
