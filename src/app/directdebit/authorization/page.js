@@ -44,7 +44,7 @@ function Page() {
     return () => {
       $('.select2').off('change');
     };
-  }, [router, dto]);
+  }, [router, dto, dateRange, searchName, searchValue]);
 
   useEffect(() => {
     const table = $(tableRef.current);

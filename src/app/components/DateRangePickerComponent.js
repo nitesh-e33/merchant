@@ -65,7 +65,7 @@ const DateRangePickerComponent = forwardRef(({ onShortcutClick, onChange }, ref)
 
   useEffect(() => {
     onShortcutClick('this_month', customRange);
-  }, []);
+  }, [onShortcutClick, customRange]);
 
   const handleShortcutClick = (shortcut) => {
     if (shortcut.custom) {

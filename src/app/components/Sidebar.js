@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Link from 'next/link';
 import React, { useState } from 'react';
 import { decryptedData } from '../lib/helper';
+import Image from 'next/image';
 
 const Sidebar = () => {
   const pathname = usePathname() || '';
@@ -28,7 +29,7 @@ const Sidebar = () => {
   return (
     <aside className="main-sidebar sidebar-dark-primary elevation-4">
       <a href="/dashboard" className="brand-link">
-        <img src="/DroomPay.png" alt="DroomPay Logo" className="brand-image" />
+        <Image src="/DroomPay.png" alt="DroomPay Logo" className="brand-image" width={200} height={40}/>
       </a>
 
       <div className="sidebar">

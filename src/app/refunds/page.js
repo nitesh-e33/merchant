@@ -75,7 +75,7 @@ function Page() {
     return () => {
       $('.select2').off('change');
     };
-  }, []);
+  }, [router, searchName, searchValue]);
 
   useEffect(() => {
     const table = $(tableRef.current);

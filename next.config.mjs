@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     images: {
-      domains: ['matrix.droom.in'],
+      domains: ['matrix.droom.in', 'local.api.droompay.in'],
     },
     reactStrictMode: false
   };

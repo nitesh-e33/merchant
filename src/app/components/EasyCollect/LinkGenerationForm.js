@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import FormComponent from './FormComponent';
 import { apiRequest } from '@/app/lib/apiHelper';
 import { copyToClipboard } from '@/app/lib/helper';
+import Image from 'next/image';
 
 function LinkGenerationForm({ open, onClose, initialData }) {
   const [qrCode, setQrCode] = useState(null);
@@ -60,7 +61,7 @@ function LinkGenerationForm({ open, onClose, initialData }) {
             <Button appearance="subtle" onClick={() => copyToClipboard(paymentShortUrl)}>Copy Link</Button>
             {qrCode && (
               <div className="text-center mt-4">
-                <img src={qrCode} alt="QR Code" />
+                <Image src={qrCode} alt="QR Code" width={200} height={200} />
               </div>
             )}
           </div>

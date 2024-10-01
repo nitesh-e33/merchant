@@ -24,7 +24,7 @@ const FormSelectDocUpload = ({ docs, entity_type_id, company_id, kyc_doc_id, onC
       setUploadedDoc(existingDoc.uploadedDocs);
       onChange('document_id', existingDoc.id);
     }
-  }, [docsArray]);
+  }, [docsArray, onChange]);
 
   const handleSelectChange = (e) => {
     setSelectedDoc(e.target.value);
@@ -38,7 +38,7 @@ const FormSelectDocUpload = ({ docs, entity_type_id, company_id, kyc_doc_id, onC
       setErrorMessage('');
       onChange('document_id', selectedDocId);
     });
-  }, []);
+  }, [onChange]);
 
   const handleFileChange = async (e) => {
     const selectedFile = e.target.files[0];

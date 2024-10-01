@@ -2,6 +2,7 @@ import { apiRequest } from '@/app/lib/apiHelper';
 import { toast } from 'react-toastify';
 import React, { useState, useEffect } from 'react';
 import { API_ASSET_URL } from '@/app/lib/constant';
+import Image from 'next/image';
 
 const CompanyProfileForm = ({
   userId,
@@ -381,11 +382,11 @@ const CompanyProfileForm = ({
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <img
+                  <Image
                     src={`${API_ASSET_URL}${formData.company_logo}`}
-                    alt="company_logo"
-                    width="40px"
-                    height="40px"
+                    alt="Company Logo"
+                    width={40}
+                    height={40}
                   />
                 </a>
               )}

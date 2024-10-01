@@ -114,7 +114,7 @@ const Page = () => {
     };
 
     fetchMerchantProfile();
-  }, []);
+  }, [router]);
 
   if (loading) {
     return (

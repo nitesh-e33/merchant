@@ -57,7 +57,7 @@ function Page() {
     return () => {
       $('.select2').off('change');
     };
-  }, [paymentStatus, paymentMode, dto]);
+  }, [paymentStatus, paymentMode, dto, dateRange, searchName, searchValue]);
 
   useEffect(() => {
     const table = $(tableRef.current);
