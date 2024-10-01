@@ -56,7 +56,8 @@ const DocumentTypeForm = ({ companyId, kycRequiredDocsList }) => {
   );
 };
 
-const DocumentCategory = memo(({ index, doc, entity_type_id, company_id, anyOneDocs, handleFileChange }) => {
+// Memoized Component: DocumentCategory
+const DocumentCategory = memo(({ index, doc, entity_type_id, company_id, anyOneDocs, handleFileChange, isFirstCategory }) => {
   const normalizedDocArray = Array.isArray(doc.doc_array)
     ? doc.doc_array
     : [doc.doc_array];
@@ -94,14 +95,47 @@ const DocumentCategory = memo(({ index, doc, entity_type_id, company_id, anyOneD
   );
 });
 
+// Assign displayName to DocumentCategory
+DocumentCategory.displayName = 'DocumentCategory';
+
+// Component: DocumentUpload
 const DocumentUpload = ({ subDoc, entity_type_id, company_id, kyc_doc_id, anyOneDocs, handleFileChange, isFirst }) => {
   if (isFirst && subDoc.is_required === 'Any one') {
-    return <FormSelectDocUpload docs={anyOneDocs} entity_type_id={entity_type_id} company_id={company_id} kyc_doc_id={kyc_doc_id} onChange={handleFileChange} />
+    return (
+      <FormSelectDocUpload
+        docs={anyOneDocs}
+        entity_type_id={entity_type_id}
+        company_id={company_id}
+        kyc_doc_id={kyc_doc_id}
+        onChange={handleFileChange}
+      />
+    );
   } else if (subDoc.is_both === 1) {
-    return <BothSidesDocUpload doc={subDoc} entity_type_id={entity_type_id} company_id={company_id} kyc_doc_id={kyc_doc_id} onChange={handleFileChange} />;
-  } else if(subDoc.is_required !== 'Any one'){
-    return <SingleDocUpload doc={subDoc} entity_type_id={entity_type_id} company_id={company_id} kyc_doc_id={kyc_doc_id} onChange={handleFileChange} />;
+    return (
+      <BothSidesDocUpload
+        doc={subDoc}
+        entity_type_id={entity_type_id}
+        company_id={company_id}
+        kyc_doc_id={kyc_doc_id}
+        onChange={handleFileChange}
+      />
+    );
+  } else if (subDoc.is_required !== 'Any one') {
+    return (
+      <SingleDocUpload
+        doc={subDoc}
+        entity_type_id={entity_type_id}
+        company_id={company_id}
+        kyc_doc_id={kyc_doc_id}
+        onChange={handleFileChange}
+      />
+    );
+  } else {
+    return null; // Return null if none of the conditions match
   }
 };
+
+// (Optional) Assign displayName to DocumentUpload if needed
+// DocumentUpload.displayName = 'DocumentUpload';
 
 export default DocumentTypeForm;

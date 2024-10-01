@@ -114,4 +114,7 @@ const DateRangePickerComponent = forwardRef(({ onShortcutClick, onChange }, ref)
   );
 });
 
+// Set the display name
+DateRangePickerComponent.displayName = 'DateRangePickerComponent';
+
 export default DateRangePickerComponent;

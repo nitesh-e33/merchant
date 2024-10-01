@@ -18,7 +18,7 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm }) => {
           <label>Do you want to generate a new Client Secret Token?</label>
           <br />
           <span className="text-gray-500 text-sm">
-            (Clicking "Confirm" will update the Client Secret Token for all linked payment services.)
+            (Clicking &quot;Confirm&quot; will update the Client Secret Token for all linked payment services.)
           </span>
         </div>
         <div className="flex justify-end p-4 border-t">
