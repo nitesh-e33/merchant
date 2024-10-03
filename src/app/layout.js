@@ -1,24 +1,23 @@
-'use client'
+'use client';
 import React from 'react';
 import { usePathname } from 'next/navigation';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Sidebar from './components/Sidebar';
 import '../styles/globals.css';
-import '../js/globals.js'
+import '../js/globals.js';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { config } from '@fortawesome/fontawesome-svg-core';
 config.autoAddCss = false;
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-
-const RootLayout = ({ children }: { children: React.ReactNode }) => {
+const RootLayout = ({ children }) => {
   const pathname = usePathname();
   const isLoginPage =
-      pathname === '/' ||
-      pathname === '/forgotpassword' ||
-      pathname.startsWith('/reset-password/')
+    pathname === '/' ||
+    pathname === '/forgotpassword' ||
+    pathname.startsWith('/reset-password/');
 
   return (
     <html lang="en">
