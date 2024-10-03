@@ -19,7 +19,7 @@ const sendExternalRequest = async (apiUrl, method, headers, body = null) => {
   }
 };
 
-export async function handler(request) {
+const handler = async (request) => {
   const method = request.method;
   let apiUrl, requestData, headers = {};
 

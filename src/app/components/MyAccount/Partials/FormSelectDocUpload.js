@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faUpload, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 import $ from 'jquery';
@@ -7,24 +7,33 @@ import { toast } from 'react-toastify';
 import { apiRequest } from '../../../lib/apiHelper';
 
 const FormSelectDocUpload = ({ docs, entity_type_id, company_id, kyc_doc_id, onChange }) => {
-  const docsArray = Array.isArray(docs) ? docs : [docs];
+  // Memoizing docsArray to prevent unnecessary re-renders
+  const docsArray = useMemo(() => (Array.isArray(docs) ? docs : [docs]), [docs]);
   const [selectedDoc, setSelectedDoc] = useState('');
   const [uploadedDoc, setUploadedDoc] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const fileInputRef = useRef(null);
 
+  // Memoize the onChange handler using useCallback to prevent it from changing unnecessarily
+  const handleDocumentChange = useCallback(
+    (key, value) => {
+      onChange(key, value);
+    },
+    [onChange]
+  );
+
   useEffect(() => {
     $(document).ready(function() {
       $('.select2').select2();
     });
-    // Check if a document is already uploaded and update state accordingly
-    const existingDoc = docsArray.find(doc => doc.uploadedDocs && doc.uploadedDocs.length !== 0);
+    // Check if a document is already uploaded and update the state
+    const existingDoc = docsArray.find((doc) => doc.uploadedDocs && doc.uploadedDocs.length !== 0);
     if (existingDoc) {
       setSelectedDoc(existingDoc.id);
       setUploadedDoc(existingDoc.uploadedDocs);
-      onChange('document_id', existingDoc.id);
+      handleDocumentChange('document_id', existingDoc.id);
     }
-  }, [docsArray, onChange]);
+  }, [docsArray, handleDocumentChange]);
 
   const handleSelectChange = (e) => {
     setSelectedDoc(e.target.value);
@@ -36,13 +45,13 @@ const FormSelectDocUpload = ({ docs, entity_type_id, company_id, kyc_doc_id, onC
       const selectedDocId = e.target.value;
       setSelectedDoc(selectedDocId);
       setErrorMessage('');
-      onChange('document_id', selectedDocId);
+      handleDocumentChange('document_id', selectedDocId);
     });
-  }, [onChange]);
+  }, [handleDocumentChange]);
 
   const handleFileChange = async (e) => {
     const selectedFile = e.target.files[0];
-    onChange('document_image_front', selectedFile);
+    handleDocumentChange('document_image_front', selectedFile);
 
     if (!selectedDoc) {
       setErrorMessage('Please select a document type before uploading.');
